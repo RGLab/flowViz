@@ -1,0 +1,4 @@
+importClassesFrom("flowCore", "fcsFrame", "fcsSet", "transformation","linearTransformation",
+              "quadraticTransformation", "lnTransformation", "logTransformation","biexponentialTransformation",
+              "filter", "rectangleGate", "polygonGate",
+              "filterResult", "norm2Filter", "filterTree")

@@ -1,0 +1,11 @@
+Package: flowViz
+Type: Package
+Title: Visualization for flow cytometry
+Version: 0.2.1
+Date: 2006-11-16
+Author: T. Duong, B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar, M. Tang
+Maintainer: Florian Hahne <f.hahne@dkfz.de>
+Description: Provides visualization tools for flow cytometry data. 
+Depends: R (>= 2.4.0), flowCore (>= 0.2.7), Biobase
+License: Artistic
+biocViews:  Infrastructure, Flowcytometry, CellBasedAssays, Visualization
