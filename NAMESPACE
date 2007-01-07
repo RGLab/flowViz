@@ -2,3 +2,5 @@ importClassesFrom("flowCore", "fcsFrame", "fcsSet", "transformation","linearTran
               "quadraticTransformation", "lnTransformation", "logTransformation","biexponentialTransformation",
               "filter", "rectangleGate", "polygonGate",
               "filterResult", "norm2Filter", "filterTree")
+
+export("densityPlot")
