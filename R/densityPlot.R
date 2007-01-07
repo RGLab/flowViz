@@ -47,3 +47,27 @@
      else
        FALSE
   }
+
+##some code from Deepayan, that can be used to get lattice versions
+
+fakedf <- function(x)
+{
+    cnames <-
+        if (is.null(colnames(x))) seq_len(ncol(x))
+        else colnames(x)
+    data.frame(column = seq_len(ncol(x)),
+               colname = factor(cnames, levels = cnames))
+}
+
+densityplot(~ column | colname, data = fakedf(x),
+            src.mat = x,
+            plot.points = FALSE,
+
+            prepanel = function(x, src.mat, ...) {
+                lattice:::prepanel.default.densityplot(src.mat[, x], ...)
+            },
+            panel = function(x, src.mat, ...) {
+                panel.densityplot(src.mat[, x], ...)
+            })
+
+
