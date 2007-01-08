@@ -3,4 +3,5 @@ importClassesFrom("flowCore", "fcsFrame", "fcsSet", "transformation","linearTran
               "filter", "rectangleGate", "polygonGate",
               "filterResult", "norm2Filter", "filterTree")
 
-export("densityPlot")
+export("densityPlot",
+       "parallelCoordinates.rgl")
