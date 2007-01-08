@@ -59,15 +59,15 @@ fakedf <- function(x)
                colname = factor(cnames, levels = cnames))
 }
 
-densityplot(~ column | colname, data = fakedf(x),
-            src.mat = x,
-            plot.points = FALSE,
-
-            prepanel = function(x, src.mat, ...) {
-                lattice:::prepanel.default.densityplot(src.mat[, x], ...)
-            },
-            panel = function(x, src.mat, ...) {
-                panel.densityplot(src.mat[, x], ...)
-            })
+#densityplot(~ column | colname, data = fakedf(x),
+#            src.mat = x,
+#            plot.points = FALSE,
+#
+#            prepanel = function(x, src.mat, ...) {
+#                lattice:::prepanel.default.densityplot(src.mat[, x], ...)
+#            },
+#            panel = function(x, src.mat, ...) {
+#                panel.densityplot(src.mat[, x], ...)
+#            })
 
 
