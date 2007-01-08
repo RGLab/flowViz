@@ -1,7 +1,6 @@
-importClassesFrom("flowCore", "fcsFrame", "fcsSet", "transformation","linearTransformation",
-              "quadraticTransformation", "lnTransformation", "logTransformation","biexponentialTransformation",
-              "filter", "rectangleGate", "polygonGate",
-              "filterResult", "norm2Filter", "filterTree")
+importClassesFrom("flowCore", "flowFrame", "flowSet", "transformation",
+    "filter", "rectangleGate", "polygonGate",
+   "filterResult", "norm2Filter", "filterTree")
 
 export("densityPlot",
        "parallelCoordinates.rgl")
