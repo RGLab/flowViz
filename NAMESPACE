@@ -1,6 +1,9 @@
-importClassesFrom("flowCore", "flowFrame", "flowSet", "transformation",
-    "filter", "rectangleGate", "polygonGate",
-   "filterResult", "norm2Filter", "filterTree")
+##FIXME: RG thinks we just want all of flowCore, methods, classes etc
+#importClassesFrom("flowCore", "flowFrame", "flowSet", "transformation",
+#    "filter", "rectangleGate", "polygonGate",
+#   "filterResult", "norm2Filter", "filterTree")
+
+import("flowCore")
 
 export("densityPlot", 
-       "parallelCoordinates.rgl")
+       "parallelCoordinates.rgl", "parallelCoord")

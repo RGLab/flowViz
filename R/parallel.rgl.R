@@ -1,5 +1,4 @@
 
-
 parallelCoordinates.rgl <-
     function(x,
              scaled = FALSE,
@@ -77,4 +76,15 @@ parallelCoordinates.rgl <-
         title3d(main = "Parallel Coordinates")
     }
 }  
+
+setGeneric("parallelCoord", function(object, ...)
+    standardGeneric("parallelCoord"))
+
+setMethod("parallelCoord", "flowFrame", function(object) {
+    time = match("<Time>", names(object), nomatch=0)
+    if( time > 0 )
+       parallelCoordinates.rgl(exprs(object)[,-time])
+    else
+       parallelCoordinates.rgl(exprs(object))
+  })
 
