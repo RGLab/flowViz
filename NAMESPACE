@@ -7,3 +7,5 @@ import("flowCore")
 
 export("densityPlot", 
        "parallelCoordinates.rgl", "parallelCoord")
+       
+exportMethods("flowPlot")
