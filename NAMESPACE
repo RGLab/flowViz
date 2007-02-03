@@ -8,4 +8,8 @@ import("flowCore")
 export("densityPlot", 
        "parallelCoordinates.rgl", "parallelCoord")
        
+importFrom("lattice", densityplot, qqmath)
+exportMethods("densityplot", "qqmath")
+
+
 exportMethods("flowPlot")
