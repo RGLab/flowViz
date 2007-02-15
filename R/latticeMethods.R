@@ -1,9 +1,11 @@
 
 
+
+
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
           function(x, data, xlab,
-                   stack = FALSE, overlap = 0.3,
+                   as.table = TRUE, overlap = 0.3, 
                    ...)
       {
           pd <- phenoData(data)@data
@@ -11,88 +13,66 @@ setMethod("densityplot",
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
           pd$name <- factor(pd$name) 
-          channel <- x[[2]]
+          channel <- x[[3]]  
           if (length(channel) == 3)
           {
               channel <- channel[[2]]
-              x[[2]][[2]] <- as.name("name")
+              x[[3]][[2]] <- as.name("name")
           }
-          else x[[2]] <- as.name("name")
+          else x[[3]] <- as.name("name")
           channel <- as.character(channel)
 
           prepanel.densityplot.flowset <- 
-              function(x, darg = list(n = 30),
+              function(x, y, darg = list(n = 30),
                        frames, channel,
-                       stack = FALSE, overlap = 0.3,
+                       overlap = 0.3,
                        ...)
               {
                   xl <- numeric(0)
-                  yl <- if (stack) c(1, length(x) + 1 + overlap) else 0
-                  dxl <- if (stack) 1 else numeric(0)
-                  dyl <- if (stack) 1 else numeric(0)
-                      
                   for (nm in as.character(x))
                   {
                       xx <- exprs(frames[[nm]])[, channel]
-                      if (!stack)
-                      {
-                          h <- do.call(density, c(list(x = xx), darg))
-                          xl <- c(xl, range(h$x))
-                          yl <- c(yl, max(h$y))
-                          quants <- quantile(xx, prob = c(0.15, 0.85), 
-                                             names = FALSE, na.rm = TRUE)
-                          ok <- h$x > quants[1] & h$x < quants[2]
-                          dxl <- c(dxl, diff(h$x[ok]))
-                          dyl <- c(dyl, diff(h$y[ok]))
-                      }
-                      else
-                      {
-                          xl <- c(xl, range(xx))
-                      }
+                      xl <- c(xl, range(xx))
                   }
-                  list(xlim = range(xl, finite = TRUE),
-                       ylim = range(yl, finite = TRUE),
-                       dx = dxl, dy = dyl)
+                  list(xlim = range(xl, finite = TRUE))
               }
 
           panel.densityplot.flowset <-
-              function(x, darg = list(n = 30), ref = FALSE,
+              function(x, y, darg = list(n = 30), ref = FALSE,
                        frames, channel,
-                       stack = FALSE, overlap = 0.3,
+                       overlap = 0.3,
 
-                       col = if (stack) plot.polygon$col else superpose.line$col,
-                       lty = if (stack) plot.polygon$lty else superpose.line$lty,
-                       lwd = if (stack) plot.polygon$lwd else superpose.line$lwd,
-                       alpha = if (stack) plot.polygon$alpha else superpose.line$alpha,
-                       border = plot.polygon$border,
+                       col = superpose.polygon$col,
+                       lty = superpose.polygon$lty,
+                       lwd = superpose.polygon$lwd,
+                       alpha = superpose.polygon$alpha,
+                       border = superpose.polygon$border,
                        ...)
               {
                   superpose.line <- trellis.par.get("superpose.line")
-                  plot.polygon <- trellis.par.get("plot.polygon")
+                  superpose.polygon <- trellis.par.get("superpose.polygon")
                   reference.line <- trellis.par.get("reference.line")
-                  nx <- length(x)
-
-                  if (stack)
-                  {
-                      height <- (1 + overlap)
-                      infolist <-
-                          lapply(as.character(x),
-                                 function(nm) {
-                                     xx <- exprs(frames[[nm]])[, channel]
-                                     h <- do.call(density, c(list(x = xx), darg))
-                                     list(med = median(xx, na.rm = TRUE),
-                                          dens = h)
-                                 })
-                      ord.med <- order(sapply(infolist, "[[", "med"))
-                      for (i in rev(seq_along(ord.med)))
+                  ycode <- as.numeric(y)
+                  ny <- nlevels(y)
+                  col <- rep(col, length = ny)
+                  lty <- rep(lty, length = ny)
+                  lwd <- rep(lwd, length = ny)
+                  alpha <- rep(alpha, length = ny)
+                  border <- rep(border, length = ny)
+                  x <- as.character(x)
+                  height <- (1 + overlap)
+                  for (i in rev(seq_len(ny)))
+                      if (i %in% ycode)
                       {
-                          h <- infolist[[ord.med[i]]][["dens"]]
+                          nm <- x[match(i, ycode)]
+                          xx <- exprs(frames[[nm]])[, channel]
+                          h <- do.call(density, c(list(x = xx), darg))
                           n <- length(h$x)
                           max.d <- max(h$y)
                           panel.polygon(x = h$x[c(1, 1:n, n)],
                                         y = i + height * c(0, h$y, 0) / max.d,
-                                        col = col, border = border,
-                                        lty = lty, lwd = lwd, alpha = alpha)
+                                        col = col[i], border = border[i],
+                                        lty = lty[i], lwd = lwd[i], alpha = alpha[i])
                           if (ref)
                           {
                               panel.abline(h = i,
@@ -102,55 +82,179 @@ setMethod("densityplot",
                                            alpha = reference.line$alpha)
                           }
                       }
-                  }
-                  else
-                  {
-                      col <- rep(col, length = nx)
-                      lty <- rep(lty, length = nx)
-                      lwd <- rep(lwd, length = nx)
-                      alpha <- rep(alpha, length = nx)
-
-                      if (ref)
-                      {
-                          panel.abline(h = 0,
-                                       col = reference.line$col,
-                                       lty = reference.line$lty,
-                                       lwd = reference.line$lwd,
-                                       alpha = reference.line$alpha)
-                      }
-
-                      x <- as.character(x)
-                      for (i in seq_along(x))
-                      {
-                          nm <- x[i]
-                          xx <- exprs(frames[[nm]])[, channel]
-                          h <- do.call(density, c(list(x = xx), darg))
-                          llines(h,
-                                 col = col[i], lty = lty[i],
-                                 lwd = lwd[i], alpha = alpha[i],
-                                 ...)
-                      }
-                  }
               }
 
           if (missing(xlab)) xlab <- channel
-          default.scales <-
-              if (stack) list(y = list(draw = FALSE))
-              else list()
-          densityplot(x, data = pd, 
+          xyplot(x, data = pd, 
 
-                      prepanel = prepanel.densityplot.flowset,
-                      panel = panel.densityplot.flowset,
+                 prepanel = prepanel.densityplot.flowset,
+                 panel = panel.densityplot.flowset,
 
-                      frames = data@frames,
-                      channel = channel,
-                      stack = stack, overlap = overlap,
+                 frames = data@frames,
+                 channel = channel,
+                 as.table = as.table,
+                 overlap = overlap,
 
-                      xlab = xlab,
-                      default.scales = default.scales,
-                      
-                      ...)
+                 xlab = xlab,
+
+                 lattice.options = list(axis.padding = list(factor = c(0.6, 1 + 2 * overlap))),
+                 horizontal = TRUE, ...)
       })
+
+
+### old version with formulas like ~x and ~x | a
+
+## setMethod("densityplot",
+##           signature(x = "formula", data = "flowSet"),
+##           function(x, data, xlab,
+##                    stack = FALSE, overlap = 0.3,
+##                    ...)
+##       {
+##           pd <- phenoData(data)@data
+##           ## ugly hack to suppress warnings about coercion introducing
+##           ## NAs (needs to be `undone' inside prepanel and panel
+##           ## functions):
+##           pd$name <- factor(pd$name) 
+##           channel <- x[[2]]
+##           if (length(channel) == 3)
+##           {
+##               channel <- channel[[2]]
+##               x[[2]][[2]] <- as.name("name")
+##           }
+##           else x[[2]] <- as.name("name")
+##           channel <- as.character(channel)
+
+##           prepanel.densityplot.flowset <- 
+##               function(x, darg = list(n = 30),
+##                        frames, channel,
+##                        stack = FALSE, overlap = 0.3,
+##                        ...)
+##               {
+##                   xl <- numeric(0)
+##                   yl <- if (stack) c(1, length(x) + 1 + overlap) else 0
+##                   dxl <- if (stack) 1 else numeric(0)
+##                   dyl <- if (stack) 1 else numeric(0)
+                      
+##                   for (nm in as.character(x))
+##                   {
+##                       xx <- exprs(frames[[nm]])[, channel]
+##                       if (!stack)
+##                       {
+##                           h <- do.call(density, c(list(x = xx), darg))
+##                           xl <- c(xl, range(h$x))
+##                           yl <- c(yl, max(h$y))
+##                           quants <- quantile(xx, prob = c(0.15, 0.85), 
+##                                              names = FALSE, na.rm = TRUE)
+##                           ok <- h$x > quants[1] & h$x < quants[2]
+##                           dxl <- c(dxl, diff(h$x[ok]))
+##                           dyl <- c(dyl, diff(h$y[ok]))
+##                       }
+##                       else
+##                       {
+##                           xl <- c(xl, range(xx))
+##                       }
+##                   }
+##                   list(xlim = range(xl, finite = TRUE),
+##                        ylim = range(yl, finite = TRUE),
+##                        dx = dxl, dy = dyl)
+##               }
+
+##           panel.densityplot.flowset <-
+##               function(x, darg = list(n = 30), ref = FALSE,
+##                        frames, channel,
+##                        stack = FALSE, overlap = 0.3,
+
+##                        col = if (stack) plot.polygon$col else superpose.line$col,
+##                        lty = if (stack) plot.polygon$lty else superpose.line$lty,
+##                        lwd = if (stack) plot.polygon$lwd else superpose.line$lwd,
+##                        alpha = if (stack) plot.polygon$alpha else superpose.line$alpha,
+##                        border = plot.polygon$border,
+##                        ...)
+##               {
+##                   superpose.line <- trellis.par.get("superpose.line")
+##                   plot.polygon <- trellis.par.get("plot.polygon")
+##                   reference.line <- trellis.par.get("reference.line")
+##                   nx <- length(x)
+
+##                   if (stack)
+##                   {
+##                       height <- (1 + overlap)
+##                       infolist <-
+##                           lapply(as.character(x),
+##                                  function(nm) {
+##                                      xx <- exprs(frames[[nm]])[, channel]
+##                                      h <- do.call(density, c(list(x = xx), darg))
+##                                      list(med = median(xx, na.rm = TRUE),
+##                                           dens = h)
+##                                  })
+##                       ord.med <- order(sapply(infolist, "[[", "med"))
+##                       for (i in rev(seq_along(ord.med)))
+##                       {
+##                           h <- infolist[[ord.med[i]]][["dens"]]
+##                           n <- length(h$x)
+##                           max.d <- max(h$y)
+##                           panel.polygon(x = h$x[c(1, 1:n, n)],
+##                                         y = i + height * c(0, h$y, 0) / max.d,
+##                                         col = col, border = border,
+##                                         lty = lty, lwd = lwd, alpha = alpha)
+##                           if (ref)
+##                           {
+##                               panel.abline(h = i,
+##                                            col = reference.line$col,
+##                                            lty = reference.line$lty,
+##                                            lwd = reference.line$lwd,
+##                                            alpha = reference.line$alpha)
+##                           }
+##                       }
+##                   }
+##                   else
+##                   {
+##                       col <- rep(col, length = nx)
+##                       lty <- rep(lty, length = nx)
+##                       lwd <- rep(lwd, length = nx)
+##                       alpha <- rep(alpha, length = nx)
+
+##                       if (ref)
+##                       {
+##                           panel.abline(h = 0,
+##                                        col = reference.line$col,
+##                                        lty = reference.line$lty,
+##                                        lwd = reference.line$lwd,
+##                                        alpha = reference.line$alpha)
+##                       }
+
+##                       x <- as.character(x)
+##                       for (i in seq_along(x))
+##                       {
+##                           nm <- x[i]
+##                           xx <- exprs(frames[[nm]])[, channel]
+##                           h <- do.call(density, c(list(x = xx), darg))
+##                           llines(h,
+##                                  col = col[i], lty = lty[i],
+##                                  lwd = lwd[i], alpha = alpha[i],
+##                                  ...)
+##                       }
+##                   }
+##               }
+
+##           if (missing(xlab)) xlab <- channel
+##           default.scales <-
+##               if (stack) list(y = list(draw = FALSE))
+##               else list()
+##           densityplot(x, data = pd, 
+
+##                       prepanel = prepanel.densityplot.flowset,
+##                       panel = panel.densityplot.flowset,
+
+##                       frames = data@frames,
+##                       channel = channel,
+##                       stack = stack, overlap = overlap,
+
+##                       xlab = xlab,
+##                       default.scales = default.scales,
+                      
+##                       ...)
+##       })
 
 ## QQ plot
 
