@@ -53,6 +53,10 @@ setMethod("densityplot",
                   superpose.polygon <- trellis.par.get("superpose.polygon")
                   reference.line <- trellis.par.get("reference.line")
                   ycode <- as.numeric(y)
+                  if (any(duplicated(ycode)))
+                  {
+                      warning("Some combinations seem to have multiple samples.  \n  Only one will be used.")
+                  }
                   ny <- nlevels(y)
                   col <- rep(col, length = ny)
                   lty <- rep(lty, length = ny)
