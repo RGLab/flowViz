@@ -1,7 +1,4 @@
 
-
-
-
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
           function(x, data, xlab,
@@ -104,6 +101,164 @@ setMethod("densityplot",
                  lattice.options = list(axis.padding = list(factor = c(0.6, 1 + 2 * overlap))),
                  horizontal = TRUE, ...)
       })
+
+
+
+
+
+
+
+
+setMethod("xyplot",
+          signature(x = "formula", data = "flowSet"),
+          function(x, data, xlab, ylab,
+                   as.table = TRUE,
+                   pch = ".", smooth = TRUE,
+                   ...)
+      {
+          pd <- phenoData(data)@data
+          ## ugly hack to suppress warnings about coercion introducing
+          ## NAs (needs to be `undone' inside prepanel and panel
+          ## functions):
+          pd$name <- factor(pd$name) 
+          channel.y <- x[[2]]
+          channel.x <- x[[3]]
+          if (length(channel.x) == 3)
+          {
+              channel.x <- channel.x[[2]]
+              x[[3]][[2]] <- as.name("name")
+              x[[2]] <- NULL
+          }
+          else
+          {
+              x[[3]] <- as.name("name")
+              x[[2]] <- NULL
+          }
+          channel.x <- as.character(channel.x)
+          channel.y <- as.character(channel.y)
+
+          prepanel.xyplot.flowset <- 
+              function(x, 
+                       frames, channel.x, channel.y,
+                       ...)
+              {
+                  if (length(x) > 1) stop("must have only one flow frame per panel")
+                  xl <- numeric(0)
+                  yl <- numeric(0)
+                  for (nm in as.character(x))
+                  {
+                      xx <- exprs(frames[[nm]])[, channel.x]
+                      yy <- exprs(frames[[nm]])[, channel.y]
+                      xl <- c(xl, range(xx))
+                      yl <- c(yl, range(yy))
+                  }
+                  list(xlim = range(xl, finite = TRUE),
+                       ylim = range(yl, finite = TRUE))
+              }
+
+          panel.xyplot.flowset <-
+              function(x, 
+                       frames, channel.x, channel.y,
+
+                       pch, smooth,
+                       ...)
+              {
+                  x <- as.character(x)
+                  if (length(x) > 1) stop("must have only one flow frame per panel")
+                  
+                  for (nm in x)
+                  {
+                      xx <- exprs(frames[[nm]])[, channel.x]
+                      yy <- exprs(frames[[nm]])[, channel.y]
+                      
+                      if (smooth) panel.smoothScatter(xx, yy, ...)
+                      else panel.xyplot(xx, yy, pch = pch, ...)
+                  }
+              }
+
+          if (missing(xlab)) xlab <- channel.x
+          if (missing(ylab)) ylab <- channel.y
+          densityplot(x, data = pd, 
+
+                      prepanel = prepanel.xyplot.flowset,
+                      panel = panel.xyplot.flowset,
+
+                      frames = data@frames,
+                      channel.x = channel.x,
+                      channel.y = channel.y,
+                      as.table = as.table,
+
+                      xlab = xlab,
+                      ylab = ylab,
+                      pch = pch, smooth = smooth,
+
+                      ...)
+      })
+
+
+
+
+setMethod("levelplot",
+          signature(x = "formula", data = "flowSet"),
+          function(x, data, xlab, ylab,
+                   as.table = TRUE, contour = TRUE, labels = FALSE,
+                   n = 50, 
+                   ...)
+      {
+          pd <- phenoData(data)@data
+          ## ugly hack to suppress warnings about coercion introducing
+          ## NAs (needs to be `undone' inside prepanel and panel
+          ## functions):
+          pd$name <- factor(pd$name) 
+          channel.y <- x[[2]]
+          channel.x <- x[[3]]
+          if (length(channel.x) == 3)
+          {
+              channel.x <- channel.x[[2]]
+              cond <- paste("|", paste(as.character(x[[3]][[3]]), collapse = " "))
+          }
+          else cond <- ""
+          channel.x <- as.character(channel.x)
+          channel.y <- as.character(channel.y)
+
+          computeKde <- function(nm)
+          {
+              xx <- exprs(data@frames[[nm]])[, channel.x]
+              yy <- exprs(data@frames[[nm]])[, channel.y]
+              temp <- kde2d(xx, yy, n = n)
+              d <- data.frame(x = rep(temp$x, n),
+                              y = rep(temp$y, each = n),
+                              z = as.vector(temp$z))
+          }
+          ft <- do.call(make.groups, sapply(as.character(pd$name), computeKde, simplify = FALSE))
+
+          rownames(pd) <- pd$name 
+          ft <- cbind(ft, pd[as.character(ft$which), , drop = FALSE])
+
+          if (missing(xlab)) xlab <- channel.x
+          if (missing(ylab)) ylab <- channel.y
+
+          my.formula <- as.formula(paste("z ~ x * y", cond))
+
+          levelplot(my.formula, data = ft,
+                    contour = contour, labels = labels,
+                    xlab = xlab,
+                    ylab = ylab,
+                    as.table = as.table, 
+                    ...)
+      })
+
+
+##Example:
+##
+## require(colorspaces)
+## YlOrBr <- c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E", "#993404")
+## colori <- colorRampPalette(YlOrBr, space = "Lab")
+## levelplot(`SSC-H` ~ `FSC-H` | name, samp, col.regions=colori(50), main="Contour Plot")
+##
+
+
+
 
 
 ### old version with formulas like ~x and ~x | a
