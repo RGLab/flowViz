@@ -1,11 +1,4 @@
-## last changed January 2, 2007
-##   
-## I moved my plot method here as it was getting overwritten by the core plot method
-## if the consensus is that this kind of convenience function doesn't belong in the core 
-## package, I'll take it local
-## Last changed November 3, 2006
-##  pdh -- fixed an error because I wasn't checking for xlim and ylim when y was missing.
-
+#
 ## ==========================================================================
 ## Basic plot for fcsFrame object
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -13,10 +6,12 @@ setGeneric("flowPlot",function(x,...) standardGeneric("flowPlot"))
 setMethod("flowPlot",
           ## basic plot without a gate specified
           signature(x="flowFrame"),
-          function(x, y, filter=NULL, plotParameters=c("FSC-H","SSC-H"),
-          	parent,colParent="Grey",colSubSet="Blue",
+          function(x, child, filter=NULL, plotParameters=c("FSC-H","SSC-H"),
+          	logx=FALSE,logy=FALSE,
+          	parent,colParent="Grey",colChild="Blue",
           	showFilter=TRUE,gate.fill="transparent",gate.border="black",
           	xlab,ylab,xlim,ylim,...){
+          	require(geneplotter)
             data <- x@exprs
             ncells <- nrow(data)
             if(missing(xlab)){
@@ -53,53 +48,73 @@ setMethod("flowPlot",
 					}  	
 				}
 			}
+			## get the data and log if necessary
+			xd =    data[selectParent,plotParameters[1]]
+            yd =    data[selectParent,plotParameters[2]]   
+            if(logx) {
+            	xd[xd <=1] = 1
+            	xd = log(xd,b=10)
+            }
+          	if(logy) {
+          		yd[yd <=1] = 1
+              	yd = log(yd,b=10)
+              }
+
             ## the default limits are going to be 0,1 or the range of the data
             if(missing(xlim)) {
-              	if(max(data[selectParent,plotParameters[1]]) <= 1.0) {
+              	if(max(xd) <= 1.0) {
               		xlim = c(0,1)
               	}
               	else {
-              		xlim <-  range(data[selectParent,plotParameters[1]])
+              		xlim <-  range(xd)
               	}
               }
               if(missing(ylim)) {
-              	if(max(data[selectParent,plotParameters[2]]) <= 1.0) {
+              	if(max(yd) <= 1.0) {
               		ylim = c(0,1)
               	}
               	else {
-                	ylim <-  range(data[selectParent,plotParameters[2]])
+                	ylim <-  range(yd)
                 }
               }
-            if(missing(y)) {             
-              
-              smoothScatter(data[selectParent,plotParameters[1]],data[selectParent,plotParameters[2]],nrpoints=50,
+
+            if(missing(child)) {  
+            
+             
+              smoothScatter(xd,yd,nrpoints=100,
                             xlim=xlim,
                             ylim=ylim,
                             xlab=xlab,
                             ylab=ylab,
+                            transformation=function(x) x^(1/1),
+                            colramp = colorRampPalette(c("white",rev(rainbow(14))[-(1:3)])),                 
                             ...)       
             }
             else {
               ## check for y and if it is a filterResult, get the subSet
-              if(class(y) != "logicalFilterResult") {
-                stop("y must be of class filterResult.")
+              if(class(child) != "logicalFilterResult") {
+                stop("child must be of class filterResult.")
               }
               else {
-                if(is.null(y@subSet)) {
-                  stop("The filterResult y must have a subSet slot.")
+                if(is.null(child@subSet)) {
+                  stop("The filterResult child must have a subSet slot.")
                 }
                 else {
-                  selectChild <-  y@subSet
+                  selectChild <-  child@subSet
                 }
               }
               ## check for the proper relationship between the parent and child
-              if(any(selectChild>selectParent)) {
-                stop("The child population must be contained in the parent population.")
-              }
+              ## if that is OK then we need to keep only the parts of child relevant to the parent
+#              if(any(selectChild>selectParent)) {
+#                stop("The child population must be contained in the parent population.")
+#              }
+#              else {
+               	selectChild = selectChild[selectParent]
+               	selectParent = rep(TRUE,length=length(selectChild))
+#              }
               selectUnfiltered <- ((selectParent & !selectChild))
-              
-              
-              plot(data[selectChild,plotParameters[1]],data[selectChild,plotParameters[2]],
+
+              plot(xd[selectChild],yd[selectChild],
                    xlab=xlab,
                    ylab=ylab,
                    xlim=xlim,
@@ -107,34 +122,33 @@ setMethod("flowPlot",
                    type="n",
                    ...)
               ## filtered population
-              points(data[selectChild,plotParameters[1]],data[selectChild,plotParameters[2]],col=colSubSet,...)
+              points(xd[selectChild],yd[selectChild],col=colChild,...)
               ## unfiltered population
-              points(data[selectUnfiltered,plotParameters[1]],data[selectUnfiltered,plotParameters[2]],col=colParent,...)
+              points(xd[selectUnfiltered],yd[selectUnfiltered],col=colParent,...)
               if(showFilter){
-              	yf = y@filterDetails$filter
-              	         #    		browser()
-              	if(class(yf) == "subsetFilter") {
-              		yf = yf@left
+              	childFilter = child@filterDetails[[1]]$filter
+              	if(class(childFilter) == "subsetFilter") {
+              		childFilter = childFilter@left
               	}
-             	if(class(yf) == "rectangleGate") {
+             	if(class(childFilter) == "rectangleGate") {
              		## a simple range gate, note that it may be possible that the graph
              		## isn't based on the parameters of the gate in which case the 
              		## gate won't show
-             		if(length(yf@parameters)==1){
-             			if(yf@parameters==plotParameters[1]) {
-             				abline(v=yf@min,col=gate.border)
-             				abline(v=yf@max,col=gate.border)
+             		if(length(childFilter@parameters)==1){
+             			if(childFilter@parameters==plotParameters[1]) {
+             				abline(v=childFilter@min,col=gate.border)
+             				abline(v=childFilter@max,col=gate.border)
              			}
-             			else if(yf@parameters==plotParameters[2]) {
-             				abline(h=yf@min,col=gate.border)
-             				abline(h=yf@max,col=gate.border)
+             			else if(childFilter@parameters==plotParameters[2]) {
+             				abline(h=childFilter@min,col=gate.border)
+             				abline(h=childFilter@max,col=gate.border)
              			}
              		}
              		## the classic rectangle
-             		else if(length(yf@parameters)==2) {
+             		else if(length(childFilter@parameters)==2) {
              			## check to be sure the parameters actually match
-             			if(all(yf@parameters %in% plotParameters)) {
-             				rectends = c(yf@min[plotParameters[1]],yf@min[plotParameters[2]],yf@max[plotParameters[1]],yf@max[plotParameters[2]])
+             			if(all(childFilter@parameters %in% plotParameters)) {
+             				rectends = c(childFilter@min[plotParameters[1]],childFilter@min[plotParameters[2]],childFilter@max[plotParameters[1]],childFilter@max[plotParameters[2]])
              				## draw the rectangles out to the boundaries if -Inf or Inf appears
              				if(rectends[1] == -Inf) {
              					rectends[1] = xlim[1]
@@ -152,21 +166,18 @@ setMethod("flowPlot",
              			}
              		}
 				}
-				if(class(yf) == "norm2Filter") {
-					## add ellipse  
-					S = yf@filterDetails
-  					eigen <- eigen(S)
-  					phi   <- seq(0, 2*pi, len = 180)
-  					phi0  <- -atan2(abs(eigen$vector[1,2]), abs(eigen$vector[1,1]))
-  					xc    <- rad * sqrt(eigen$value[1]) * cos(phi)
-  					yc    <- rad * sqrt(eigen$value[2]) * sin(phi)
-  					xc1 <- mu[1] + xc*cos(phi0) + yc*sin(phi0)
-  					yc1 <- mu[2] - xc*sin(phi0) + yc*cos(phi0)
-  					#polygon(x=xc1, y=yc1, col="#fffab1")
-  					ell <- cbind(xc1, yc1)
- 				}
+# require(ellipse)
+#				if(!is.null(attr(parentFilter@subSet,"center"))){
+#				elps <- ellipse(x=attr(parentFilter@subSet,"cov"),centre=attr(parentFilter@subSet,"center"))
+#				lines(elps)
+#			}
+#				if(!missing(ellCov)) {
+#					elps <- ellipse(x=attr(parentFilter@subSet,"cov"),centre=attr(parentFilter@subSet,"center"))
+#					lines(elps)
+# 				}
 					
  
               }
             }
-          })
+          }
+)
