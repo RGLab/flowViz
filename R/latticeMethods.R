@@ -1,22 +1,38 @@
 
+
+
+
+createUniqueColumnName <- function(x)
+{
+    make.unique(c(names(x), "sample"))[ncol(x) + 1]
+}
+
+
+## FIXME: should have some way to combine or transform channel, e.g.
+## densityplot(factor(Visit) ~ log(`FSC-H`) | factor(Patient), GvHD)
+## Unfortunately, that won't be straightforward (nor that important probably)
+
+
+
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
           function(x, data, xlab,
                    as.table = TRUE, overlap = 0.3, 
                    ...)
       {
-          pd <- phenoData(data)@data
+          pd <- pData(phenoData(data))
+          uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
-          pd$name <- factor(pd$name) 
+          pd[[uniq.name]] <- factor(sampleNames(data)) 
           channel <- x[[3]]  
           if (length(channel) == 3)
           {
               channel <- channel[[2]]
-              x[[3]][[2]] <- as.name("name")
+              x[[3]][[2]] <- as.name(uniq.name)
           }
-          else x[[3]] <- as.name("name")
+          else x[[3]] <- as.name(uniq.name)
           channel <- as.character(channel)
 
           prepanel.densityplot.flowset <- 
@@ -86,7 +102,7 @@ setMethod("densityplot",
               }
 
           if (missing(xlab)) xlab <- channel
-          xyplot(x, data = pd, 
+          bwplot(x, data = pd, 
 
                  prepanel = prepanel.densityplot.flowset,
                  panel = panel.densityplot.flowset,
@@ -116,22 +132,23 @@ setMethod("xyplot",
                    pch = ".", smooth = TRUE,
                    ...)
       {
-          pd <- phenoData(data)@data
+          pd <- pData(phenoData(data))
+          uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
-          pd$name <- factor(pd$name) 
+          pd[[uniq.name]] <- factor(sampleNames(data)) 
           channel.y <- x[[2]]
           channel.x <- x[[3]]
           if (length(channel.x) == 3)
           {
               channel.x <- channel.x[[2]]
-              x[[3]][[2]] <- as.name("name")
+              x[[3]][[2]] <- as.name(uniq.name)
               x[[2]] <- NULL
           }
           else
           {
-              x[[3]] <- as.name("name")
+              x[[3]] <- as.name(uniq.name)
               x[[2]] <- NULL
           }
           channel.x <- as.character(channel.x)
@@ -205,41 +222,43 @@ setMethod("levelplot",
                    n = 50, 
                    ...)
       {
-          pd <- phenoData(data)@data
-          ## ugly hack to suppress warnings about coercion introducing
-          ## NAs (needs to be `undone' inside prepanel and panel
-          ## functions):
-          pd$name <- factor(pd$name) 
+          samples <- sampleNames(data)
           channel.y <- x[[2]]
           channel.x <- x[[3]]
-          if (length(channel.x) == 3)
+          if (length(channel.x) == 3) ## cy ~ cx | foo+bar
           {
               channel.x <- channel.x[[2]]
-              cond <- paste("|", paste(as.character(x[[3]][[3]]), collapse = " "))
+              my.formula <- x
+              my.formula[[2]] <- as.name("z")
+              my.formula[[3]][[2]] <- (z ~ x * y)[[3]]
           }
-          else cond <- ""
+          else ## cy ~ cx
+          {
+              my.formula <- z ~ x * y
+          }
           channel.x <- as.character(channel.x)
           channel.y <- as.character(channel.y)
-
+          range.x <- range(unlist(lapply(samples, function(nm) range(exprs(data@frames[[nm]])[, channel.x], finite = TRUE))))
+          range.y <- range(unlist(lapply(samples, function(nm) range(exprs(data@frames[[nm]])[, channel.y], finite = TRUE))))
+          ## range.y <- range(unlist(eapply(data@frames, function(x) range(x[, channel.y], finite = TRUE))))
+          range.x <- lattice:::extend.limits(range.x, prop = 0.05)
+          range.y <- lattice:::extend.limits(range.y, prop = 0.05)
           computeKde <- function(nm)
           {
               xx <- exprs(data@frames[[nm]])[, channel.x]
               yy <- exprs(data@frames[[nm]])[, channel.y]
-              temp <- kde2d(xx, yy, n = n)
-              d <- data.frame(x = rep(temp$x, n),
-                              y = rep(temp$y, each = n),
-                              z = as.vector(temp$z))
+              temp <- kde2d(xx, yy, n = n, lims = c(range.x, range.y))
+              data.frame(x = rep(temp$x, n),
+                         y = rep(temp$y, each = n),
+                         z = as.vector(temp$z))
           }
-          ft <- do.call(make.groups, sapply(as.character(pd$name), computeKde, simplify = FALSE))
-
-          rownames(pd) <- pd$name 
-          ft <- cbind(ft, pd[as.character(ft$which), , drop = FALSE])
-
+          ft <- do.call(make.groups, sapply(samples, computeKde, simplify = FALSE))
+          ## The next step is not efficient, as it replicates the
+          ## phenodata many times over.  However, bypassing this is a
+          ## task for another day
+          ft <- cbind(ft, pData(phenoData(data))[as.character(ft$which), , drop = FALSE])
           if (missing(xlab)) xlab <- channel.x
           if (missing(ylab)) ylab <- channel.y
-
-          my.formula <- as.formula(paste("z ~ x * y", cond))
-
           levelplot(my.formula, data = ft,
                     contour = contour, labels = labels,
                     xlab = xlab,
@@ -260,161 +279,6 @@ setMethod("levelplot",
 
 
 
-
-### old version with formulas like ~x and ~x | a
-
-## setMethod("densityplot",
-##           signature(x = "formula", data = "flowSet"),
-##           function(x, data, xlab,
-##                    stack = FALSE, overlap = 0.3,
-##                    ...)
-##       {
-##           pd <- phenoData(data)@data
-##           ## ugly hack to suppress warnings about coercion introducing
-##           ## NAs (needs to be `undone' inside prepanel and panel
-##           ## functions):
-##           pd$name <- factor(pd$name) 
-##           channel <- x[[2]]
-##           if (length(channel) == 3)
-##           {
-##               channel <- channel[[2]]
-##               x[[2]][[2]] <- as.name("name")
-##           }
-##           else x[[2]] <- as.name("name")
-##           channel <- as.character(channel)
-
-##           prepanel.densityplot.flowset <- 
-##               function(x, darg = list(n = 30),
-##                        frames, channel,
-##                        stack = FALSE, overlap = 0.3,
-##                        ...)
-##               {
-##                   xl <- numeric(0)
-##                   yl <- if (stack) c(1, length(x) + 1 + overlap) else 0
-##                   dxl <- if (stack) 1 else numeric(0)
-##                   dyl <- if (stack) 1 else numeric(0)
-                      
-##                   for (nm in as.character(x))
-##                   {
-##                       xx <- exprs(frames[[nm]])[, channel]
-##                       if (!stack)
-##                       {
-##                           h <- do.call(density, c(list(x = xx), darg))
-##                           xl <- c(xl, range(h$x))
-##                           yl <- c(yl, max(h$y))
-##                           quants <- quantile(xx, prob = c(0.15, 0.85), 
-##                                              names = FALSE, na.rm = TRUE)
-##                           ok <- h$x > quants[1] & h$x < quants[2]
-##                           dxl <- c(dxl, diff(h$x[ok]))
-##                           dyl <- c(dyl, diff(h$y[ok]))
-##                       }
-##                       else
-##                       {
-##                           xl <- c(xl, range(xx))
-##                       }
-##                   }
-##                   list(xlim = range(xl, finite = TRUE),
-##                        ylim = range(yl, finite = TRUE),
-##                        dx = dxl, dy = dyl)
-##               }
-
-##           panel.densityplot.flowset <-
-##               function(x, darg = list(n = 30), ref = FALSE,
-##                        frames, channel,
-##                        stack = FALSE, overlap = 0.3,
-
-##                        col = if (stack) plot.polygon$col else superpose.line$col,
-##                        lty = if (stack) plot.polygon$lty else superpose.line$lty,
-##                        lwd = if (stack) plot.polygon$lwd else superpose.line$lwd,
-##                        alpha = if (stack) plot.polygon$alpha else superpose.line$alpha,
-##                        border = plot.polygon$border,
-##                        ...)
-##               {
-##                   superpose.line <- trellis.par.get("superpose.line")
-##                   plot.polygon <- trellis.par.get("plot.polygon")
-##                   reference.line <- trellis.par.get("reference.line")
-##                   nx <- length(x)
-
-##                   if (stack)
-##                   {
-##                       height <- (1 + overlap)
-##                       infolist <-
-##                           lapply(as.character(x),
-##                                  function(nm) {
-##                                      xx <- exprs(frames[[nm]])[, channel]
-##                                      h <- do.call(density, c(list(x = xx), darg))
-##                                      list(med = median(xx, na.rm = TRUE),
-##                                           dens = h)
-##                                  })
-##                       ord.med <- order(sapply(infolist, "[[", "med"))
-##                       for (i in rev(seq_along(ord.med)))
-##                       {
-##                           h <- infolist[[ord.med[i]]][["dens"]]
-##                           n <- length(h$x)
-##                           max.d <- max(h$y)
-##                           panel.polygon(x = h$x[c(1, 1:n, n)],
-##                                         y = i + height * c(0, h$y, 0) / max.d,
-##                                         col = col, border = border,
-##                                         lty = lty, lwd = lwd, alpha = alpha)
-##                           if (ref)
-##                           {
-##                               panel.abline(h = i,
-##                                            col = reference.line$col,
-##                                            lty = reference.line$lty,
-##                                            lwd = reference.line$lwd,
-##                                            alpha = reference.line$alpha)
-##                           }
-##                       }
-##                   }
-##                   else
-##                   {
-##                       col <- rep(col, length = nx)
-##                       lty <- rep(lty, length = nx)
-##                       lwd <- rep(lwd, length = nx)
-##                       alpha <- rep(alpha, length = nx)
-
-##                       if (ref)
-##                       {
-##                           panel.abline(h = 0,
-##                                        col = reference.line$col,
-##                                        lty = reference.line$lty,
-##                                        lwd = reference.line$lwd,
-##                                        alpha = reference.line$alpha)
-##                       }
-
-##                       x <- as.character(x)
-##                       for (i in seq_along(x))
-##                       {
-##                           nm <- x[i]
-##                           xx <- exprs(frames[[nm]])[, channel]
-##                           h <- do.call(density, c(list(x = xx), darg))
-##                           llines(h,
-##                                  col = col[i], lty = lty[i],
-##                                  lwd = lwd[i], alpha = alpha[i],
-##                                  ...)
-##                       }
-##                   }
-##               }
-
-##           if (missing(xlab)) xlab <- channel
-##           default.scales <-
-##               if (stack) list(y = list(draw = FALSE))
-##               else list()
-##           densityplot(x, data = pd, 
-
-##                       prepanel = prepanel.densityplot.flowset,
-##                       panel = panel.densityplot.flowset,
-
-##                       frames = data@frames,
-##                       channel = channel,
-##                       stack = stack, overlap = overlap,
-
-##                       xlab = xlab,
-##                       default.scales = default.scales,
-                      
-##                       ...)
-##       })
-
 ## QQ plot
 
 ## setGeneric("qqmath")
@@ -423,21 +287,22 @@ setMethod("levelplot",
 
 setMethod("qqmath",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, ylab,
+          function(x, data, xlab, ylab,
                    f.value = function(n) ppoints(ceiling(sqrt(n))),
                    distribution = qnorm,
                    ...)
       {
-          pd <- phenoData(data)@data
+          pd <- pData(phenoData(data))
+          uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing NAs
-          pd$name <- factor(pd$name) 
+          pd[[uniq.name]] <- factor(sampleNames(data))
           channel <- x[[2]]
           if (length(channel) == 3)
           {
               channel <- channel[[2]]
-              x[[2]][[2]] <- as.name("name")
+              x[[2]][[2]] <- as.name(uniq.name)
           }
-          else x[[2]] <- as.name("name")
+          else x[[2]] <- as.name(uniq.name)
           channel <- as.character(channel)
 
           prepanel.qqmath.flowset <- 
@@ -520,16 +385,13 @@ setMethod("qqmath",
                   else eval(distribution)
 
                   nobs <- max(unlist(eapply(frames, function(x) nrow(exprs(x)))))
-
                   qq <-
                       if (is.null(f.value)) 
                           ppoints(sqrt(nobs))
                       else if (is.numeric(f.value))
                           f.value
                       else f.value(nobs)
-
                   xx <- distribution(qq)
-
                   x <- as.character(x)
                   for (i in seq_along(x))
                   {
@@ -549,17 +411,15 @@ setMethod("qqmath",
                   }
               }
 
+          if (missing(xlab)) xlab <- deparse(substitute(distribution))
           if (missing(ylab)) ylab <- channel
           qqmath(x, data = pd,
-
                  f.value = f.value, distribution = distribution,
-
                  prepanel = prepanel.qqmath.flowset,
                  panel = panel.qqmath.flowset,
-
                  frames = data@frames,
                  channel = channel,
-
+                 xlab = xlab,
                  ylab = ylab,
                       
                  ...)
