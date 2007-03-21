@@ -5,6 +5,7 @@ export("densityPlot",
        
 importFrom("lattice", densityplot, xyplot, levelplot, qqmath)
 importFrom("MASS", kde2d)
+importFrom("KernSmooth",bkde2D)
 
 exportMethods("densityplot", "xyplot", "levelplot", "qqmath")
-exportMethods("flowPlot")
+exportMethods("flowPlot","contour")
