@@ -470,7 +470,6 @@ setMethod("parallel",
               column.names <- column.names[column.order]
           }
           parallel(expr[, column.names],
-                   pscales = pscales, 
                    ...)
       })
 

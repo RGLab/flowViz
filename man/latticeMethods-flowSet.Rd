@@ -301,7 +301,7 @@ parallel(GvHD[["s6a01"]])
 \dontrun{
 
 ## try with PDF device
-parallel GvHD[["s7a01"]], alpha = 0.01)
+parallel(GvHD[["s7a01"]], alpha = 0.01)
 
 }
 

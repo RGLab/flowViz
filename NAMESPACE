@@ -7,10 +7,12 @@ importFrom("lattice",
            densityplot, xyplot, levelplot, qqmath,
            splom, parallel)
 importFrom("MASS", kde2d)
-importFrom("KernSmooth",bkde2D)
+importFrom("KernSmooth", bkde2D)
 
 exportMethods("densityplot", "xyplot", "levelplot", "qqmath",
               "splom", "parallel")
-exportMethods("flowPlot","contour")
+
+exportMethods("flowPlot")
+#,"contour")
 
 
