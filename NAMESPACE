@@ -3,9 +3,14 @@ import("flowCore")
 export("densityPlot", 
        "parallelCoordinates.rgl", "parallelCoord")
        
-importFrom("lattice", densityplot, xyplot, levelplot, qqmath)
+importFrom("lattice",
+           densityplot, xyplot, levelplot, qqmath,
+           splom, parallel)
 importFrom("MASS", kde2d)
 importFrom("KernSmooth",bkde2D)
 
-exportMethods("densityplot", "xyplot", "levelplot", "qqmath")
+exportMethods("densityplot", "xyplot", "levelplot", "qqmath",
+              "splom", "parallel")
 exportMethods("flowPlot","contour")
+
+
