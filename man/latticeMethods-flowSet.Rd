@@ -226,6 +226,10 @@ levelplot(`SSC-H` ~ `FSC-H` | Visit + Patient, GvHD, n = 20,
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD, 
        layout = c(7, 5))
 
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD,
+       layout = c(7, 5))
+
 ## version without smooth
 
 xyplot(`SSC-H` ~ `FSC-H` | Visit + Patient, data = GvHD, 
