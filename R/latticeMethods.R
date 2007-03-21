@@ -2,6 +2,9 @@
 
 
 
+
+
+
 createUniqueColumnName <- function(x)
 {
     make.unique(c(names(x), "sample"))[ncol(x) + 1]
@@ -159,18 +162,17 @@ setMethod("xyplot",
                        frames, channel.x, channel.y,
                        ...)
               {
-                  if (length(x) > 1) stop("must have only one flow frame per panel")
-                  xl <- numeric(0)
-                  yl <- numeric(0)
-                  for (nm in as.character(x))
+                  if (length(nm <- as.character(x)) > 1)
+                      stop("must have only one flow frame per panel")
+                  if (length(nm) == 1)
                   {
                       xx <- exprs(frames[[nm]])[, channel.x]
                       yy <- exprs(frames[[nm]])[, channel.y]
-                      xl <- c(xl, range(xx))
-                      yl <- c(yl, range(yy))
+                      list(xlim = range(xx, finite = TRUE),
+                           ylim = range(yy, finite = TRUE),
+                           dx = diff(xx), dy = diff(yy))
                   }
-                  list(xlim = range(xl, finite = TRUE),
-                       ylim = range(yl, finite = TRUE))
+                  else list()
               }
 
           panel.xyplot.flowset <-
@@ -424,4 +426,121 @@ setMethod("qqmath",
                       
                  ...)
       })
+
+
+
+
+setMethod("splom",
+          signature(x = "flowFrame", data = "missing"),
+          function(x, data, 
+                   pscales = 0,
+                   smooth = TRUE, pch = ".",
+                   time = "Time", exclude.time = TRUE,
+                   panel = function(x, y, smooth, ...) {
+                       if (smooth) panel.smoothScatter(x, y, ...)
+                       else panel.xyplot(x, y, ...)
+                   },
+                   ...)
+      {
+          expr <- exprs(x)
+          column.names <- colnames(expr)
+          if (exclude.time) column.names <- column.names[column.names != time]
+          splom(exprs(x[, column.names]),
+                pscales = pscales, 
+                panel = panel,
+                smooth = smooth, pch = pch,
+                ...)
+      })
+
+
+
+setMethod("parallel",
+          signature(x = "flowFrame", data = "missing"),
+          function(x, data, 
+                   reorder.by = function(x) var(x, na.rm = TRUE),
+                   time = "Time", exclude.time = TRUE,
+                   ...)
+      {
+          expr <- exprs(x)
+          column.names <- colnames(expr)
+          if (exclude.time) column.names <- column.names[column.names != time]
+          if (!is.null(reorder.by))
+          {
+              column.order <- rev(order(apply(expr[, column.names], 2, reorder.by)))
+              column.names <- column.names[column.order]
+          }
+          parallel(expr[, column.names],
+                   pscales = pscales, 
+                   ...)
+      })
+
+
+
+
+## xyplot for flowFrames, plotting columns against time
+
+setMethod("xyplot",
+          signature(x = "flowFrame", data = "missing"),
+          function(x, data, xlab = time, ylab = "", time = "Time",
+                   layout,
+                   type = "l", smooth = FALSE,
+                   ...)
+      {
+          expr <- exprs(x)
+          if (!(time %in% colnames(expr)))
+              stop("Name of the Time (X) variable must be specified as the 'time' argument")
+          time.x <- expr[, time]
+          fakedf <- data.frame(channel = setdiff(colnames(expr), time), time = 1)
+          prepanel.xyplot.flowframe <- 
+              function(x, y, time.x, expr, ...)
+              {
+                  xx <- time.x
+                  yy <- expr[, as.character(y)]
+                  list(xlim = range(xx, finite = TRUE),
+                       ylim = range(yy, finite = TRUE),
+                       dx = diff(xx), dy = diff(yy))
+              }
+          panel.xyplot.flowframe <- 
+              function(x, y, time.x, expr, smooth = FALSE, ...)
+              {
+                  xx <- time.x
+                  yy <- expr[, as.character(y)]
+                  if (smooth) panel.smoothScatter(xx, yy, ...)
+                  else panel.xyplot(xx, yy, ...)
+              }
+          if (missing(layout)) layout <- c(1, ncol(expr) - 1)
+          xyplot(channel ~ time | channel, data = fakedf,
+                 prepanel = prepanel.xyplot.flowframe,
+                 panel = panel.xyplot.flowframe,
+                 type = type, smooth = smooth,
+                 time.x = time.x, expr = expr,
+                 xlab = xlab, ylab = ylab,
+                 layout = layout,
+                 default.scales = list(y = list(relation = "free", rot = 0)),
+                 ...)
+      })
+
+
+## xyplot with a formula.  We'll make this very simple; the drawback
+## being that the expression matrix will be copied, the upshot being
+## that all the fancy xyplot formula stuff will be valid.
+
+setMethod("xyplot",
+          signature(x = "formula", data = "flowFrame"),
+          function(x, data,
+                   smooth = TRUE, 
+                   panel = if (smooth) panel.smoothScatter else panel.xyplot,
+                   ...)
+      {
+          xyplot(x, data = as.data.frame(exprs(data)),
+                 smooth = smooth, 
+                 panel = panel,
+                 ...)
+      })
+
+
+
+
+
+
 
