@@ -120,10 +120,10 @@
   \item{n}{ the number of bins on each axis to be used when evaluating
     the density }
 
-  \item{as.table, contour, labels,pscales}{ These arguments are passed
-    unchanged to the corresponding methods in lattice, and are listed
-    here only because they provide different defaults.  See
-    documentation for the original methods for details.
+  \item{as.table, contour, labels, pscales, layout, type}{ These
+    arguments are passed unchanged to the corresponding methods in
+    lattice, and are listed here only because they provide different
+    defaults.  See documentation for the original methods for details.
   }
   \item{time}{ A character string giving the name of the column
     recording time. }
@@ -214,7 +214,7 @@ phenoData(GvHD)$Visit <- factor(phenoData(GvHD)$Visit)
 
 require(colorspace)
 YlOrBr <- c("#FFFFD4", "#FED98E", "#FE9929", "#D95F0E", "#993404")
-colori <- colorRampPalette(YlOrBr, space = "Lab")
+colori <- colorRampPalette(YlOrBr)
 levelplot(`SSC-H` ~ `FSC-H` | Visit + Patient, GvHD, n = 20,
           col.regions = colori(50), main = "Contour Plot")
 
