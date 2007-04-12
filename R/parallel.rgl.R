@@ -77,14 +77,14 @@ parallelCoordinates.rgl <-
     }
 }  
 
-setGeneric("parallelCoord", function(object, ...)
-    standardGeneric("parallelCoord"))
+## setGeneric("parallelCoord", function(object, ...)
+##     standardGeneric("parallelCoord"))
 
-setMethod("parallelCoord", "flowFrame", function(object) {
-    time = match("<Time>", names(object), nomatch=0)
-    if( time > 0 )
-       parallelCoordinates.rgl(exprs(object)[,-time])
-    else
-       parallelCoordinates.rgl(exprs(object))
-  })
+## setMethod("parallelCoord", "flowFrame", function(object) {
+##     time = match("<Time>", names(object), nomatch=0)
+##     if( time > 0 )
+##        parallelCoordinates.rgl(exprs(object)[,-time])
+##     else
+##        parallelCoordinates.rgl(exprs(object))
+##   })
 

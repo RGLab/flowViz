@@ -1,6 +1,6 @@
 \name{flowPlot}
 \alias{flowPlot}
-\alias{flowPlot,generic}
+\alias{flowPlot,flowFrame-method}
 \docType{methods}
 \title{Standard Plots for Flow Cytometry Data
 }
@@ -10,9 +10,18 @@
   the plot.
 }
 \usage{
+
 flowPlot(x, ...)
+
+\S4method{flowPlot}{flowFrame}(x, child, filter = NULL,
+         plotParameters = c("FSC-H","SSC-H"),
+         logx = FALSE, logy = FALSE,
+         parent, colParent="Grey", colChild="Blue",
+         showFilter = TRUE, gate.fill = "transparent",
+         gate.border = "black", xlab, ylab, xlim, ylim,
+         \dots)
 }
-          	}
+
 \arguments{
 	\item{x}{An object of class \code{flowFrame} that contains the data to be plotted.}
 	\item{child}{An optional argument of class \code{filterResult} that specifies
@@ -31,10 +40,10 @@ flowPlot(x, ...)
 	\item{ylab}{}
 	\item{xlim}{}
 	\item{ylim}{}
-	\item{...}{}
+	\item{\dots}{}
 }
 \details{
-	The plot that is most commonly used in flow cytometry data analysis is usuall called
+  The plot that is most commonly used in flow cytometry data analysis is usuall called
   a "dot plot". In common statistical language, we would call this a scatter plot. The
   basic idea is a 2-dimensional plot that shows the location of every cell in regard
   to the measurements made on it, for example, forward scatter vs side scatter. Most
@@ -52,5 +61,9 @@ flowPlot(x, ...)
 \code{\link[flowCore:flowCore-package]{flowCore}}
 }
 \examples{
-## examples go here
+
+data(GvHD)
+flowPlot(GvHD[["s5a01"]])
+flowPlot(transform("SSC-H"=asinh,"FSC-H"=asinh) \%on\% GvHD[["s5a01"]])
+
 }

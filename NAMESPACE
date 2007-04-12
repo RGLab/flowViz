@@ -1,11 +1,11 @@
 import("flowCore")
 
-export("densityPlot", 
-       "parallelCoordinates.rgl", "parallelCoord")
+## export("parallelCoordinates.rgl", "parallelCoord")
        
 importFrom("lattice",
            densityplot, xyplot, levelplot, qqmath,
            splom, parallel)
+
 importFrom("MASS", kde2d)
 ## importFrom("KernSmooth", bkde2D)
 

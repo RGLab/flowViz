@@ -1,5 +1,11 @@
 \name{lattice-methods}
 \docType{methods}
+\alias{densityplot}
+\alias{xyplot}
+\alias{qqmath}
+\alias{levelplot}
+\alias{splom}
+\alias{parallel}
 \alias{densityplot,formula,flowSet-method}
 \alias{xyplot,formula,flowSet-method}
 \alias{qqmath,formula,flowSet-method}
