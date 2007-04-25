@@ -1,22 +1,6 @@
 
 
 
-
-
-
-
-createUniqueColumnName <- function(x)
-{
-    make.unique(c(names(x), "sample"))[ncol(x) + 1]
-}
-
-
-## FIXME: should have some way to combine or transform channel, e.g.
-## densityplot(factor(Visit) ~ log(`FSC-H`) | factor(Patient), GvHD)
-## Unfortunately, that won't be straightforward (nor that important probably)
-
-
-
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
           function(x, data, xlab,
@@ -36,7 +20,7 @@ setMethod("densityplot",
               x[[3]][[2]] <- as.name(uniq.name)
           }
           else x[[3]] <- as.name(uniq.name)
-          channel <- as.character(channel)
+          channel <- as.expression(channel)
 
           prepanel.densityplot.flowset <- 
               function(x, y, darg = list(n = 30),
@@ -47,7 +31,7 @@ setMethod("densityplot",
                   xl <- numeric(0)
                   for (nm in as.character(x))
                   {
-                      xx <- exprs(frames[[nm]])[, channel]
+                      xx <- evalInFlowFrame(channel, frames[[nm]])
                       xl <- c(xl, range(xx))
                   }
                   list(xlim = range(xl, finite = TRUE))
@@ -85,7 +69,7 @@ setMethod("densityplot",
                       if (i %in% ycode)
                       {
                           nm <- x[match(i, ycode)]
-                          xx <- exprs(frames[[nm]])[, channel]
+                          xx <- evalInFlowFrame(channel, frames[[nm]])
                           h <- do.call(density, c(list(x = xx), darg))
                           n <- length(h$x)
                           max.d <- max(h$y)
@@ -104,7 +88,7 @@ setMethod("densityplot",
                       }
               }
 
-          if (missing(xlab)) xlab <- channel
+          if (missing(xlab)) xlab <- as.character(channel)
           bwplot(x, data = pd, 
 
                  prepanel = prepanel.densityplot.flowset,
@@ -133,8 +117,17 @@ setMethod("xyplot",
           function(x, data, xlab, ylab,
                    as.table = TRUE,
                    pch = ".", smooth = TRUE,
+                   filter = NULL,
+                   filterResults = NULL,
                    ...)
       {
+
+          
+          if (!is.null(filter) && is.null(filterResults))
+              filterResults <- filter(data, filter)
+
+          
+
           pd <- pData(phenoData(data))
           uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing
@@ -154,8 +147,10 @@ setMethod("xyplot",
               x[[3]] <- as.name(uniq.name)
               x[[2]] <- NULL
           }
-          channel.x <- as.character(channel.x)
-          channel.y <- as.character(channel.y)
+          ## channel.x <- as.character(channel.x)
+          ## channel.y <- as.character(channel.y)
+          channel.x <- as.expression(channel.x)
+          channel.y <- as.expression(channel.y)
 
           prepanel.xyplot.flowset <- 
               function(x, 
@@ -166,8 +161,8 @@ setMethod("xyplot",
                       stop("must have only one flow frame per panel")
                   if (length(nm) == 1)
                   {
-                      xx <- exprs(frames[[nm]])[, channel.x]
-                      yy <- exprs(frames[[nm]])[, channel.y]
+                      xx <- evalInFlowFrame(channel.x, frames[[nm]])
+                      yy <- evalInFlowFrame(channel.y, frames[[nm]])
                       list(xlim = range(xx, finite = TRUE),
                            ylim = range(yy, finite = TRUE),
                            dx = diff(xx), dy = diff(yy))
@@ -178,25 +173,69 @@ setMethod("xyplot",
           panel.xyplot.flowset <-
               function(x, 
                        frames, channel.x, channel.y,
+                       filterResults = NULL,
 
                        pch, smooth,
                        ...)
               {
                   x <- as.character(x)
                   if (length(x) > 1) stop("must have only one flow frame per panel")
+                  if (length(x) < 1) return()
+
+                  nm <- x
+                  xx <- evalInFlowFrame(channel.x, frames[[nm]])
+                  yy <- evalInFlowFrame(channel.y, frames[[nm]])
+##                   xx <- exprs(frames[[nm]])[, channel.x]
+##                   yy <- exprs(frames[[nm]])[, channel.y]
                   
-                  for (nm in x)
+
+                  if (!is.null(filterResults))
                   {
-                      xx <- exprs(frames[[nm]])[, channel.x]
-                      yy <- exprs(frames[[nm]])[, channel.y]
+                      this.filter.result <- filterResults[[nm]]
+                      groups <- this.filter.result@subSet
+
+                      ## do something special if there's a natural
+                      ## representation of the filter/gate in this
+                      ## panel.  When is that true?  First of all, the
+                      ## filter has to be a "2-D" filter with no holes
+                      ## (topologically speaking), and it's "x" and
+                      ## "y" variables must match the current
+                      ## channel.x and channel.y
+
+                      ## to complicate things, both the filter and the
+                      ## data being plotted may be transformed, not
+                      ## necessarily the same way.  One option, that
+                      ## should work most of the time, is to simply
+                      ## draw a convex hull around 'groups=TRUE' when
+                      ## the first set of requirements are met.
                       
-                      if (smooth) panel.smoothScatter(xx, yy, ...)
-                      else panel.xyplot(xx, yy, pch = pch, ...)
+                      if (TRUE)
+                      {
+                          hull <- chull(xx[groups], yy[groups])
+                      }
+
+                      
                   }
+                  else groups <- NULL
+
+                  if (smooth) {
+                      panel.smoothScatter(xx, yy, ...)
+                      if (!is.null(groups))
+                      {
+                          lpolygon(xx[groups][hull],
+                                   yy[groups][hull],
+                                   border = "yellow")
+                      }
+                  }
+                  else panel.xyplot(xx, yy, pch = pch,
+                                    groups = groups,
+                                    subscripts = seq_along(groups),
+                                    ...)
               }
 
-          if (missing(xlab)) xlab <- channel.x
-          if (missing(ylab)) ylab <- channel.y
+          if (missing(xlab)) xlab <- as.character(channel.x)
+          if (missing(ylab)) ylab <- as.character(channel.y)
+
           densityplot(x, data = pd, 
 
                       prepanel = prepanel.xyplot.flowset,
@@ -205,6 +244,7 @@ setMethod("xyplot",
                       frames = data@frames,
                       channel.x = channel.x,
                       channel.y = channel.y,
+                      filterResults = filterResults,
                       as.table = as.table,
 
                       xlab = xlab,
@@ -238,17 +278,19 @@ setMethod("levelplot",
           {
               my.formula <- z ~ x * y
           }
-          channel.x <- as.character(channel.x)
-          channel.y <- as.character(channel.y)
-          range.x <- range(unlist(lapply(samples, function(nm) range(exprs(data@frames[[nm]])[, channel.x], finite = TRUE))))
-          range.y <- range(unlist(lapply(samples, function(nm) range(exprs(data@frames[[nm]])[, channel.y], finite = TRUE))))
+          channel.x <- as.expression(channel.x)
+          channel.y <- as.expression(channel.y)
+
+          range.x <- range(unlist(lapply(samples, function(nm) range(evalInFlowFrame(channel.x, data@frames[[nm]]), finite = TRUE))))
+          range.y <- range(unlist(lapply(samples, function(nm) range(evalInFlowFrame(channel.y, data@frames[[nm]]), finite = TRUE))))
           ## range.y <- range(unlist(eapply(data@frames, function(x) range(x[, channel.y], finite = TRUE))))
+
           range.x <- lattice:::extend.limits(range.x, prop = 0.05)
           range.y <- lattice:::extend.limits(range.y, prop = 0.05)
           computeKde <- function(nm)
           {
-              xx <- exprs(data@frames[[nm]])[, channel.x]
-              yy <- exprs(data@frames[[nm]])[, channel.y]
+              xx <- evalInFlowFrame(channel.x, data@frames[[nm]])
+              yy <- evalInFlowFrame(channel.y, data@frames[[nm]])
               temp <- kde2d(xx, yy, n = n, lims = c(range.x, range.y))
               data.frame(x = rep(temp$x, n),
                          y = rep(temp$y, each = n),
@@ -259,8 +301,8 @@ setMethod("levelplot",
           ## phenodata many times over.  However, bypassing this is a
           ## task for another day
           ft <- cbind(ft, pData(phenoData(data))[as.character(ft$which), , drop = FALSE])
-          if (missing(xlab)) xlab <- channel.x
-          if (missing(ylab)) ylab <- channel.y
+          if (missing(xlab)) xlab <- as.character(channel.x)
+          if (missing(ylab)) ylab <- as.character(channel.y)
           levelplot(my.formula, data = ft,
                     contour = contour, labels = labels,
                     xlab = xlab,
@@ -277,7 +319,6 @@ setMethod("levelplot",
 ## colori <- colorRampPalette(YlOrBr, space = "Lab")
 ## levelplot(`SSC-H` ~ `FSC-H` | name, samp, col.regions=colori(50), main="Contour Plot")
 ##
-
 
 
 
@@ -305,7 +346,7 @@ setMethod("qqmath",
               x[[2]][[2]] <- as.name(uniq.name)
           }
           else x[[2]] <- as.name(uniq.name)
-          channel <- as.character(channel)
+          channel <- as.expression(channel)
 
           prepanel.qqmath.flowset <- 
               function(x, frames, channel,
@@ -332,7 +373,7 @@ setMethod("qqmath",
                   yy <-
                       unlist(eapply(frames,
                                     function(x) {
-                                        quantile(exprs(x)[, channel],
+                                        quantile(evalInFlowFrame(channel, x),
                                                  qrange,
                                                  na.rm = TRUE)
                                     }))
@@ -341,7 +382,7 @@ setMethod("qqmath",
                   dy <-
                       unlist(eapply(frames,
                                     function(x) {
-                                        diff(quantile(exprs(x)[, channel],
+                                        diff(quantile(evalInFlowFrame(channel, x),
                                                       c(0.25, 0.75),
                                                       na.rm = TRUE))
                                     }))
@@ -399,7 +440,7 @@ setMethod("qqmath",
                   {
                       nm <- x[i]
                       yy <-
-                          quantile(exprs(frames[[nm]])[, channel],
+                          quantile(evalInFlowFrame(channel, frames[[nm]]),
                                    qq, na.rm = TRUE)
                       panel.xyplot(xx, yy,
                                    col.line = col.line[i],
@@ -414,7 +455,7 @@ setMethod("qqmath",
               }
 
           if (missing(xlab)) xlab <- deparse(substitute(distribution))
-          if (missing(ylab)) ylab <- channel
+          if (missing(ylab)) ylab <- as.character(channel)
           qqmath(x, data = pd,
                  f.value = f.value, distribution = distribution,
                  prepanel = prepanel.qqmath.flowset,
@@ -451,28 +492,6 @@ setMethod("splom",
                 smooth = smooth, pch = pch,
                 ...)
       })
-
-
-
-setMethod("parallel",
-          signature(x = "flowFrame", data = "missing"),
-          function(x, data, 
-                   reorder.by = function(x) var(x, na.rm = TRUE),
-                   time = "Time", exclude.time = TRUE,
-                   ...)
-      {
-          expr <- exprs(x)
-          column.names <- colnames(expr)
-          if (exclude.time) column.names <- column.names[column.names != time]
-          if (!is.null(reorder.by))
-          {
-              column.order <- rev(order(apply(expr[, column.names], 2, reorder.by)))
-              column.names <- column.names[column.order]
-          }
-          parallel(expr[, column.names],
-                   ...)
-      })
-
 
 
 
