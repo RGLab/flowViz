@@ -9,6 +9,7 @@ setMethod("xyplot",
                    pch = ".", smooth = TRUE,
                    filter = NULL,
                    filterResults = NULL,
+                   displayFilter=FALSE,
                    ...)
       {
 
@@ -121,6 +122,15 @@ setMethod("xyplot",
                                     groups = groups,
                                     subscripts = seq_along(groups),
                                     ...)
+                                    
+                  if(displayFilter) {
+				       if(class(filter)!="rectangleGate") {stop("Only rectangleGate is supported for displayFilter")}			       
+				       hLine=c(attr(filter,"min")[gsub("`","",paste(channel.y))],attr(filter,"max")[gsub("`","",paste(channel.y))])
+				       vLine=c(attr(filter,"min")[gsub("`","",paste(channel.x))],attr(filter,"max")[gsub("`","",paste(channel.x))])
+                  	   if(!sum(is.na(hLine))) {panel.abline(h=hLine,col="red")}
+                  	   if(!sum(is.na(vLine))) {panel.abline(v=vLine,col="red")}
+                  }
+
               }
 
           if (missing(xlab)) xlab <- as.character(channel.x)
