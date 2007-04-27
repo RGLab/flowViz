@@ -12,6 +12,7 @@
 \alias{levelplot,formula,flowSet-method}
 \alias{splom,flowFrame,missing-method}
 \alias{parallel,flowFrame,missing-method}
+\alias{parallel,formula,flowSet-method}
 \alias{xyplot,flowFrame,missing-method}
 \alias{xyplot,formula,flowFrame-method}
 
@@ -63,7 +64,10 @@
 
 \S4method{xyplot}{formula,flowSet}(x, data,
        xlab, ylab, as.table = TRUE,
-       pch = ".", smooth = TRUE, \dots)
+       pch = ".", smooth = TRUE,
+       filter = NULL,
+       filterResults = NULL,
+       \dots)
 
 \S4method{qqmath}{formula,flowSet}(x, data, xlab, ylab,
        f.value = function(n) ppoints(ceiling(sqrt(n))),
@@ -109,7 +113,7 @@
 
 \arguments{
   \item{x}{ a formula describing the structure of the plot and the
-    variables used to create it }
+    variables to be used in the display.   }
   \item{data}{ a \code{flowSet} object that serves as a source of data }
   \item{xlab, ylab}{ Labels for data axes, with suitable defaults taken
     from the formula }
@@ -140,6 +144,13 @@
     columns are ordered by the results.  Reordering can be suppressed by
     setting this to \code{NULL}.  }
   \item{panel}{ panel function used. }
+  \item{filter}{ A \link[flowCore:filter-class]{filter} object.  Ignored
+    when \code{filterResults} is not \code{NULL}. }
+  \item{filterResults}{ A
+    \link[flowCore:filterResult-class]{filterResult-class} object, that
+    is the result of applying a filter on each frame in \code{data}.  If
+    this is \code{NULL} but \code{filter} is not, it will be created on
+    the fly by applying \code{filter} to each frame.  }
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods. }
 }
@@ -194,12 +205,11 @@
 }
 
 \details{
-  Transformations of raw data (such as taking logarithms) are not
-  supported, except for the \code{xyplot("formula", "flowFrame")}
-  method.  Not all standard lattice arguments will have the intended
+  Not all standard lattice arguments will have the intended
   effect, but many should.  For a fuller description of possible
   arguments and their effects, consult documentation on lattice (Trellis
-  docs would also work for the fundamentals). }
+  docs would also work for the fundamentals).
+}
 
 
 \examples{

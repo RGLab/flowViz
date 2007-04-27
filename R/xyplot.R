@@ -13,11 +13,8 @@ setMethod("xyplot",
                    ...)
       {
 
-          
           if (!is.null(filter) && is.null(filterResults))
               filterResults <- filter(data, filter)
-
-          
 
           pd <- pData(phenoData(data))
           uniq.name <- createUniqueColumnName(pd)
@@ -83,8 +80,21 @@ setMethod("xyplot",
                   if (!is.null(filterResults))
                   {
                       this.filter.result <- filterResults[[nm]]
-                      groups <- this.filter.result@subSet
+                      groups <- this.filter.result@subSet                      
+                  }
+                  else groups <- NULL
 
+                  if (smooth) {
+                      panel.smoothScatter(xx, yy, ...)
+                  }
+                  else panel.xyplot(xx, yy, pch = pch,
+                                    groups = groups,
+                                    subscripts = seq_along(groups),
+                                    ...)
+
+
+                  if (!is.null(groups))
+                  {
                       ## do something special if there's a natural
                       ## representation of the filter/gate in this
                       ## panel.  When is that true?  First of all, the
@@ -100,28 +110,17 @@ setMethod("xyplot",
                       ## draw a convex hull around 'groups=TRUE' when
                       ## the first set of requirements are met.
                       
-                      if (TRUE)
+                      if (setequal(parameters(this.filter.result),
+                                   c(as.character(channel.x), as.character(channel.y))))
                       {
                           hull <- chull(xx[groups], yy[groups])
-                      }
-
-                      
-                  }
-                  else groups <- NULL
-
-                  if (smooth) {
-                      panel.smoothScatter(xx, yy, ...)
-                      if (!is.null(groups))
-                      {
                           lpolygon(xx[groups][hull],
                                    yy[groups][hull],
                                    border = "yellow")
                       }
                   }
-                  else panel.xyplot(xx, yy, pch = pch,
-                                    groups = groups,
-                                    subscripts = seq_along(groups),
-                                    ...)
+
+                  
                                     
                   if(displayFilter) {
 				       if(class(filter)!="rectangleGate") {stop("Only rectangleGate is supported for displayFilter")}			       

@@ -35,3 +35,24 @@ createUniqueColumnName <- function(x)
     make.unique(c(names(x), "sample"))[ncol(x) + 1]
 }
 
+
+
+setGeneric("filterBoundary",
+           function(object, ...) standardGeneric("filterBoundary"))
+
+setMethod("filterBoundary", signature = "filterResult",
+          definition = function(object, ...) {
+              list(x = numeric(0), y = numeric(0))
+          })
+
+setMethod("filterBoundary", signature = "filterResult",
+          definition = function(object, ...) {
+              list(x = numeric(0), y = numeric(0))
+          })
+
+
+
+
+
+
+

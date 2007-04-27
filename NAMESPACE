@@ -6,11 +6,14 @@ importFrom("lattice",
            densityplot, xyplot, levelplot, qqmath,
            splom, parallel)
 
+importFrom("latticeExtra", ecdfplot)
+
+
 importFrom("MASS", kde2d)
 ## importFrom("KernSmooth", bkde2D)
 
 exportMethods("densityplot", "xyplot", "levelplot", "qqmath",
-              "splom", "parallel")
+              "splom", "parallel", "ecdfplot")
 
 exportMethods("flowPlot")
 #,"contour")
