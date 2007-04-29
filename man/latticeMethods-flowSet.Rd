@@ -67,6 +67,7 @@
        pch = ".", smooth = TRUE,
        filter = NULL,
        filterResults = NULL,
+       displayFilter = TRUE,
        \dots)
 
 \S4method{qqmath}{formula,flowSet}(x, data, xlab, ylab,
@@ -151,6 +152,13 @@
     is the result of applying a filter on each frame in \code{data}.  If
     this is \code{NULL} but \code{filter} is not, it will be created on
     the fly by applying \code{filter} to each frame.  }
+  \item{displayFilter}{ logical or list.  If \code{TRUE}, an attempt is
+    made to display the geometric boundaries of \code{filter} (if
+    specified) in the plot.  The same holds if \code{displayFilter} is a
+    list, but in that case the components are interpreted as graphical
+    parameters to be passed on to
+    \code{\link[lattice:llines]{panel.polygon}}
+  }
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods. }
 }
@@ -215,15 +223,11 @@
 \examples{
 
 data(GvHD)
-densityplot(factor(Visit) ~ `FSC-H` | factor(Patient), GvHD)
+densityplot(Visit ~ `FSC-H` | Patient, GvHD)
 
 qqmath( ~ `FSC-H` | factor(Patient), GvHD,
        grid = TRUE, type = "l",
        f.value = ppoints(100))
-
-
-phenoData(GvHD)$Patient <- factor(phenoData(GvHD)$Patient)
-phenoData(GvHD)$Visit <- factor(phenoData(GvHD)$Visit)
 
 
 ## contourplot of bivariate density:
@@ -331,6 +335,52 @@ xyplot(`FSC-H` + `SSC-H` + `FL1-H` ~ Time, GvHD[["s5a07"]],
        type = "l", smooth = FALSE)
 
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a01"]], nbin = 100)
+
+## displaying filters
+
+n2gate <- norm2Filter("SSC-H", "FSC-H")
+
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD,
+       filter = n2gate, ## displayFilter = TRUE,
+       layout = c(7, 5))
+
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) \%on\% GvHD,
+       smooth = FALSE,
+       filter = n2gate, displayFilter = list(border = "black"),
+       layout = c(7, 5))
+
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) \%on\% GvHD,
+       filter = rectangleGate("FSC-H"=c(5.5, 7),"SSC-H"=c(4, 6.5)),
+       displayFilter = list(lwd = 3),
+       layout = c(7, 5))
+
+n2gate.results <- filter(GvHD, n2gate \%on\% transform("SSC-H"=asinh,"FSC-H"=asinh))
+
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD,
+       filterResults = n2gate.results, smooth = FALSE,
+       layout = c(7, 5))
+
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
+       data = GvHD,
+       smooth = FALSE,
+       filter = n2gate,
+       filterResults = n2gate.results,
+       displayFilter = list(border = 'black', lwd = 0.5),
+       layout = c(7, 5))
+
+
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) \%on\% GvHD,
+       smooth = FALSE,
+       filter = rectangleGate("FSC-H"=c(5.5, 7),"SSC-H"=c(4, 6.5)),
+       filterResults = n2gate.results,
+       displayFilter = list(border = 'red'),
+       layout = c(7, 5))
+
+
+
 
 }
 
