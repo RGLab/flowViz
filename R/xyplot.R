@@ -108,7 +108,7 @@ setMethod("xyplot",
 
                   if (!is.null(filter) && (is.list(displayFilter) || displayFilter))
                   {
-                      display.pars <- if (is.list(displayFilter)) displayFilter else list(border = "yellow")
+                      display.pars <- if (is.list(displayFilter)) displayFilter else list(border = TRUE)
                       filter.boundary <-
                           filterBoundary(filter = filter,
                                          parameters = c(channel.x.name, channel.y.name),

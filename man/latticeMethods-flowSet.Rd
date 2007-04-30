@@ -347,7 +347,7 @@ xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD,
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
        data = transform("SSC-H"=asinh,"FSC-H"=asinh) \%on\% GvHD,
        smooth = FALSE,
-       filter = n2gate, displayFilter = list(border = "black"),
+       filter = n2gate, ## displayFilter = list(border = "black"),
        layout = c(7, 5))
 
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
@@ -367,7 +367,7 @@ xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
        smooth = FALSE,
        filter = n2gate,
        filterResults = n2gate.results,
-       displayFilter = list(border = 'black', lwd = 0.5),
+       displayFilter = list(lwd = 0.5),
        layout = c(7, 5))
 
 
@@ -376,7 +376,7 @@ xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
        smooth = FALSE,
        filter = rectangleGate("FSC-H"=c(5.5, 7),"SSC-H"=c(4, 6.5)),
        filterResults = n2gate.results,
-       displayFilter = list(border = 'red'),
+       ## displayFilter = list(border = 'red'),
        layout = c(7, 5))
 
 
