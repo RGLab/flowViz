@@ -19,7 +19,7 @@
 
 \S4method{ecdfplot}{formula,flowSet}(x, data, xlab, ylab,
          f.value = function(n) ppoints(ceiling(sqrt(n))),
-         type = "l",
+         type = "l", ref = TRUE,
          \dots)
 
 }
