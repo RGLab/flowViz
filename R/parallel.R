@@ -26,23 +26,23 @@ setMethod("parallel",
 
 
 
-setMethod("parallel",
-          signature(x = "formula", data = "flowSet"),
-          function(x, data, 
-                   reorder.by = function(x) var(x, na.rm = TRUE),
-                   time = "Time", exclude.time = TRUE,
-                   ...)
-      {
-          expr <- exprs(x)
-          column.names <- colnames(expr)
-          if (exclude.time) column.names <- column.names[column.names != time]
-          if (!is.null(reorder.by))
-          {
-              column.order <- rev(order(apply(expr[, column.names], 2, reorder.by)))
-              column.names <- column.names[column.order]
-          }
-          parallel(expr[, column.names], ...)
-      })
+## setMethod("parallel",
+##           signature(x = "formula", data = "flowSet"),
+##           function(x, data, 
+##                    reorder.by = function(x) var(x, na.rm = TRUE),
+##                    time = "Time", exclude.time = TRUE,
+##                    ...)
+##       {
+##           expr <- exprs(x)
+##           column.names <- colnames(expr)
+##           if (exclude.time) column.names <- column.names[column.names != time]
+##           if (!is.null(reorder.by))
+##           {
+##               column.order <- rev(order(apply(expr[, column.names], 2, reorder.by)))
+##               column.names <- column.names[column.order]
+##           }
+##           parallel(expr[, column.names], ...)
+##       })
 
 
 ## Formula is like  ~ . | a + b. The '.' part is currently ignored.

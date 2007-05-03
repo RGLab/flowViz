@@ -1,0 +1,392 @@
+% NOTE -- ONLY EDIT THE .Rnw FILE!!!  The .tex file is
+% likely to be overwritten.
+%
+%\VignetteIndexEntry{Visualizing Gates with Flow Cytometry Data}
+%\VignetteDepends{flowViz}
+%\VignetteKeywords{}
+%\VignettePackage{flowViz}
+\documentclass[11pt]{article}
+
+\SweaveOpts{keep.source=TRUE,pdf=TRUE,eps=FALSE}
+
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textsf{#1}}}
+\newcommand{\Rdata}[1]{{\textsf{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+
+
+
+\title{Gates/filters in Flow Cytometry Data Visualization} 
+\date{\today}
+
+
+
+\usepackage[text={7.5in,9in},centering]{geometry}
+\usepackage{Sweave}
+\setkeys{Gin}{width=0.95\textwidth}
+\usepackage[round]{natbib}
+
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+
+% \usepackage{setspace}
+% \setlength{\parindent}{0in}
+
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  The \Rpackage{flowViz} package provides tools for visualization of
+  flow cytometry data.  This document describes the support for
+  visualizing gates (a.k.a. filters).
+\end{abstract}
+
+
+
+<<loadPackage, echo=false,results=hide>>=
+library(flowViz)
+@
+
+
+\section{Introduction}
+
+
+Tools to read in and otherwise manipulate flow cytometry data are
+implemented in the \Rpackage{flowCore} package.  The
+\Rpackage{flowViz} package provides visualization support for such
+data.  In this document we give examples dealing with gated or
+filtered data.
+
+
+
+
+\subsection{Filters and filter results}
+
+The \Rpackage{flowCore} package defines the concepts of filters and
+filter results.  Filters are abstract entities defined in terms of
+marker (?) channels, whereas a filter result is the result of applying
+a filter to one or more flow frames (data objects representing
+individual FCM experiments).  Some filters are data driven, while some
+some are not.  
+
+
+\subsection{Visualization}
+
+It only makes sense to visualize a filter if it has a (two
+dimensional) geometric representation.  This is true for (2D)
+rectangle gates and polygon gates, which are both frequently used.  It
+is also true for some data driven gates, e.g. \Rclass{norm2Filter}
+gates, which have a (data dependent) spherical representation.  Also,
+it makes sense to draw gate boundaries only what plotting the channels
+that define the gate.
+
+
+Visualizing filter results is a more general.  Specifically, the
+result of applying a filter is usually a logical (\Rcode{TRUE} or
+\Rcode{FALSE}) vector for each cell, or more generally, a
+\Rclass{factor} (as long as we restrict ourselves to non-fuzzy
+filters).  This can be used a grouping variable within a display, and
+can be used with channels other than those defining the gate.
+
+
+
+\subsection{Examples}
+
+We use the \Rdata{GvHD} data set to provide some examples (what's the
+equivalent of \Rcode{subset(GvHD, Patient == "6"}?).
+<<>>=
+data(GvHD)
+@ 
+%
+We define 2 filters and apply one of them to the full data set.
+<<>>=
+n2gate <- norm2Filter("SSC-H", "FSC-H")
+rgate <- rectangleGate("FSC-H"=c(5.5, 7),"SSC-H"=c(4, 6.5))
+n2gate.results <- filter(GvHD, n2gate)
+## n2gate.results <- filter(GvHD, n2gate %on% transform("SSC-H"=asinh,"FSC-H"=asinh))
+@ 
+
+
+
+
+\section{Filters in scatter plots}
+
+
+The \Rfunction{xyplot} method for \Rclass{flowSet} objects support
+filters through three arguments:
+\begin{itemize}
+\item \Rcode{filter}: A \Rclass{filter} object
+\item \Rcode{filterResults}: A \Rclass{filterResult} object that has
+  been obtained by applying a filter (not necessarily \Rcode{filter})
+  on the \Rclass{flowSet} object that is the \Rcode{data} argument in
+  the call.  This is essentially the result of applying the filter on
+  each frame in \Rcode{data}.  If this is \Rcode{NULL} but
+  \Rcode{filter} is not, it will be created on the fly by applying
+  \Rcode{filter} to each frame.
+\item \Rcode{displayFilter}: logical or list.  If \Rcode{FALSE}, no
+  attempt is made to render \Rcode{filter}.  If \Rcode{TRUE}, an
+  attempt is made to display the geometric boundaries of
+  \Rcode{filter} (if specified) in the plot.  The same holds if
+  \Rcode{displayFilter} is a list, but in that case the components are
+  interpreted as graphical parameters to be passed on to the polygon
+  drawing routines.
+\end{itemize}
+The key concepts here are that
+\begin{itemize}
+\item \Rcode{filter} and \Rcode{filterResults} can be unrelated
+\item \Rcode{filter} is visualized geometrically, which makes sense
+  only under certain circumstances (e.g. display axes matching filter
+  parameters), while \Rcode{filterResults} is visualized through
+  grouping, which makes sense more generally (display variables need
+  not match filter parameters).
+\item \Rcode{displayFilter} is concerned with \Rcode{filter}, not
+  \Rcode{filterResults}
+\item Visualization of \Rcode{filterResults} depends on the type of
+  rendering.  For example, with \Rcode{smooth = TRUE},
+  \Rcode{filterResults} will be ignored because the panel function
+  used to perform the rendering cannot handle a grouping variable.
+  Grouping is done when \Rcode{smooth = FALSE}, but this has the
+  drawback of overplotting.  The effect of overplotting can be reduced
+  somewhat using transparency, but scalability issues remain.  We may
+  try dealing with this at some point if it becomes enough of a
+  hassle.
+\end{itemize}
+We will next give several examples using the filters defined above.
+
+
+\newpage
+
+<<>>=
+xyplot(`SSC-H` ~ `FSC-H` | Visit, data = GvHD,
+       filter = n2gate, displayFilter = TRUE,
+       subset = Patient == "6")
+@ 
+
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+In this figure, \Rcode{n2gate} is applied to each frame and the
+results rendered as an ellipse.  Since the gate is data driven, the
+ellipse is different for each panel.  Since \Rcode{smooth=TRUE}, the
+subset of points in the gate are not indicated separately.
+
+
+\newpage
+
+
+<<>>=
+xyplot(`SSC-H` ~ `FSC-H` | Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD,
+       smooth = FALSE, alpha = 0.1,
+       filter = n2gate,
+       displayFilter = list(lwd = 2),
+       subset = Patient == "6")
+##
+@ 
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+In this figure, \Rcode{n2gate} is again applied to each frame, but
+this time to the inline-transformed \Rclass{flowSet} object suppiled
+as the \Rcode{data} argument.  Since \Rcode{smooth=FALSE}, the subset
+of points in the gate are shown in a different color
+(\Rcode{filterResults} is computed by applying \Rcode{filter} to each
+frame).  Making the points translucent allows us to get a feel of the
+local density of points.
+
+
+
+\newpage
+
+
+<<>>=
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD,
+       subset = Patient == "6",
+       filter = rgate)
+##
+@ 
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+In this figure, the rectagle gate \Rcode{r2gate} is rendered on the
+transformed data.
+
+
+
+
+\newpage
+
+
+<<>>=
+xyplot(`SSC-H` ~ `FSC-H` | Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD,
+       subset = Patient == "6",
+       filterResults = n2gate.results,
+       smooth = FALSE, alpha = 0.1)
+##
+@ 
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+In this figure, there is no \Rcode{filter} argument.  However, there
+is a \Rcode{filterResults} argument, which has been set to
+\Rcode{n2gate.results}.  Note that the filter was originally applied
+to untransformed data, but the data being displayed is transformed.
+Consequently, the boundaries of the points in the gate are not
+ellipses in the display scale.
+
+
+\newpage
+
+
+<<>>=
+xyplot(`SSC-H` ~ `FSC-H` | Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD,
+       subset = Patient == "6",
+       filterResults = n2gate.results,
+       filter = n2gate,
+       smooth = FALSE, alpha = 0.1)
+##
+@ 
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+In this figure, we have both a \Rcode{filter} and a
+\Rcode{filterResults} argument.  The effect of \Rcode{filterResults}
+is exactly as it was in the previous plot.  However, \Rcode{filter} is
+applied anew, and rendered as ellipses, on the \emph{transformed}
+data.  As we can see, both versions localize the primary cluster in
+roughly the same region, except in one case.
+
+
+
+\newpage
+
+
+<<>>=
+xyplot(`SSC-H` ~ `FSC-H` | Visit,
+       data = transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD,
+       subset = Patient == "6",
+       smooth = FALSE, alpha = 0.1,
+       filter = rectangleGate("FSC-H"=c(5.5, 7),"SSC-H"=c(4, 6.5)),
+       filterResults = n2gate.results,
+       displayFilter = list(border = 'red'))
+##
+@ 
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+This figure is in principle similar to the previous one, except that
+\Rcode{filter} is now the rectangle gate.
+
+
+
+\newpage
+
+
+<<>>=
+xyplot(asinh(`FL3-H`) ~ asinh(`FL1-H`) | Visit, data = GvHD,
+       subset = Patient == "6",
+       smooth = FALSE, alpha = 0.1,
+       filter = rectangleGate("FSC-H"=c(5.5, 7),"SSC-H"=c(4, 6.5)),
+       filterResults = n2gate.results,
+       displayFilter = list(border = 'red'))
+##
+@ 
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+As noted earlier, rendering a filter only makes sense when variables
+match, whereas a filter result can be used for grouping even when this
+does not hold.  In this figure, a \Rcode{filter} argument is
+specified, but it is ignored because the parameters of the filter are
+not being plotted.  However, \Rcode{filterResults} is still used.
+
+
+
+\newpage
+
+\section{Filters in parallel coodinate plots}
+
+
+Although the \Rcode{filter} argument does not make much sense except
+in scatter plots, \Rcode{filterResults} can be used for grouping in
+other contexts.  So far, only the \Rfunction{parallel} method supports
+this syntax.
+
+
+<<>>=
+parallel(~ . | Visit, 
+         data =
+         transform("SSC-H"=asinh,"FSC-H"=asinh, "FL1-H"=asinh,
+                   "FL2-H"=asinh, "FL3-H"=asinh, "FL2-A"=asinh,
+                   "FL4-H"=asinh) %on% GvHD,
+         subset = Patient == "6",
+         filterResults = n2gate.results,
+         alpha = 0.01)
+##
+@ 
+
+\begin{center}
+  
+<<fig=TRUE,width=9,height=8,echo=FALSE>>=
+plot(trellis.last.object())
+@
+
+\end{center}
+
+
+
+
+
+
+\clearpage
+
+% \bibliographystyle{plainnat} 
+% \bibliography{cytoref}
+
+\end{document}

@@ -20,6 +20,7 @@ setMethod("densityplot",
               x[[3]][[2]] <- as.name(uniq.name)
           }
           else x[[3]] <- as.name(uniq.name)
+          channel.name <- expr2char(channel)
           channel <- as.expression(channel)
 
           prepanel.densityplot.flowset <- 
@@ -88,7 +89,7 @@ setMethod("densityplot",
                       }
               }
 
-          if (missing(xlab)) xlab <- as.character(channel)
+          if (missing(xlab)) xlab <- channel.name
           bwplot(x, data = pd, 
 
                  prepanel = prepanel.densityplot.flowset,
@@ -132,6 +133,8 @@ setMethod("levelplot",
           {
               my.formula <- z ~ x * y
           }
+          channel.x.name <- expr2char(channel.x)
+          channel.y.name <- expr2char(channel.y)
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
 
@@ -155,8 +158,8 @@ setMethod("levelplot",
           ## phenodata many times over.  However, bypassing this is a
           ## task for another day
           ft <- cbind(ft, pData(phenoData(data))[as.character(ft$which), , drop = FALSE])
-          if (missing(xlab)) xlab <- as.character(channel.x)
-          if (missing(ylab)) ylab <- as.character(channel.y)
+          if (missing(xlab)) xlab <- channel.x.name
+          if (missing(ylab)) ylab <- channel.y.name
           levelplot(my.formula, data = ft,
                     contour = contour, labels = labels,
                     xlab = xlab,
@@ -200,6 +203,7 @@ setMethod("qqmath",
               x[[2]][[2]] <- as.name(uniq.name)
           }
           else x[[2]] <- as.name(uniq.name)
+          channel.name <- expr2char(channel)
           channel <- as.expression(channel)
 
           prepanel.qqmath.flowset <- 
@@ -309,7 +313,7 @@ setMethod("qqmath",
               }
 
           if (missing(xlab)) xlab <- deparse(substitute(distribution))
-          if (missing(ylab)) ylab <- as.character(channel)
+          if (missing(ylab)) ylab <- channel.name
           qqmath(x, data = pd,
                  f.value = f.value, distribution = distribution,
                  prepanel = prepanel.qqmath.flowset,

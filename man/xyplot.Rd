@@ -82,11 +82,11 @@
   \item{type}{ type of rendering; see
     \code{\link[lattice:panel.xyplot]{panel.xyplot}} for details. }
 
+  \item{panel}{ panel function used. }
   \item{filter}{ A \link[flowCore:filter-class]{filter} object.  Ignored
     when \code{filterResults} is not \code{NULL}. }
-  \item{panel}{ panel function used. }
   \item{filterResults}{ A
-    \link[flowCore:filterResult-class]{filterResult-class} object, that
+    \link[flowCore:filterResult-class]{filterResult} object, that
     is the result of applying a filter on each frame in \code{data}.  If
     this is \code{NULL} but \code{filter} is not, it will be created on
     the fly by applying \code{filter} to each frame.  }

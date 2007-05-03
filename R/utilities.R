@@ -2,6 +2,12 @@
 
 ### Some utilities (used by the lattice methods, at least)
 
+
+## needed for nice labels.  deparse() can potentially give results
+## with length > 1
+expr2char <- function(x) paste(deparse(x), collapse = "")
+
+
 evalInFlowFrame <- function(expr, envir, enclos = baseenv())
 {
     expr <- as.expression(expr)

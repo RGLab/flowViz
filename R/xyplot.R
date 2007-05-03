@@ -31,8 +31,8 @@ setMethod("xyplot",
               x[[3]] <- as.name(uniq.name)
               x[[2]] <- NULL
           }
-          channel.x.name <- as.character(channel.x)
-          channel.y.name <- as.character(channel.y)
+          channel.x.name <- expr2char(channel.x)
+          channel.y.name <- expr2char(channel.y)
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
 

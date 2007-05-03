@@ -120,7 +120,7 @@ setMethod("ecdfplot",
                   }
               }
 
-          if (missing(xlab)) xlab <- as.character(channel)
+          if (missing(xlab)) xlab <- expr2char(channel)
           ecdfplot(x, data = pd,
                    f.value = f.value,
                    prepanel = prepanel.ecdfplot.flowset,
