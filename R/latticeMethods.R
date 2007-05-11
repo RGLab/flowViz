@@ -7,8 +7,6 @@ setMethod("densityplot",
                    as.table = TRUE, overlap = 0.3, 
                    ...)
       {
-          ## Errol Strain added vLine draw a vertical line on the plots (3/11/07)
-          ## There is probably a more clever, generic way to do this.
       
           pd <- pData(phenoData(data))
           uniq.name <- createUniqueColumnName(pd)
