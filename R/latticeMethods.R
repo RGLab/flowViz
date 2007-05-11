@@ -3,10 +3,13 @@
 
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, xlab,
+          function(x, data, xlab, vLine=NULL,
                    as.table = TRUE, overlap = 0.3, 
                    ...)
       {
+          ## Errol Strain added vLine draw a vertical line on the plots (3/11/07)
+          ## There is probably a more clever, generic way to do this.
+      
           pd <- pData(phenoData(data))
           uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing
@@ -87,6 +90,12 @@ setMethod("densityplot",
                                            alpha = reference.line$alpha)
                           }
                       }
+                     
+                    ## Ugly hack to make vertical line representing one dimension from a rectangleGate, is there a better
+                    ## way to do this?  
+                    if(!is.null(vLine)) {
+                    	panel.abline(v=vLine)
+                    }
               }
 
           if (missing(xlab)) xlab <- channel.name
