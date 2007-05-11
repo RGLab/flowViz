@@ -3,7 +3,7 @@
 
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, xlab, vLine=NULL,
+          function(x, data, xlab,
                    as.table = TRUE, overlap = 0.3, 
                    ...)
       {
@@ -90,12 +90,6 @@ setMethod("densityplot",
                                            alpha = reference.line$alpha)
                           }
                       }
-                     
-                    ## Ugly hack to make vertical line representing one dimension from a rectangleGate, is there a better
-                    ## way to do this?  
-                    if(!is.null(vLine)) {
-                    	panel.abline(v=vLine)
-                    }
               }
 
           if (missing(xlab)) xlab <- channel.name
