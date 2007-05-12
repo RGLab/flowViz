@@ -322,8 +322,9 @@ setMethod("ecdfplot",
               x[[2]][[2]] <- as.name(uniq.name)
           }
           else x[[2]] <- as.name(uniq.name)
+          channel.name <- expr2char(channel)
           channel <- as.expression(channel)
-          if (missing(xlab)) xlab <- expr2char(channel)
+          if (missing(xlab)) xlab <- channel.name
           ccall$x <- x
           ccall$data <- pd
           ccall$f.value <- f.value
@@ -334,7 +335,6 @@ setMethod("ecdfplot",
           ccall$frames <- data@frames
           ccall$channel <- channel
           ccall[[1]] <- quote(latticeExtra::ecdfplot)
-
           ans <- eval.parent(ccall)
           ans$call <- ocall
           ans
