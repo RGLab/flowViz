@@ -137,4 +137,30 @@ setMethod("filterBoundary",
 
 
 
+## mysterious match.call() stuff not understood all that well by the
+## author (but bad things happen without them, trust me)...
+          
+
+manipulate.call <-
+    function(ocall, ccall)
+    ## ocall: call actually made by user
+    ## ccall: result of match.call(expand.dots = FALSE)
+    ## ccall will be modified and returned
+{
+
+    ## need to replace things in ccall$"..." with correspondingly
+    ## named things in ocall, because language objects get replaced by
+    ## ..1, ..2 etc which are never recovered (something to do with
+    ## method dispatch)
+
+    if (is.null(ccall$"...")) return(ccall) ## else
+    dotnames <- names(ccall$"...")
+    if ("" %in% dotnames)
+    {
+        stop("Unnamed arguments cannot be matched formal arguments")
+    }
+    ccall$"..." <- NULL
+    ccall[dotnames] <- ocall[dotnames]
+    ccall
+}
 

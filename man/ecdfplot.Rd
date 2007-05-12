@@ -19,7 +19,7 @@
 
 \S4method{ecdfplot}{formula,flowSet}(x, data, xlab, ylab,
          f.value = function(n) ppoints(ceiling(sqrt(n))),
-         type = "l", ref = TRUE,
+         type = "l", 
          \dots)
 
 }
@@ -33,9 +33,9 @@
   \item{f.value}{ determines the number of points used in the plot
     \code{\link[latticeExtra:ecdfplot]{ecdfplot}} for details.  }
   \item{type}{ type of rendering; by default lines are drawn }
-  \item{ref}{ logical; whether to add reference lines at 0 and 1 }
+%   \item{ref}{ logical; whether to add reference lines at 0 and 1 }
   \item{\dots}{ more arguments, usually passed on to the underlying
-    lattice methods. }
+    lattice methods and the panel function. }
 }
 
 
@@ -64,7 +64,11 @@ ecdfplot(~ `FSC-H` | Patient, GvHD, f.value = ppoints(100))
 
 ecdfplot(~ asinh(`FSC-H`) | Patient, GvHD,
          strip = strip.custom(strip.names = TRUE),
-         ref = FALSE, auto.key = TRUE)
+         ref = FALSE)
+
+ecdfplot(~ asinh(`FSC-H`) | Patient, GvHD, groups = Visit,
+         strip = strip.custom(strip.names = TRUE),
+         ref = FALSE, auto.key = list(columns = 4))
 
 }
 
