@@ -139,7 +139,19 @@
 \examples{
 
 data(GvHD)
+
 densityplot(Visit ~ `FSC-H` | Patient, GvHD)
+
+densityplot(Visit ~ asinh(`FSC-H`) | Patient, GvHD,
+            panel = function(...) {
+                ylim <- current.panel.limits()$ylim
+                v <- c(5.5, 7)
+                panel.rect(v[1], ylim[1],
+                           v[2], ylim[2],
+                           col = "grey")
+                panel.densityplot.flowset(...)
+            })
+
 
 qqmath( ~ `FSC-H` | factor(Patient), GvHD,
        grid = TRUE, type = "l",

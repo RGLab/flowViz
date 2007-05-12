@@ -1,13 +1,82 @@
 
+prepanel.densityplot.flowset <- 
+    function(x, y, darg = list(n = 50),
+             frames, channel,
+             overlap = 0.3,
+             ...)
+{
+    xl <- numeric(0)
+    for (nm in as.character(x))
+    {
+        xx <- evalInFlowFrame(channel, frames[[nm]])
+        xl <- c(xl, range(xx))
+    }
+    list(xlim = range(xl, finite = TRUE))
+}
+
+panel.densityplot.flowset <-
+    function(x, y, darg = list(n = 50), ref = FALSE,
+             frames, channel,
+             overlap = 0.3,
+
+             col = superpose.polygon$col,
+             lty = superpose.polygon$lty,
+             lwd = superpose.polygon$lwd,
+             alpha = superpose.polygon$alpha,
+             border = superpose.polygon$border,
+             ...)
+{
+    superpose.line <- trellis.par.get("superpose.line")
+    superpose.polygon <- trellis.par.get("superpose.polygon")
+    reference.line <- trellis.par.get("reference.line")
+    ycode <- as.numeric(y)
+    if (any(duplicated(ycode)))
+    {
+        warning("Some combinations seem to have multiple samples.  \n  Only one will be used.")
+    }
+    ny <- nlevels(y)
+    col <- rep(col, length = ny)
+    lty <- rep(lty, length = ny)
+    lwd <- rep(lwd, length = ny)
+    alpha <- rep(alpha, length = ny)
+    border <- rep(border, length = ny)
+    x <- as.character(x)
+    height <- (1 + overlap)
+    for (i in rev(seq_len(ny)))
+        if (i %in% ycode)
+        {
+            nm <- x[match(i, ycode)]
+            xx <- evalInFlowFrame(channel, frames[[nm]])
+            h <- do.call(density, c(list(x = xx), darg))
+            n <- length(h$x)
+            max.d <- max(h$y)
+            panel.polygon(x = h$x[c(1, 1:n, n)],
+                          y = i + height * c(0, h$y, 0) / max.d,
+                          col = col[i], border = border[i],
+                          lty = lty[i], lwd = lwd[i], alpha = alpha[i])
+            if (ref)
+            {
+                panel.abline(h = i,
+                             col = reference.line$col,
+                             lty = reference.line$lty,
+                             lwd = reference.line$lwd,
+                             alpha = reference.line$alpha)
+            }
+        }
+}
 
 
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
           function(x, data, xlab,
-                   as.table = TRUE, overlap = 0.3, 
+                   as.table = TRUE, overlap = 0.3,
+                   prepanel = prepanel.densityplot.flowset,
+                   panel = panel.densityplot.flowset,
                    ...)
       {
-      
+          ocall <- sys.call(sys.parent())
+          ccall <- match.call(expand.dots = FALSE)
+          ccall <- manipulate.call(ocall, ccall)
           pd <- pData(phenoData(data))
           uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing
@@ -23,89 +92,70 @@ setMethod("densityplot",
           else x[[3]] <- as.name(uniq.name)
           channel.name <- expr2char(channel)
           channel <- as.expression(channel)
-
-          prepanel.densityplot.flowset <- 
-              function(x, y, darg = list(n = 30),
-                       frames, channel,
-                       overlap = 0.3,
-                       ...)
-              {
-                  xl <- numeric(0)
-                  for (nm in as.character(x))
-                  {
-                      xx <- evalInFlowFrame(channel, frames[[nm]])
-                      xl <- c(xl, range(xx))
-                  }
-                  list(xlim = range(xl, finite = TRUE))
-              }
-
-          panel.densityplot.flowset <-
-              function(x, y, darg = list(n = 30), ref = FALSE,
-                       frames, channel,
-                       overlap = 0.3,
-
-                       col = superpose.polygon$col,
-                       lty = superpose.polygon$lty,
-                       lwd = superpose.polygon$lwd,
-                       alpha = superpose.polygon$alpha,
-                       border = superpose.polygon$border,
-                       ...)
-              {
-                  superpose.line <- trellis.par.get("superpose.line")
-                  superpose.polygon <- trellis.par.get("superpose.polygon")
-                  reference.line <- trellis.par.get("reference.line")
-                  ycode <- as.numeric(y)
-                  if (any(duplicated(ycode)))
-                  {
-                      warning("Some combinations seem to have multiple samples.  \n  Only one will be used.")
-                  }
-                  ny <- nlevels(y)
-                  col <- rep(col, length = ny)
-                  lty <- rep(lty, length = ny)
-                  lwd <- rep(lwd, length = ny)
-                  alpha <- rep(alpha, length = ny)
-                  border <- rep(border, length = ny)
-                  x <- as.character(x)
-                  height <- (1 + overlap)
-                  for (i in rev(seq_len(ny)))
-                      if (i %in% ycode)
-                      {
-                          nm <- x[match(i, ycode)]
-                          xx <- evalInFlowFrame(channel, frames[[nm]])
-                          h <- do.call(density, c(list(x = xx), darg))
-                          n <- length(h$x)
-                          max.d <- max(h$y)
-                          panel.polygon(x = h$x[c(1, 1:n, n)],
-                                        y = i + height * c(0, h$y, 0) / max.d,
-                                        col = col[i], border = border[i],
-                                        lty = lty[i], lwd = lwd[i], alpha = alpha[i])
-                          if (ref)
-                          {
-                              panel.abline(h = i,
-                                           col = reference.line$col,
-                                           lty = reference.line$lty,
-                                           lwd = reference.line$lwd,
-                                           alpha = reference.line$alpha)
-                          }
-                      }
-              }
-
           if (missing(xlab)) xlab <- channel.name
-          bwplot(x, data = pd, 
-
-                 prepanel = prepanel.densityplot.flowset,
-                 panel = panel.densityplot.flowset,
-
-                 frames = data@frames,
-                 channel = channel,
-                 as.table = as.table,
-                 overlap = overlap,
-
-                 xlab = xlab,
-
-                 lattice.options = list(axis.padding = list(factor = c(0.6, 1 + 2 * overlap))),
-                 horizontal = TRUE, ...)
+          ccall$x <- x
+          ccall$data <- pd
+          ccall$prepanel <- prepanel
+          ccall$panel <- panel
+          ccall$frames <- data@frames
+          ccall$channel <- channel
+          ccall$as.table <- as.table
+          ccall$overlap <- overlap
+          ccall$xlab <- xlab
+          ccall$horizontal <- TRUE
+          ccall$lattice.options <-
+              list(axis.padding =
+                   list(factor = c(0.6, 1 + 2 * overlap)))
+          ccall[[1]] <- quote(lattice::bwplot)
+          ans <- eval.parent(ccall)
+          ans$call <- ocall
+          ans
       })
+
+
+
+## old version.  Delete once new version is tested
+
+## setMethod("densityplot",
+##           signature(x = "formula", data = "flowSet"),
+##           function(x, data, xlab,
+##                    as.table = TRUE, overlap = 0.3, 
+##                    ...)
+##       {
+      
+##           pd <- pData(phenoData(data))
+##           uniq.name <- createUniqueColumnName(pd)
+##           ## ugly hack to suppress warnings about coercion introducing
+##           ## NAs (needs to be `undone' inside prepanel and panel
+##           ## functions):
+##           pd[[uniq.name]] <- factor(sampleNames(data)) 
+##           channel <- x[[3]]  
+##           if (length(channel) == 3)
+##           {
+##               channel <- channel[[2]]
+##               x[[3]][[2]] <- as.name(uniq.name)
+##           }
+##           else x[[3]] <- as.name(uniq.name)
+##           channel.name <- expr2char(channel)
+##           channel <- as.expression(channel)
+
+
+##           if (missing(xlab)) xlab <- channel.name
+##           bwplot(x, data = pd, 
+
+##                  prepanel = prepanel.densityplot.flowset,
+##                  panel = panel.densityplot.flowset,
+
+##                  frames = data@frames,
+##                  channel = channel,
+##                  as.table = as.table,
+##                  overlap = overlap,
+
+##                  xlab = xlab,
+
+##                  lattice.options = list(axis.padding = list(factor = c(0.6, 1 + 2 * overlap))),
+##                  horizontal = TRUE, ...)
+##       })
 
 
 

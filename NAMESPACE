@@ -15,6 +15,14 @@ importFrom("MASS", kde2d)
 exportMethods("densityplot", "xyplot", "levelplot", "qqmath",
               "splom", "parallel", "ecdfplot")
 
+## prepanel and panel functions
+
+export("panel.densityplot.flowset",
+       "prepanel.densityplot.flowset", 
+       "panel.ecdfplot.flowset",
+       "prepanel.ecdfplot.flowset")
+
+
 exportMethods("flowPlot")
 #,"contour")
 
