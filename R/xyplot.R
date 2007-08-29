@@ -20,7 +20,9 @@ prepanel.xyplot.flowset <-
 
 panel.xyplot.flowset <-
     function(x, 
-             frames, channel.x, channel.y,
+             frames,
+             channel.x, channel.y,
+             channel.x.name, channel.y.name, 
              filter = NULL,
              filterResults = NULL,
 
@@ -141,6 +143,9 @@ setMethod("xyplot",
                       frames = data@frames,
                       channel.x = channel.x,
                       channel.y = channel.y,
+                      channel.x.name = channel.x.name,
+                      channel.y.name = channel.y.name,
+                      
                       filter = filter,
                       filterResults = filterResults,
                       as.table = as.table,
