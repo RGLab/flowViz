@@ -104,7 +104,8 @@ setMethod("filterBoundary",
 
 
 
-
+## FIXME: I don't think the next two need to actually apply the filter
+## at all...
 
 setMethod("filterBoundary", 
           signature(filter.object = "rectangleGate", parameters = "character"), 
@@ -145,16 +146,18 @@ setMethod("filterBoundary",
                setequal(parameters(filter.object), parameters))
           if (!valid)
               return (list(x = numeric(0), y = numeric(0)))
-          if (is.null(result)) result <- filter(frame, filter.object)
-          result.details <- filterDetails(result)
-          if (length(result.details) != 1)
-              stop("'result' represents more than one filter.\nThis should not have happened, please send a bug report")
+##           if (is.null(result)) result <- filter(frame, filter.object)
+##           result.details <- filterDetails(result)
+##           if (length(result.details) != 1)
+##               stop("'result' represents more than one filter.\nThis should not have happened, please send a bug report")
 		  
-          ## FIXME: the next section assumes details which may change (but don't know how else to access them)
-          result.details <- result.details[[1]][[1]]@boundaries
+##           ## FIXME: the next section assumes details which may change (but don't know how else to access them)
+##           result.details <- result.details[[1]][[1]]@boundaries
+##           ans <- list(x =result.details[,parameters[[1]]], y = result.details[,parameters[[2]]])
 
-          ans <- list(x =result.details[,parameters[[1]]], y = result.details[,parameters[[2]]])
-		  
+          result.details <- filter.object@boundaries
+          ans <- list(x = result.details[,parameters[[1]]],
+                      y = result.details[,parameters[[2]]])
           ans
       })
 
