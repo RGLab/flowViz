@@ -75,7 +75,7 @@ setMethod("filterBoundary",
           bnds.x <- unlist(lapply(bnds, function(b) c(b$x, NA)))
           bnds.y <- unlist(lapply(bnds, function(b) c(b$y, NA)))
           list(x = bnds$x, y = bnds$y)
-      }
+      })
 
 
 
