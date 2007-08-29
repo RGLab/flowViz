@@ -20,7 +20,9 @@ exportMethods("densityplot", "xyplot", "levelplot", "qqmath",
 export("panel.densityplot.flowset",
        "prepanel.densityplot.flowset", 
        "panel.ecdfplot.flowset",
-       "prepanel.ecdfplot.flowset")
+       "prepanel.ecdfplot.flowset",
+       "prepanel.xyplot.flowset",
+       "panel.xyplot.flowset")
 
 
 exportMethods("flowPlot")
