@@ -61,6 +61,22 @@ setMethod("filterBoundary",
       })
 
 
+## for a subsetFilter (which is only a binary subset?), draw
+## boundaries for components (if possible).  Based on a patch from
+## Greg Warnes.  I'm not really sure whether this is general enough
+## (it does work for a special case).
+
+setMethod("filterBoundary", 
+          signature(filter.object = "subsetFilter", parameters = "character"), 
+          definition = function(filter.object, parameters, ...)
+      {
+          ## see class 'setOperationFilter'
+          bnds <- lapply(filter@filters, filterBoundary, ...)
+          bnds.x <- unlist(lapply(bnds, function(b) c(b$x, NA)))
+          bnds.y <- unlist(lapply(bnds, function(b) c(b$y, NA)))
+          list(x = bnds$x, y = bnds$y)
+      }
+
 
 
 ## for norm2Filter, we need the filter result to determine the
