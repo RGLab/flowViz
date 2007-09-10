@@ -1,8 +1,10 @@
 \name{ecdfplot}
 \docType{methods}
 \alias{ecdfplot}
-\alias{ecdfplot,formula,flowSet-method}
 
+\alias{ecdfplot,formula,flowSet-method}
+\alias{panel.ecdfplot.flowset}
+\alias{prepanel.ecdfplot.flowset}
 \title{ Method implementing Lattice ECDF plots for flow data }
 
 \description{

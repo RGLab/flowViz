@@ -2,6 +2,8 @@
 \docType{methods}
 \alias{xyplot}
 \alias{splom}
+\alias{panel.xyplot.flowset}
+\alias{prepanel.xyplot.flowset}
 \alias{xyplot,formula,flowSet-method}
 \alias{xyplot,flowFrame,missing-method}
 \alias{xyplot,formula,flowFrame-method}

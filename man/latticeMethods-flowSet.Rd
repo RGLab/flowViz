@@ -5,6 +5,8 @@
 \alias{levelplot}
 \alias{parallel}
 \alias{densityplot,formula,flowSet-method}
+\alias{panel.densityplot.flowset}
+\alias{prepanel.densityplot.flowset}
 \alias{qqmath,formula,flowSet-method}
 \alias{levelplot,formula,flowSet-method}
 \alias{parallel,flowFrame,missing-method}

@@ -17,7 +17,11 @@ Version: \tab 0.2.1\cr
 Date: \tab 2006-11-16\cr
 License: \tab Artistic\cr
 }
-Overview of packages goes here
+Traditionally, large parts of the analysis process of flow cytometry
+data has been mostly qualitative. To this end, dedicated visualization
+techniques have been used for both quality control and infernece of the
+data. This package provides a number of different visualization tools
+for flow data.
 }
 \author{
 
@@ -25,9 +29,7 @@ Overview of packages goes here
   Maintainer: Florian Hahne <f.hahne@dkfz.de>
   Authors: T. Duong, B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar, M. Tang
 }
-\references{
-references go here
-}
+
 
 \keyword{ package }
 \seealso{
