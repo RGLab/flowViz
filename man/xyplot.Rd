@@ -66,11 +66,22 @@
       \dots)
 
 
+
+panel.xyplot.flowset(x, frames, channel.x, channel.y,
+             channel.x.name, channel.y.name, 
+             filter = NULL, filterResults = NULL, displayFilter = TRUE,
+             pch, smooth, \dots)
+
+prepanel.xyplot.flowset(x, frames, channel.x, channel.y, \dots)
+
+
 }
 
 \arguments{
   \item{x}{ a formula describing the structure of the plot and the
-    variables to be used in the display.   }
+    variables to be used in the display.  In
+    \code{prepanel.xyplot.flowset} and \code{panel.xyplot.flowset},
+    names of flow frames. }
   \item{data}{ a \code{flowSet} or \code{flowFrame} object that serves
     as the source of data }
   \item{smooth}{ logical.  If \code{TRUE},
@@ -109,6 +120,13 @@
     original methods for details.
   }
 
+  \item{channel.x, channel.y}{ expressions defining the x and y
+    variables in terms of columns in the data.  Can involve functions
+    or multiple columns from the data. }
+  \item{channel.x.name, channel.y.name}{ character strings giving
+    corresponding names, used to match filter parameters if applicable.
+  }
+  \item{frames}{an environment containing frame-specific data}
 
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods. }

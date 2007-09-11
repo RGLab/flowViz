@@ -1,5 +1,6 @@
 
 
+
 prepanel.xyplot.flowset <- 
     function(x, 
              frames, channel.x, channel.y,
@@ -25,6 +26,7 @@ panel.xyplot.flowset <-
              channel.x.name, channel.y.name, 
              filter = NULL,
              filterResults = NULL,
+             displayFilter = TRUE,
 
              pch, smooth,
              ...)
@@ -148,6 +150,7 @@ setMethod("xyplot",
                       
                       filter = filter,
                       filterResults = filterResults,
+                      displayFilter = displayFilter,
                       as.table = as.table,
 
                       xlab = xlab,
