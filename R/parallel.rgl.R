@@ -1,4 +1,11 @@
 
+## we are not exporting this any more (and removing the dependency on
+## rgl), but keeping the code around in case we want to resurrect it
+## in future.
+
+if (FALSE)
+{
+
 parallelCoordinates.rgl <-
     function(x,
              scaled = FALSE,
@@ -88,3 +95,4 @@ parallelCoordinates.rgl <-
 ##        parallelCoordinates.rgl(exprs(object))
 ##   })
 
+}
