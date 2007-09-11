@@ -21,23 +21,44 @@
 
 \S4method{ecdfplot}{formula,flowSet}(x, data, xlab, ylab,
          f.value = function(n) ppoints(ceiling(sqrt(n))),
-         type = "l", 
+         type = "l", as.table = TRUE,
          \dots)
+
+prepanel.ecdfplot.flowset(x, frames, channel, 
+                          f.value, \dots)
+panel.ecdfplot.flowset(x, frames, channel,
+                       f.value, ref = TRUE,
+                       groups = NULL, subscripts,
+                       col, col.points, pch, cex, 
+                       alpha, col.line, lty, lwd, \dots)
 
 }
 
 \arguments{
   \item{x}{ a formula describing the structure of the plot and the
-    variables to be used in the display.   }
+    variables to be used in the display.  For the prepanel and panel
+    functions, a vector of names for the flow frames to be used in the
+    panel. }
   \item{data}{ a \code{flowSet} object that serves as a source of data }
   \item{xlab, ylab}{ Labels for data axes, with suitable defaults taken
     from the formula }
   \item{f.value}{ determines the number of points used in the plot
     \code{\link[latticeExtra:ecdfplot]{ecdfplot}} for details.  }
   \item{type}{ type of rendering; by default lines are drawn }
-%   \item{ref}{ logical; whether to add reference lines at 0 and 1 }
+  \item{as.table}{ logical; whether to draw panels from top left }
+  \item{ref}{ logical; whether to add reference lines at 0 and 1 }
+
+  \item{frames}{ environment containing frame-specific data }
+  \item{channel}{ expression involving names of columns in the data }
+  \item{groups, subscripts}{ grouping variable, if specified, and
+    subscripts indexing which frames are being used in the panel.  See
+    \code{\link[lattice:xyplot]{xyplot}} for details.  }
+  \item{col, col.points, pch, cex, alpha, col.line, lty, lwd}{ vector of
+    graphical parameters that are replicated for each group }
+
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods and the panel function. }
+
 }
 
 
