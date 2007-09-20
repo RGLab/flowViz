@@ -35,12 +35,16 @@
 ## methods for 'flowSet' objects
 
 \S4method{xyplot}{formula,flowSet}(x, data,
-       xlab, ylab, as.table = TRUE,
+       xlab, ylab,
+       as.table = TRUE,
+       prepanel = prepanel.xyplot.flowset,
+       panel = panel.xyplot.flowset,
        pch = ".", smooth = TRUE,
        filter = NULL,
        filterResults = NULL,
        displayFilter = TRUE,
        \dots)
+
 
 ## methods for 'flowFrame' objects
 
@@ -95,7 +99,10 @@ prepanel.xyplot.flowset(x, frames, channel.x, channel.y, \dots)
   \item{type}{ type of rendering; see
     \code{\link[lattice:panel.xyplot]{panel.xyplot}} for details. }
 
-  \item{panel}{ panel function used. }
+  \item{prepanel}{ the prepanel function.  See
+    \code{\link[lattice:xyplot]{xyplot}} }
+  \item{panel}{ the panel function.  See
+    \code{\link[lattice:xyplot]{xyplot}} }
   \item{filter}{ A \link[flowCore:filter-class]{filter} object.  Ignored
     when \code{filterResults} is not \code{NULL}. }
   \item{filterResults}{ A

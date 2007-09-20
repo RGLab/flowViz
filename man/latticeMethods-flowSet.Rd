@@ -46,18 +46,18 @@
 ## methods for 'flowSet' objects
 
 \S4method{densityplot}{formula,flowSet}(x, data, 
-            xlab, as.table = TRUE, overlap = 0.3, 
+            xlab, as.table = TRUE, overlap = 0.3,
+            prepanel = prepanel.densityplot.flowset,
+            panel = panel.densityplot.flowset,
             \dots)
 
 \S4method{qqmath}{formula,flowSet}(x, data, xlab, ylab,
        f.value = function(n) ppoints(ceiling(sqrt(n))),
-       distribution = qnorm,
-       \dots)
+       distribution = qnorm, \dots)
 
 \S4method{levelplot}{formula,flowSet}(x, data, xlab, ylab,
           as.table = TRUE, contour = TRUE, labels = FALSE,
-          n = 50, 
-          \dots)
+          n = 50, \dots)
 
 
 ## methods for 'flowFrame' objects
@@ -76,6 +76,10 @@
   \item{xlab, ylab}{ Labels for data axes, with suitable defaults taken
     from the formula }
   \item{overlap}{ the amount of overlap between stacked density plots }
+  \item{prepanel}{ the prepanel function.  See
+    \code{\link[lattice:xyplot]{xyplot}} }
+  \item{panel}{ the panel function.  See
+    \code{\link[lattice:xyplot]{xyplot}} }
   \item{f.value, distribution}{ number of points used in Q-Q plot, and
     the reference distribution used.  See
     \code{\link[lattice:qqmath]{qqmath}} for details.  }

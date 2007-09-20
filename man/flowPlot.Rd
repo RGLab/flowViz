@@ -54,7 +54,6 @@ flowPlot(x, ...)
 
 }
 \author{P. Haaland}
-}
 
 \keyword{methods}
 \seealso{
