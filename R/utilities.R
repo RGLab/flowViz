@@ -100,7 +100,8 @@ setMethod("filterBoundary",
           if (length(result.details) != 1)
               stop("'result' represents more than one filter.\nThis should not have happened, please send a bug report")
 
-          ## FIXME: the next section assumes details which may change (but don't know how else to access them)
+          ## FIXME: the next section assumes details which may change
+          ## (but don't know how else to access them)
           result.details <- result.details[[1]]
           if (length(result.details$filter@transformation) > 0) {
               warning("'result' appears to have been applied on transformed data.\nThese are not supported yet.")
@@ -112,7 +113,9 @@ setMethod("filterBoundary",
           ## now what?
           chol.cov <- t(chol(norm.cov))
           t <- seq(0, 2 * base::pi, length = 50)
-          ans <- norm.center + (chol.cov %*% rbind(x = norm.radius * cos(t), y = norm.radius * sin(t)))
+          ans <- norm.center +
+              (chol.cov %*% rbind(x = norm.radius * cos(t),
+                                  y = norm.radius * sin(t)))
           ans <- as.data.frame(t(ans))
           names(ans) <- c("x", "y")
           ans
@@ -174,6 +177,45 @@ setMethod("filterBoundary",
           result.details <- filter.object@boundaries
           ans <- list(x = result.details[,parameters[[1]]],
                       y = result.details[,parameters[[2]]])
+          ans
+      })
+
+
+setMethod("filterBoundary", 
+          signature(filter.object = "curv2Gate", parameters = "character"), 
+          definition =
+          function(filter.object, parameters,
+                   frame, result = NULL, ...)
+      {
+          #valid <-
+          #    (length(parameters(filter.object)) == 2 && 
+          #     length(parameters) == 2 &&
+          #     setequal(parameters(filter.object), parameters))
+          #if (!valid)
+          #    return (list(x = numeric(0), y = numeric(0)))
+          result.details <- attr(result@subSet, "polygons")
+          ans <- list(x = sapply(result.details, function(y) c(y$x, NA)),
+                      y = sapply(result.details, function(y) c(y$y, NA)))
+          ans
+      })
+
+setMethod("filterBoundary", 
+          signature(filter.object = "curv2Filter", parameters = "character"), 
+          definition =
+          function(filter.object, parameters,
+                   frame, result = NULL, ...)
+      {
+          valid <-
+              (length(parameters(filter.object)) == 2 && 
+               length(parameters) == 2 &&
+               setequal(parameters(filter.object), parameters))
+          if (!valid)
+              return (list(x = numeric(0), y = numeric(0)))
+          result.details <- attr(result@subSet, "polygons")
+          ans <- list(x = unlist(sapply(result.details,
+                      function(y) c(y$x, NA))),
+                      y = unlist(sapply(result.details,
+                      function(y) c(y$y, NA))))
           ans
       })
 
