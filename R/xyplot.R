@@ -167,10 +167,28 @@ setMethod("xyplot",
 
 ## xyplot for flowFrames, plotting columns against time
 
+panel.xyplot.flowframe <- 
+    function(x, y, time.x, expr, smooth = FALSE, discrete, ...)
+{
+    xx <- time.x
+    yy <- expr[, as.character(y)]
+    if (smooth) panel.smoothScatter(xx, yy, ...)
+    else{
+        if(discrete){
+            tmp <- split(yy,xx)
+            yy <- sapply(tmp, median)
+            xx <- unique(xx)
+        }
+        panel.xyplot(xx, yy, ...)
+    }
+}
+
+
+
 setMethod("xyplot",
           signature(x = "flowFrame", data = "missing"),
           function(x, data, xlab = time, ylab = "", time = "Time",
-                   layout,
+                   layout, discrete=FALSE, panel=panel.xyplot.flowframe,
                    type = "l", smooth = FALSE,
                    ...)
       {
@@ -188,14 +206,7 @@ setMethod("xyplot",
                        ylim = range(yy, finite = TRUE),
                        dx = diff(xx), dy = diff(yy))
               }
-          panel.xyplot.flowframe <- 
-              function(x, y, time.x, expr, smooth = FALSE, ...)
-              {
-                  xx <- time.x
-                  yy <- expr[, as.character(y)]
-                  if (smooth) panel.smoothScatter(xx, yy, ...)
-                  else panel.xyplot(xx, yy, ...)
-              }
+         
           if (missing(layout)) layout <- c(1, ncol(expr) - 1)
           xyplot(channel ~ time | channel, data = fakedf,
                  prepanel = prepanel.xyplot.flowframe,
@@ -203,7 +214,7 @@ setMethod("xyplot",
                  type = type, smooth = smooth,
                  time.x = time.x, expr = expr,
                  xlab = xlab, ylab = ylab,
-                 layout = layout,
+                 layout = layout, discrete=discrete,
                  default.scales = list(y = list(relation = "free", rot = 0)),
                  ...)
       })
