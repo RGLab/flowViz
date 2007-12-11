@@ -1,12 +1,12 @@
 Package: flowViz
 Type: Package
 Title: Visualization for flow cytometry
-Version: 1.3.1
-Date: 2007-09-20
-Author: T. Duong, B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar, M. Tang
+Version: 1.3.2
+Date: 2007-12-10
+Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar
 Maintainer: Florian Hahne <fhahne@fhcrc.org>
 Description: Provides visualization tools for flow cytometry data. 
-Depends: R (>= 2.4.0), flowCore (>= 0.3.0), Biobase, geneplotter, lattice, MASS, methods
+Depends: R (>= 2.4.0), flowCore (>= 0.3.0), Biobase, geneplotter, lattice, MASS, methods, RColorBrewer
 Imports: latticeExtra
 License: Artistic
 biocViews:  Infrastructure, Flowcytometry, CellBasedAssays, Visualization

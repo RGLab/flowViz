@@ -22,7 +22,8 @@ export("panel.densityplot.flowset",
        "panel.ecdfplot.flowset",
        "prepanel.ecdfplot.flowset",
        "prepanel.xyplot.flowset",
-       "panel.xyplot.flowset")
+       "panel.xyplot.flowset",
+       "timeLinePlot")
 
 
 exportMethods("flowPlot")
