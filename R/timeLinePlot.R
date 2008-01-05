@@ -40,8 +40,10 @@ prepareSet <- function(x, parm){
 
 
 ## wrapper function to produce the plots
-timeLinePlot <- function(x, par, type=c("stacked", "scaled", "native"), col,
+timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"), col,
                          ylab=names(x), ...){
+    if(!channel %in% colnames(x[[1]]))
+        stop(channel, " is not a valid channel in this flowSet.")
     if(missing(col)){
         require(RColorBrewer)
         colp <- brewer.pal(12, "Paired")
@@ -53,31 +55,40 @@ timeLinePlot <- function(x, par, type=c("stacked", "scaled", "native"), col,
             stop("'col' must be color vector of length 1 or same length ",
                  "as the flowSet")
     }
-    timeData <-  fsApply(x, prepareSet, par, use.exprs=TRUE, simplify=FALSE)
+    opar <- par(c("mar", "mgp", "mfcol", "mfrow", "las"))
+    on.exit(par(opar))
+    timeData <-  fsApply(x, prepareSet, channel, use.exprs=TRUE, simplify=FALSE)
     type <- match.arg(type)
-    mr <- range(x[[1]])[par,]
+    mr <- range(x[[1]])[channel,]
     mr[1] <- max(mr[1], 0)
     med <- sapply(timeData, function(z) median(z[,2], na.rm=TRUE))
-    switch(type, 
-        "scaled"=scaledPlot(timeData, p=par, range=mr, col=col, med=med, ...),
-        "stacked"=stackedPlot(timeData, p=par, range=mr, col=col, ylab=ylab,
-        med=med, ...),
-        "native"=nativePlot(timeData, p=par, range=mr, col=col, med=med, ...),
-        stop("Unknown type"))
+    if(length(med)==1){
+        nativePlot(timeData, p=channel, range=mr, col=col, med=med, ...)
+        return(sum(abs(timeData[[1]][,2]-med), na.rm=TRUE)/nrow(timeData[[1]]))
+    }
+    layout(matrix(1:2), heights=c(0.8, 0.2))
+    switch(type,
+           "scaled"=scaledPlot(timeData, p=channel, range=mr, col=col,
+           med=med, ...),
+           "stacked"=stackedPlot(timeData, p=channel, range=mr, col=col,
+           ylab=ylab, med=med, ...),
+           "native"=nativePlot(timeData, p=channel, range=mr, col=col,
+           med=med, ...),
+           stop("Unknown type"))
     ad <- mapply(function(z,m) sum(abs(z[,2]-m), na.rm=TRUE)/nrow(z),
                  timeData, med)
-    opar <- par(mar=c(5,3,0,3), las=2)
-    barplot(ad, axes=FALSE, col=col, cex.names=0.8, ylim=c(0, mr[2]/25))
+    par(mar=c(5,3,0,3), las=2)
+    on.exit(par(opar))
+    barplot(ad, axes=FALSE, col=col, cex.names=0.8,
+            ylim=c(0, mr[2]/25), border=col)
     box(col="darkgray")
-    par(opar)
-    return(invisible(NULL))
+    return(ad)
 }
 
 
 ## align values around 0 and plot
 scaledPlot <- function(y, p, main=paste("time line for", p),
                        range, col, med, ...){
-    layout(matrix(1:2), heights=c(0.8, 0.2))
     par(mar=c(3.5,2.5,3,2.5), mgp=c(1.5,0.5,0))
     y <- mapply(function(z, m) data.frame(x=z[,1], y=z[,2]-m), y, med,
                 SIMPLIFY=FALSE)
@@ -98,17 +109,14 @@ scaledPlot <- function(y, p, main=paste("time line for", p),
 ## plot stacked values for each flowFrame
 stackedPlot <- function(y, p, main=paste("time line for", p),
                         range, col, ylab, med, ...){
-    layout(matrix(1:2), heights=c(0.8, 0.2))
-    par(mar=c(3.5,3,3,3), mgp=c(1.5,0.5,0))
-    stacks <- 1:length(y) * (diff(range)/10)
+    par(mar=c(4,5,3,3), mgp=c(2,0.5,0), las=1)
+    stacks <- length(y):1 * (diff(range)/10)
     y <- mapply(function(z, m, s) data.frame(x=z[,1], y=z[,2]-m+s), y, med, 
 			stacks, SIMPLIFY=FALSE)
     maxX <- max(sapply(y, function(z) max(z[,1], na.rm=TRUE)), na.rm=TRUE)
     xlim <- c(0, maxX)
-    maxY <- max(sapply(y, function(z) max(abs(range(z[,2], na.rm=TRUE)), 
-                                          na.rm=TRUE)), na.rm=TRUE)
-    ylim <- c(1, maxY)
-    if(missing(ylab))
+    ylim <- range(sapply(y, function(z) range(z[,2], na.rm=TRUE)), na.rm=TRUE)
+    if(missing(ylab) | is.null(ylab))
        ylab <- names(y)
     plot(y[[1]], xlab="time", ylab="", type="l", col=col[1], 
          lwd=1, xlim=xlim, ylim=ylim, main=main, yaxt="n", ...)
@@ -122,7 +130,6 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
 ## plot values in the "native" dimensions
 nativePlot <- function(y, p, main=paste("time line for", p),
                        range, col, med, ...){
-    layout(matrix(1:2), heights=c(0.8, 0.2))
     par(mar=c(3.5,2.5,3,2.5), mgp=c(1.5,0.5,0))
     maxX <- max(sapply(y, function(z) max(z[,1], na.rm=TRUE)), na.rm=TRUE)
     xlim <- c(0, maxX)
@@ -132,7 +139,8 @@ nativePlot <- function(y, p, main=paste("time line for", p),
     ylim <- c(0, max(minRange, maxY))
     plot(y[[1]], xlab="time", ylab="", type="l", col=col[1], 
          lwd=1, xlim=xlim, ylim=ylim, main=main, ...)
-    for(j in 2:length(y))
-        lines(y[[j]], col=col[j], lwd=1)
+    if(length(y)>1)
+        for(j in 2:length(y))
+            lines(y[[j]], col=col[j], lwd=1)
 }
 
