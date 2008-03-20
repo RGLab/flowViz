@@ -59,7 +59,7 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"), col,
     on.exit(par(opar))
     timeData <-  fsApply(x, prepareSet, channel, use.exprs=TRUE, simplify=FALSE)
     type <- match.arg(type)
-    mr <- range(x[[1]])[channel,]
+    mr <- range(x[[1]])[,channel]
     mr[1] <- max(mr[1], 0)
     med <- sapply(timeData, function(z) median(z[,2], na.rm=TRUE))
     if(length(med)==1){
