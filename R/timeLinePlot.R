@@ -63,7 +63,7 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"), col,
     mr[1] <- max(mr[1], 0)
     med <- sapply(timeData, function(z) median(z[,2], na.rm=TRUE))
     if(length(med)==1){
-        nativePlot(timeData, p=channel, range=mr, col=col, med=med, ...)
+        nativePlot(timeData, p=channel, range=mr, col="darkblue", med=med, ...)
         return(sum(abs(timeData[[1]][,2]-med), na.rm=TRUE)/nrow(timeData[[1]]))
     }
     layout(matrix(1:2), heights=c(0.8, 0.2))
