@@ -5,7 +5,7 @@
 
 
 ## run over a cytoFrame, bin the values according to the time domain
-## and compute medians for each bin. The resultof this function will
+## and compute medians for each bin. The result of this function will
 ## be the input to the plotting functions
 prepareSet <- function(x, parm){
     cn <- colnames(x)
@@ -20,8 +20,13 @@ prepareSet <- function(x, parm){
     yy <- x[ord, parm]
     lenx <- length(xx)
     bs <- 500
+    bc <- floor(lenx/bs)
+    if(length(unique(xx)) < bc){
+        yy <- sapply(split(yy, xx), median)
+        return(cbind(unique(xx), yy))
+    }
     if(lenx>bs){
-        bc <- floor(lenx/bs)
+        
         cf <- c(rep(1:bc, each=bs), rep(bc+1, lenx-bc*bs))
         stopifnot(length(cf) == lenx)
         tmpx <- split(xx,cf)
@@ -42,6 +47,8 @@ prepareSet <- function(x, parm){
 ## wrapper function to produce the plots
 timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"), col,
                          ylab=names(x), ...){
+    if(!length(channel)==1)
+        stop("'channel' must be character scalar")
     if(!channel %in% colnames(x[[1]]))
         stop(channel, " is not a valid channel in this flowSet.")
     if(missing(col)){
@@ -135,8 +142,14 @@ nativePlot <- function(y, p, main=paste("time line for", p),
     xlim <- c(0, maxX)
     maxY <-  max(sapply(y, function(z) max(abs(range(z[,2], na.rm=TRUE)), 
                                            na.rm=TRUE)), na.rm=TRUE)
-    minRange <- diff(range)/4
-    ylim <- c(0, max(minRange, maxY))
+    minY <-  max(sapply(y, function(z) min(abs(range(z[,2], na.rm=TRUE)), 
+                                           na.rm=TRUE)), na.rm=TRUE)
+    empRange <- diff(range(maxY, minY))
+    minRange <- diff(range)/8
+    if(empRange < minRange)
+        ylim <- c(mean(c(maxY, minY)) - minRange, mean(c(maxY, minY)) + minRange)
+    else
+        ylim <- c(0, max(minRange, maxY))
     plot(y[[1]], xlab="time", ylab="", type="l", col=col[1], 
          lwd=1, xlim=xlim, ylim=ylim, main=main, ...)
     if(length(y)>1)

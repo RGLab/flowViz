@@ -182,24 +182,6 @@ setMethod("filterBoundary",
 
 
 setMethod("filterBoundary", 
-          signature(filter.object = "curv2Gate", parameters = "character"), 
-          definition =
-          function(filter.object, parameters,
-                   frame, result = NULL, ...)
-      {
-          #valid <-
-          #    (length(parameters(filter.object)) == 2 && 
-          #     length(parameters) == 2 &&
-          #     setequal(parameters(filter.object), parameters))
-          #if (!valid)
-          #    return (list(x = numeric(0), y = numeric(0)))
-          result.details <- attr(result@subSet, "polygons")
-          ans <- list(x = sapply(result.details, function(y) c(y$x, NA)),
-                      y = sapply(result.details, function(y) c(y$y, NA)))
-          ans
-      })
-
-setMethod("filterBoundary", 
           signature(filter.object = "curv2Filter", parameters = "character"), 
           definition =
           function(filter.object, parameters,

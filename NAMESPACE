@@ -1,7 +1,9 @@
 import("flowCore")
 
 ## export("parallelCoordinates.rgl", "parallelCoord")
-       
+
+
+importFrom("graphics", "lines", "polygon")
 importFrom("lattice",
            densityplot, xyplot, levelplot, qqmath,
            splom, parallel)
@@ -13,11 +15,12 @@ importFrom("MASS", kde2d)
 ## importFrom("KernSmooth", bkde2D)
 
 exportMethods("densityplot", "xyplot", "levelplot", "qqmath",
-              "splom", "parallel", "ecdfplot")
+              "splom", "parallel", "ecdfplot", "glines", "gpolygon")
 
 ## prepanel and panel functions
 
-export("panel.densityplot.flowset",
+
+export("polygon", "panel.densityplot.flowset",
        "prepanel.densityplot.flowset", 
        "panel.ecdfplot.flowset",
        "prepanel.ecdfplot.flowset",
