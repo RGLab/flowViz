@@ -192,165 +192,45 @@ prepanel.xyplot.flowset <-
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.xyplot.flowset <-
     function(x, frames, channel.x, channel.y, channel.x.name, channel.y.name, 
-             filter=NULL, filterResults=NULL, displayFilter=TRUE, pch,
-             smooth, ...)
+             filter=NULL, filterResults=NULL, pch=".", smooth=TRUE, ...)
 {
     x <- as.character(x)
     if (length(x) > 1) stop("must have only one flow frame per panel")
     if (length(x) < 1) return()
-
     nm <- x
-    xx <- evalInFlowFrame(channel.x, frames[[nm]])
-    yy <- evalInFlowFrame(channel.y, frames[[nm]])
-
-    ## this.filter.result represents result of applying
-    ## filter, which is not necessarily
-    ## filterResults[[nm]] (and we have no way of
-    ## knowing if it is, so we will always need to
-    ## recompute it).  However, it is only required if
-    ## filter is specified, and then only for certain
-    ## types of filters (specifically, those that don't have a
-    ## 2D geometric representation), and even then only
-    ## if the parameters match.  All these decisions are
-    ## made inside the call to filterBoundary() later,
-    ## but we define the 'this.filter.result' variable
-    ## now because we don't want to compute it twice.
-
-    
-    this.filter.result <- NULL
-
-    ## create groups vector from filterResult and filter arguments.
-    ## There is no straight forward way to combine both filterResult
-    ## and filter for overlapping poulations, so by definition filter
-    ## gets precedence over the filterResult
-    ## FIXME: Ignoring the whole grouping thing for now. It is already
-    ## useful just to plot gate boundaries (if possible)
-   ## groups <- rep(1, length(xx))
-##     gid <- 2
-##     if(!is.null(filterResults)){
-##         fsSub <- filterResults[[nm]]
-##         if(is(fsSub, "logicalFilterResult")){
-##             groups[fsSub@subSet] <- gid
-##             gid <- 3
-##         }else{
-##             groups <- fsSub
-##             gid <- max(fsSub@subSet)+1
-##         }
-##     }
-##     if(!is.null(filter))
-##     {
-##         this.filter.result <- filter(frames[[nm]], filter)
-##         if(is(this.filter.result, "logicalFilterResult"))
-##             groups[this.filter.result@subSet] <- gid
-##         else{
-##             val <- this.filter.result@subSet + gid
-##             groups[this.filter.result@subSet > 1] <- val
-##         }
-##     }
-
-    groups <- 
-        if (!is.null(filterResults))
-        {
-            filterResults[[nm]]@subSet
-        }
-        else if (!is.null(filter))
-        {
-            this.filter.result <- filter(frames[[nm]], filter)
-            this.filter.result@subSet
-        }
-        else NULL
-    
-
-    if (smooth) {
-        panel.smoothScatter(xx, yy, ...)
+    if(is(filter, "filter")){
+        filter <- list(filter)
+        names(filter) <- nm
     }
-    else panel.xyplot(xx, yy, pch = pch,
-                      groups = groups,
-                      subscripts = seq_along(groups),
-                      ...)
-
-
-    if (!is.null(filter) && (is.list(displayFilter) || displayFilter))
-    {
-        display.pars <- {if (is.list(displayFilter)) displayFilter else
-                         list(border = TRUE)}
-        filter.boundary <-
-            filterBoundary(filter = filter,
-                           parameters = c(channel.x.name, channel.y.name),
-                           frame = frames[[nm]],
-                           result = this.filter.result)
-        do.call(panel.polygon,
-                c(filter.boundary, display.pars))
-    }
-    if (!is.null(filterResults) && (is.list(displayFilter) || displayFilter)){
-        this.filter <- filterResults[[nm]]@filterDetails[[1]]$filter@filterDetails[[1]]$filter
-
-        filter.boundary <-
-            filterBoundary(filter=thisFilter,
-                           parameters = c(channel.x.name, channel.y.name),
-                           frame = frames[[nm]],
-                           result = filterResults[[nm]])
-        do.call(panel.polygon,
-                c(filter.boundary, display.pars))
-    }
-}
-
-
-
-
-
-
-
-
-
-
-## add filterResults to a lattice xyplot panel
-my.panel.xyplot.flowset <- function(x, frames, channel.x, channel.y,
-                                    channel.x.name, channel.y.name,
-                                    filter = NULL, filterResults = NULL,
-                                    displayFilter = TRUE, pch, fill, ...)
-{
-    x <- as.character(x)
-    if (length(x) > 1) stop("must have only one flow frame per panel")
-    if (length(x) < 1) return()
-
-    ## get the raw data
-    nm <- x
+    if(!is.null(filter) && (!(nm %in% names(filter) ||
+                              !is(filter[[nm]] ,"filter"))))
+        stop("'filter' must inherit from class 'filter' or a be list of ",
+             "such objects.", call.=FALSE) 
     xx <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     yy <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
-    this.filter.result <- filterResults[[nm]]
 
-    ## get the subpopulations
-    groups <-
-        if (!is.null(filterResults))
-        {
-            filterResults[[nm]]@subSet
+    if(smooth) {
+        panel.smoothScatter(xx, yy, ...)
+        if(!is.null(filter)){
+            glpolygon(filter[[nm]], frames[[nm]],
+                      channels=c(channel.x.name, channel.y.name),
+                      verbose=FALSE, ...)
         }
-        else if (!is.null(filter))
-        {
-            this.filter.result <- filter(frames[[nm]], filter)
-            this.filter.result@subSet
-        }
-        else NULL
-
-    ## plot it
-    panel.smoothScatter(xx, yy, ...)
-    if (!is.null(filter) && (is.list(displayFilter) || displayFilter))
-    {
-        display.pars <- {if (is.list(displayFilter)) displayFilter else
-                         list(border = TRUE)}
-
-        ## add filter boundaries
-        filter.boundary <- flowViz:::filterBoundary(filter = filter,
-                                parameters = c(channel.x.name, channel.y.name),
-                                frame = frames[[nm]],
-                                result = this.filter.result)
-        if(!missing(fill))
-          display.pars$fill <- fill
-        do.call(panel.polygon,
-                c(filter.boundary, display.pars))
+    }
+    else{
+        panel.xyplot(xx, yy, pch=pch, ...)
+        col = brewer.pal(9, "Set1")
+         if(!is.null(filter)){
+             glpoints(filter[[nm]], frames[[nm]],
+                      channels=c(channel.x.name, channel.y.name),
+                      verbose=FALSE, pch=pch, col=col, ...)
+         }
     }
 }
+
+
+
+
 
 
 

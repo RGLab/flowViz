@@ -17,7 +17,8 @@ fixInf <- function(x, replacement){
     else
         x
 }
-    
+
+
 
 ## ==========================================================================
 ## allow for dispatch to default polygon function in graphics
@@ -36,7 +37,7 @@ fixInf <- function(x, replacement){
 ## they match the plotted data, hence we warn
 setMethod("gpolygon",
           signature(x="filter", data="missing"), 
-          definition=function(x, data, ...)
+          definition=function(x, data, verbose=TRUE, ...)
       {
           parms <- parameters(x)
           if(length(parms)!=2)
@@ -44,11 +45,35 @@ setMethod("gpolygon",
                    paste(parms, collapse=", "), "\nDon't know how to match to",
                    " the plotted data.\nPlease specify plotting parameters as ",
                    "an additional argument.", call.=FALSE)
-          warning("The filter is defined for parameters '",
-                  paste(parms, collapse="' and '"), "'.\nPlease make sure ",
-                  "that they match the plotting parameters.", call.=FALSE)
+          if(verbose)
+              warning("The filter is defined for parameters '",
+                      paste(parms, collapse="' and '"), "'.\nPlease make sure ",
+                      "that they match the plotting parameters.", call.=FALSE)
           gpolygon(x, parms, ...)
       })
+
+
+## Extract the filter definiton from a filterResult and pass that on
+## along with it
+setMethod("gpolygon",
+          signature(x="filterResult", data="missing"), 
+          definition=function(x, data, verbose=TRUE, ...)
+      {
+          filt <- filterDetails(x)[[1]]$filter
+          parms <- parameters(filt)
+          if(verbose)
+              warning("The filter is defined for parameters '",
+                      paste(parms, collapse="' and '"), "'.\nPlease make sure ",
+                      "that they match the plotting parameters.", call.=FALSE)
+          gpolygon(filt, x, verbose=FALSE, ...)
+      })
+
+## We don't need the flowFrame if the filter is already evaluated
+setMethod("gpolygon",
+          signature(x="filterResult", data="flowFrame"), 
+          definition=function(x, data, verbose=TRUE, channels, ...)
+                  gpolygon(x, verbose=verbose, channels=channels, ...)
+          )
 
 
 
@@ -58,7 +83,7 @@ setMethod("gpolygon",
 ## Plotting parameters are specified as a character vector
 setMethod("gpolygon",
           signature(x="rectangleGate", data="character"), 
-          definition=function(x, data, ...)
+          definition=function(x, data, verbose=TRUE, ...)
       {
           parms <- parameters(x)
           if(length(data) != 2)
@@ -92,12 +117,23 @@ setMethod("gpolygon",
 ## We can ignore the filterResult, don't need it to plot the gate
 setMethod("gpolygon",
           signature(x="rectangleGate", data="filterResult"), 
-          definition=function(x, data, ...)
+          definition=function(x, data, verbose=TRUE, ...)
       {
-          warning("No 'filterResult' needed to plot 'rectangleGates'.\n",
-                  "Argument is ignored.", call.=FALSE)
-          gpolygon(x, ...)
+          if(verbose)
+              warning("No 'filterResult' needed to plot 'rectangleGates'.\n",
+                      "Argument is ignored.", call.=FALSE)
+          gpolygon(x, verbose=verbose, ...)
       })
+
+## we can drop the dataFrame, don't need it for rectangleGates
+setMethod("gpolygon",
+          signature(x="rectangleGate", data="flowFrame"), 
+          definition=function(x, data, verbose=TRUE, channels, ...){
+              if(!missing(channels))
+                  gpolygon(x, channels, verbose=verbose, ...)
+              else
+                  gpolygon(x, verbose=verbose, ...)
+          })
 
 
 
@@ -107,7 +143,7 @@ setMethod("gpolygon",
 ## Plotting parameters are specified as a character vector
 setMethod("gpolygon",
           signature(x="polygonGate", data="character"), 
-          definition=function(x, data, ...)
+          definition=function(x, data, verbose=TRUE, ...)
       {
           parms <- parameters(x)
           if(length(data) != 2)
@@ -126,13 +162,23 @@ setMethod("gpolygon",
 ## We can ignore the filterResult, don't need it to plot the gate
 setMethod("gpolygon",
           signature(x="polygonGate", data="filterResult"), 
-          definition=function(x, data, ...)
+          definition=function(x, data, verbose=TRUE, ...)
       {
-          warning("No 'filterResult' needed to plot 'polygonGates'.\n",
-                  "Argument is ignored.", call.=FALSE)
-          gpolygon(x, ...)
+          if(verbose)
+              warning("No 'filterResult' needed to plot 'polygonGates'.\n",
+                      "Argument is ignored.", call.=FALSE)
+          gpolygon(x, verbose=verbose, ...)
       })
 
+## we can drop the flowFrame, don't need it for polygonGates
+setMethod("gpolygon",
+          signature(x="polygonGate", data="flowFrame"), 
+          definition=function(x, data, verbose=TRUE, channels, ...){
+              if(!missing(channels))
+                  gpolygon(x, channels, verbose=verbose, ...)
+              else
+                  gpolygon(x, verbose=verbose, ...)
+          })
 
 # ==========================================================================
 ## for norm2Filters
@@ -140,7 +186,7 @@ setMethod("gpolygon",
 ## An error if we can't evaluate the filter
 setMethod("gpolygon",
           signature(x="norm2Filter", data="ANY"), 
-          definition=function(x, data, ...)  
+          definition=function(x, data, verbose=TRUE, ...)  
           stop("'norm2Filters' need to be evaluated for plotting.\n",
                "Either provide a 'flowFrame' or an appropriate ",
                "'filterResult' \nas second argument.", call.=FALSE) 
@@ -149,7 +195,7 @@ setMethod("gpolygon",
 ## Filter has been evaluated and the filterResult is provided
 setMethod("gpolygon",
           signature(x="norm2Filter", data="logicalFilterResult"), 
-          definition=function(x, data, ...){
+          definition=function(x, data, verbose=TRUE, ...){
               ## a lot of sanity checking up first
               fd <- filterDetails(data, identifier(x))
               if(!identical(identifier(x), identifier(data)) ||
@@ -157,7 +203,7 @@ setMethod("gpolygon",
                   stop("The 'filterResult' and the 'norm2Filter' ",
                        "don't match.", call.=FALSE)
               parms <- parameters(x)
-              if(length(fd$filter@transformation) > 0)
+              if(length(fd$filter@transformation) > 0 && verbose)
                   warning("'result' appears to have been applied on ",
                           "transformed data.\nThese are not supported yet.")
               ## get the ellipse lines
@@ -172,15 +218,15 @@ setMethod("gpolygon",
               ans <- as.data.frame(t(ans))
               names(ans) <- parms
               ## create a polygonGate and plot that 
-              gpolygon(polygonGate(boundaries=ans), ...)          
+              gpolygon(polygonGate(boundaries=ans), verbose=verbose, ...)          
           })
 
 ## Evaluate the filter and plot the filterResult
 setMethod("gpolygon",
           signature(x="norm2Filter", data="flowFrame"), 
-          definition=function(x, data, ...){
+          definition=function(x, data, verbose=TRUE, ...){
               fres <- filter(data, x)
-               gpolygon(x, fres, ...)
+               gpolygon(x, fres, verbose=verbose, ...)
           })
 
 
@@ -191,7 +237,7 @@ setMethod("gpolygon",
 ## An error if we can't evaluate the filter
 setMethod("gpolygon",
           signature(x="curv2Filter", data="ANY"), 
-          definition=function(x, data, ...)  
+          definition=function(x, data, verbose=TRUE, ...)  
           stop("'curv2Filters' need to be evaluated for plotting.\n",
                "Either provide a 'flowFrame' or an appropriate ",
                "'filterResult' \nas second argument.", call.=FALSE) 
@@ -200,7 +246,7 @@ setMethod("gpolygon",
 ## Filter has been evaluated and the filterResult is provided
 setMethod("gpolygon",
           signature(x="curv2Filter", data="multipleFilterResult"), 
-          definition=function(x, data, ...){
+          definition=function(x, data, verbose=TRUE, col, ...){
               ## a lot of sanity checking up first
               fd <- filterDetails(data, identifier(x))
               if(!identical(identifier(x), identifier(data)) ||
@@ -209,24 +255,96 @@ setMethod("gpolygon",
                        "don't match.", call.=FALSE)
               parms <- parameters(x)
               polygons <- fd$polygons
-              oo <- options(warn=-1)
-              sapply(polygons,
-                     function(x, ...){
-                         tmp <- cbind(x$x, x$y)
-                         colnames(tmp) <- parms
-                         gpolygon(polygonGate(boundaries=tmp), ...)
-                     }, ...)
-              options(oo)
-              warning("The filter is defined for parameters '",
-                      paste(parms, collapse="' and '"), "'.\nPlease make sure ",
-                      "that they match the plotting parameters.", call.=FALSE)
-              return(NULL)
+              lf <- length(polygons)
+              if(missing(col))
+                  col <-  colorRampPalette(brewer.pal(9, "Set1"))(lf)
+              else
+                  col <- rep(col, lf)[1:lf]
+              mapply(function(x, co, ...){
+                  tmp <- cbind(x$x, x$y)
+                  colnames(tmp) <- parms
+                  gpolygon(polygonGate(boundaries=tmp), col=co, ...)
+              }, x=polygons, co=col, MoreArgs=list(verbose=FALSE, ...))
+              if(verbose)
+                  warning("The filter is defined for parameters '",
+                          paste(parms, collapse="' and '"), "'.\nPlease make ",
+                          "sure that they match the plotting parameters.",
+                          call.=FALSE)
+              return(invisible(NULL))
           })
               
 ## Evaluate the filter and plot the filterResult
 setMethod("gpolygon",
           signature(x="curv2Filter", data="flowFrame"), 
-          definition=function(x, data, ...){
+          definition=function(x, data, verbose=TRUE, ...){
               fres <- filter(data, x)
-               gpolygon(x, fres, ...)
+               gpolygon(x, fres, verbose=verbose, ...)
           })
+
+
+
+## ==========================================================================
+## for curv1Filters
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## An error if we can't evaluate the filter
+setMethod("gpolygon",
+          signature(x="curv1Filter", data="ANY"), 
+          definition=function(x, data, verbose=TRUE, ...)  
+          stop("'curv1Filters' need to be evaluated for plotting.\n",
+               "Either provide a 'flowFrame' or an appropriate ",
+               "'filterResult' \nas second argument.", call.=FALSE) 
+          )
+
+## Filter has been evaluated and the filterResult is provided
+setMethod("gpolygon",
+          signature(x="curv1Filter", data="multipleFilterResult"), 
+          definition=function(x, data, verbose=TRUE, channels, col, ...){
+              ## a lot of sanity checking up first
+              fd <- filterDetails(data, identifier(x))
+              if(!identical(identifier(x), identifier(data)) ||
+                 class(x) != class(fd$filter))
+                  stop("The 'filterResult' and the 'norm2Filter' ",
+                       "don't match.", call.=FALSE)
+              parms <- parameters(x)
+              if(missing(channels))
+                  channels <- parms
+              bounds <- fd$boundaries
+              lb <- length(bounds)
+              if(missing(col))
+                  col <-  colorRampPalette(brewer.pal(9, "Set1"))(lb)
+              else
+                  col <- rep(col, lb)[1:lb]
+              mapply(function(x, co, ...){
+                  tmp <- matrix(x, nrow=2)
+                  colnames(tmp) <- parms
+                  gpolygon(rectangleGate(.gate=tmp), channels, col=co, ...)
+              }, x=bounds, co=col, MoreArgs=list(verbose=FALSE, ...))
+              if(verbose)
+                  warning("The filter is defined for parameters '",
+                          paste(parms, collapse="' and '"), "'.\nPlease make ",
+                          "sure that they match the plotting parameters.",
+                          call.=FALSE)
+              return(invisible(NULL))
+          })
+              
+## Evaluate the filter and plot the filterResult
+setMethod("gpolygon",
+          signature(x="curv1Filter", data="flowFrame"), 
+          definition=function(x, data, verbose=TRUE, ...){
+              fres <- filter(data, x)
+               gpolygon(x, fres, verbose=verbose, ...)
+          })
+
+
+
+## ==========================================================================
+## for kmeansFilters
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## We don't know how to plot these, hence we warn
+setMethod("gpolygon",
+          signature(x="kmeansFilter", data="ANY"), 
+          definition=function(x, data, verbose=TRUE, ...)
+          if(verbose)
+          warning("Don't know how to plot polygons for a 'kmeansFilter'",
+                  call.=FALSE)
+          )
