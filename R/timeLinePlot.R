@@ -67,6 +67,7 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
         stop("'channel' must be character scalar")
     if(!channel %in% colnames(x[[1]]))
         stop(channel, " is not a valid channel in this flowSet.")
+    sampleNames(x) <- truncNames(sampleNames(x))
     if(missing(col)){
         require(RColorBrewer)
         colp <- brewer.pal(8, "Dark2")
@@ -88,10 +89,14 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
     mr <- range(x[[1]])[,channel]
     mr[1] <- max(mr[1], 0)
     med <- sapply(timeData, function(z) median(z$smooth[,2], na.rm=TRUE))
+    gvars <- sapply(timeData, function(x) mean(x$variance))
+    ad <- mapply(function(z,m,v) abs(z$smooth[,2]-m)-v*varCut, timeData,
+                 med, gvars)
     if(length(med)==1){
         nativePlot(timeData, p=channel, range=mr, col="darkblue", med=med,
                    varCut=varCut, ...)
-        return(sum(abs(timeData[[1]][,2]-med), na.rm=TRUE)/nrow(timeData[[1]]))
+        
+        return((sum(ad[ad>0])/length(ad))/varCut)
     }
     layout(matrix(1:2), heights=c(0.8, 0.2))
     switch(type,
@@ -102,9 +107,6 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
            "native"=nativePlot(timeData, p=channel, range=mr, col=col,
            med=med, varCut=varCut, ...),
            stop("Unknown type"))
-    gvars <- sapply(timeData, function(x) mean(x$variance))
-    ad <- mapply(function(z,m,v) abs(z$smooth[,2]-m)-v*varCut, timeData,
-                 med, gvars)
     qaScore <- sapply(ad, function(z) sum(z[z>0])/length(z))/varCut
     par(mar=c(5,3,0,3), las=2)
     on.exit(par(opar))
@@ -114,11 +116,18 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
     wh <- which(qaScore >= top)
     points((wh+wh*0.2)-0.5, rep(top-(top/12), length(wh)), pch=17, col="white",
            cex=0.7)
-    #box(col="darkgray")
     attr(qaScore, "binSize") <- binSize
     return(qaScore)
 }
 
+
+
+## truncData
+truncNames <- function(names){
+    nc <- nchar(names)
+    names[nc>11] <- paste(substr(names[nc>11], 1, 8), "...", sep="")
+    return(names)
+}
 
 ## lighten up colors
 desat <- function(col, by=50)
@@ -134,25 +143,28 @@ desat <- function(col, by=50)
 ## align values around 0 and plot
 scaledPlot <- function(y, p, main=paste("time line for", p),
                        range, col, med, lwd, varCut, ...){
-    par(mar=c(3.5,2.5,3,2.5), mgp=c(1.5,0.5,0))
+    par(mar=c(1,2.5,3,2.5), mgp=c(1.5,0.5,0))
     yy <- mapply(function(z, m) data.frame(x=z$smooth[,1], y=z$smooth[,2]-m),
                  y, med, SIMPLIFY=FALSE)
-    var <- lapply(y, function(z) z$var)
+    var <- sapply(y, function(z) mean(z$var))
     maxX <- max(sapply(yy, function(z) max(z[,1], na.rm=TRUE)), na.rm=TRUE)
     xlim <- c(0, maxX)
     maxY <- max(sapply(yy, function(z) max(abs(range(z[,2], na.rm=TRUE)), 
                                           na.rm=TRUE)), na.rm=TRUE)
-    minRange <- diff(range)/20
+    minRange <- max(c(diff(range)/20, var)) 
     ylim <- c(min(-maxY, -minRange), max(maxY, minRange))
     if(missing(lwd))
         lwd <- 2
-    plot(yy[[1]], xlab="time", type="l", col=col[1], 
+    plot(yy[[1]], xlab="time", type="n", col=col[1], xaxt="n", yaxt="n",
          lwd=lwd, xlim=xlim, ylim=ylim, main=main, ylab="", ...)
+    if(varCut>0){
+        xl <- par("usr")[1:2]
+        xl <- xl + c(1,-1)*(diff(xl)*0.01)
+        rect(xl[1], max(var)*varCut, xl[2], -max(var)*varCut,
+             col=desat("gray", by=30), border=NA)
+    }
     abline(h=0, col="darkgray")
-    if(varCut>0)
-        abline(h=c(-1,1)*mean(sapply(var, mean))*varCut,
-               col="red", lwd=1, lty="dotted")
-    for(j in 2:length(y))
+    for(j in 1:length(y))
         lines(yy[[j]], col=col[j], lwd=lwd)
 }
 
@@ -160,14 +172,14 @@ scaledPlot <- function(y, p, main=paste("time line for", p),
 ## plot stacked values for each flowFrame
 stackedPlot <- function(y, p, main=paste("time line for", p),
                         range, col, ylab, med, lwd, varCut, ...){
-    par(mar=c(4,5,3,3), mgp=c(2,0.5,0), las=1)
+    par(mar=c(1,5,3,3), mgp=c(2,0.5,0), las=1)
+    var <- sapply(y, function(z) median(z$var))
     actualRange <- max(c(diff(range)/10, sapply(y, function(x)
-                        diff(range(x$smooth[,2], na.rm=TRUE)))))*1.05
+                        diff(range(x$smooth[,2], na.rm=TRUE))), var*2))*1.01
     stacks <- ((1:length(y))-1) * actualRange
     yy <- mapply(function(z, m, s) data.frame(x=z$smooth[,1],
                                               y=z$smooth[,2]-m+s), y,
                  med, stacks, SIMPLIFY=FALSE)
-    var <- lapply(y, function(z) z$var)
     maxX <- max(sapply(yy, function(z) max(z[,1], na.rm=TRUE)))
     xlim <- c(0, maxX)
     ylim <- range(sapply(yy, function(z) range(z[,2], na.rm=TRUE)))
@@ -175,7 +187,7 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
        ylab <- names(y)
     if(missing(lwd))
         lwd <- 2
-    plot(yy[[1]], xlab="time", ylab="", type="n", 
+    plot(yy[[1]], xlab="", ylab="", type="n", xaxt="n", 
          lwd=lwd, xlim=xlim, ylim=ylim, main=main, yaxt="n", ...)
     xl <- par("usr")[1:2]
     xl <- xl + c(1,-1)*(diff(xl)*0.01)
@@ -183,9 +195,9 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
         axis(2, stacks, ylab, cex.axis=0.8)
     for(j in 1:length(y)){
         if(varCut>0)
-            rect(xl[1], mean(yy[[j]]$y)-mean(var[[j]])*varCut, xl[2],
-                 mean(yy[[j]]$y)+mean(var[[j]])*varCut,
-                 col=desat("gray", by=30), border="white")
+            rect(xl[1], mean(yy[[j]]$y)-var[[j]]*varCut, xl[2],
+                 mean(yy[[j]]$y)+var[[j]]*varCut,
+                 col=desat("gray", by=30), border=NA)
         lines(yy[[j]], col=col[j], lwd=lwd)   
     }
 }
@@ -195,33 +207,34 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
 ## plot values in the "native" dimensions
 nativePlot <- function(y, p, main=paste("time line for", p),
                        range, col, med, lwd, varCut, ...){
-    par(mar=c(3.5,2.5,3,2.5), mgp=c(1.5,0.5,0))
-    var <- lapply(y, function(z) z$var)
+    par(mar=c(1,2.5,3,2.5), mgp=c(1.5,0.5,0))
+    var <- sapply(y, function(z) mean(z$var))
+    actualRange <- max(c(diff(range)/10, sapply(y, function(x)
+                        diff(range(x$smooth[,2], na.rm=TRUE))),
+                         max(var)*2.1))*1.01
     maxX <- max(sapply(y, function(z) max(z$smooth[,1], na.rm=TRUE)),
                 na.rm=TRUE)
     xlim <- c(0, maxX)
-    maxY <-  max(sapply(y,function(z) max(abs(range(z$smooth[,2],na.rm=TRUE)))))
-    minY <-  max(sapply(y,function(z) min(abs(range(z$smooth[,2],na.rm=TRUE)))))
-    empRange <- diff(range(maxY, minY))
-    minRange <- diff(range)/20
-    if(empRange < minRange)
-        ylim <- c(mean(c(maxY, minY)) - minRange, mean(c(maxY, minY)) +
-                  minRange)
-    else
-        ylim <- c(0, max(minRange, maxY))
+    m <- mean(sapply(y, function(z) mean(z$smooth[,2])))
+    maxY <-  max(c(sapply(y,function(z)
+                          max(abs(range(z$smooth[,2],na.rm=TRUE)))),
+                   m+max(var)*1.05, m-diff(range)/20))
+    minY <-  min(c(sapply(y,function(z)
+                        min(abs(range(z$smooth[,2],na.rm=TRUE)))),
+                   m-max(var)*1.05, m-diff(range)/20))
+    ylim <- c(minY, maxY)
     if(missing(lwd))
         lwd <- 2                  
-    plot(y[[1]]$smooth, xlab="time", ylab="", type="l", col=col[1], 
-         lwd=lwd, xlim=xlim, ylim=ylim, main=main, ...)
-    if(varCut>0)
-    abline(h=mean(y[[1]]$smooth[,2])+c(-1,1)*mean(var[[1]])*varCut, col=col[1],
-           lwd=1, lty="dotted")
-    if(length(y)>1)
-        for(j in 2:length(y)){
-            lines(y[[j]]$smooth, col=col[j], lwd=lwd)
-            if(varCut>0)
-                abline(h=mean(y[[j]]$smooth[,2])+c(-1,1)*mean(var[[j]])*varCut,
-                       col=col[j], lwd=1, lty="dotted")
-        }
+    plot(y[[1]]$smooth, xlab="", ylab="", type="n", col=col[1], yaxt="n", 
+         lwd=lwd, xlim=xlim, ylim=ylim, main=main, xaxt="n", ...)
+    if(varCut>0 && length(var)==1){
+        xl <- par("usr")[1:2]
+        xl <- xl + c(1,-1)*(diff(xl)*0.01)
+        
+        rect(xl[1], m-max(var)*varCut, xl[2], m+max(var)*varCut,
+             col=desat("gray", by=30), border=NA)
+    }
+    for(j in 1:length(y))
+        lines(y[[j]]$smooth, col=col[j], lwd=lwd, ...)
 }
 
