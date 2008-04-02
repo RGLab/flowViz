@@ -67,7 +67,9 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
         stop("'channel' must be character scalar")
     if(!channel %in% colnames(x[[1]]))
         stop(channel, " is not a valid channel in this flowSet.")
+    ## making sure the sample names fit the axis annotation
     sampleNames(x) <- truncNames(sampleNames(x))
+    ## lets fix ourselves some nioce colors
     if(missing(col)){
         require(RColorBrewer)
         colp <- brewer.pal(8, "Dark2")
@@ -79,24 +81,28 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
             stop("'col' must be color vector of length 1 or same length ",
                  "as the flowSet")
     }
+    ## a reasonable default for the bin size
     if(missing(binSize))
         binSize <- min(max(1, floor(median(fsApply(x, nrow)/100))), 500)
     opar <- par(c("mar", "mgp", "mfcol", "mfrow", "las"))
     on.exit(par(opar))
+    ## bin the data and compute location and variance
     timeData <-  fsApply(x, prepareSet, channel, binSize=binSize,
                          use.exprs=TRUE, simplify=FALSE)
     type <- match.arg(type)
     mr <- range(x[[1]])[,channel]
     mr[1] <- max(mr[1], 0)
+    ## standardize to compute maeningful scale-free QA scores
     med <- sapply(timeData, function(z) median(z$smooth[,2], na.rm=TRUE))
     gvars <- sapply(timeData, function(x) mean(x$variance))
-    ad <- mapply(function(z,m,v) abs(z$smooth[,2]-m)-v*varCut, timeData,
+    stand <-  mapply(function(z,m,v) abs(z$smooth[,2]-m)/(v*varCut), timeData,
                  med, gvars)
+    ## create teh plot
     if(length(med)==1){
         nativePlot(timeData, p=channel, range=mr, col="darkblue", med=med,
                    varCut=varCut, ...)
         
-        return((sum(ad[ad>0])/length(ad))/varCut)
+        return((sum(stand[stand>0])/length(stand))/varCut)
     }
     layout(matrix(1:2), heights=c(0.8, 0.2))
     switch(type,
@@ -107,10 +113,10 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
            "native"=nativePlot(timeData, p=channel, range=mr, col=col,
            med=med, varCut=varCut, ...),
            stop("Unknown type"))
-    qaScore <- sapply(ad, function(z) sum(z[z>0])/length(z))/varCut
+    qaScore <- sapply(stand, function(z) sum(z[abs(z)>1])/length(z))*100
     par(mar=c(5,3,0,3), las=2)
     on.exit(par(opar))
-    top <- 2.5
+    top <- 2
     barplot(qaScore, axes=FALSE, col=col, cex.names=0.7,
             ylim=c(0, min(c(top, max(qaScore)))), border=col, space=0.2)
     wh <- which(qaScore >= top)
