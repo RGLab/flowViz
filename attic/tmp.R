@@ -2,288 +2,286 @@
 library(flowViz)
 data(GvHD)
 fcs1 <- GvHD[[1]]
+fcs2 <- GvHD[[1]]
+colnames(fcs2)[1] <- "noname"
+
+source("R/gateplotting_utils.R")
+source("R/lines-methods.R")
+source("R/polygon-methods.R")
+source("R/points-methods.R")
+state <- function(x) flowViz:::flowViz.state[[x]]
+
+## a wrapper that catches and reports errors
+wrap <- function(x)
+{
+    tmp <- try(x)
+    if(!is(tmp, "try-error")){
+        print("done")
+        if(!is.null(tmp))
+            warning("Return value should be NULL.", call.=FALSE)
+    }
+}
+    
+
+## plot a gate with all possible combinations of arguments
+plotGates <- function(gate, data=fcs1, verbose=TRUE)
+{
+    opar <- par(ask=TRUE)
+    oo <- options(warn=1)
+    on.exit({par(opar); options(oo)})
+    yp <- xp <- p <- parameters(gate)
+    xp[1] <- "falseX"
+    yp[2] <- "falseY"
+    fres <- try(filter(data, gate))
+    ## first without a second argument
+    print("Only dispatch on filter")
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, verbose=verbose, lwd=2, lty=3))
+    ## Now with optional channel argument
+    print("Only dispatch on filter, but with optional channels argument")
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, channels=c("FSC-H", "SSC-H"), lty=3,
+             lwd=2, verbose=verbose))
+    ## Now the second argument are the channels
+    print("Dispatch on filter and channel names")   
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, c("FSC-H", "SSC-H"), verbose=verbose,
+                col=2, lwd=2, lty=3))
+    ## Some of the channels are not in the filter
+    print("Dispatch on filter and channel names with y channel wrong")  
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, yp, verbose=verbose, col=2, lwd=2, lty=3))
+    ## And with optional channel argument added on top
+    print("Dispatch on filter with optional channels argument")  
+    plot(fcs1, c("SSC-H", "FSC-H"))
+    wrap(fun(gate, c("FSC-H", "SSC-H"), verbose=verbose,
+                col=2, lwd=2, lty=3, channels=c("SSC-H", "FSC-H")))
+    ## Some of the channels are not in the filter
+    print("Dispatch on filter and channel names with y channel wrong and with optional channels argument")
+    plot(fcs1, c("SSC-H", "FSC-H"))
+    wrap(fun(gate, yp, verbose=verbose, col=2, lwd=2, lty=3, channels=xp))
+    ## Now the second argument is a filterResult
+    print("Dispatch on filter and filterResult")   
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, fres, verbose=verbose,
+                lwd=2, lty=3))
+    ## And with optional channel argument added on top
+    print("Dispatch on filter and filterResult with optional channels argument")   
+    plot(fcs1, c("SSC-H", "FSC-H"))
+    wrap(fun(gate, fres, verbose=verbose,
+                col=5, lwd=2, lty=3, channels=c("SSC-H", "FSC-H")))
+    ## Now the second argument is a flowFrame
+    print("Dispatch on filter and flowFrame")   
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, data, verbose=verbose,
+                col=5, lwd=2, lty=3))
+    ## And with optional channel argument added on top
+    print("Dispatch on filter and flowFrame with optional channels argument")   
+    plot(fcs1, c("SSC-H", "FSC-H"))
+    wrap(fun(gate, data, verbose=verbose,
+                lwd=2, lty=3, channels=c("SSC-H", "FSC-H")))
+}
+
+
+## plot points in a gate with all possible combinations of arguments
+plotPoints <- function(gate, data=fcs1, verbose=TRUE)
+{
+    opar <- par(ask=TRUE)
+    oo <- options(warn=1)
+    on.exit({par(opar); options(oo)})
+    yp <- xp <- p <- parameters(gate)
+    xp[1] <- "falseX"
+    yp[2] <- "falseY"
+    fres <- try(filter(data, gate))
+    ## first without a third argument
+    print("Only dispatch on filter")
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, fcs1, verbose=verbose, lwd=2, lty=3))
+    ## Now with the channel argument
+    print("Only dispatch on filter, but with optional channels argument")
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, fcs1, channels=c("FSC-H", "SSC-H"), lty=3,
+             lwd=2, verbose=verbose))
+    ## Some of the channels are not in the filter
+    print("Dispatch on filter and channel names with y channel wrong")  
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(gate, fcs1, yp, verbose=verbose, col=2, lwd=2, lty=3))
+    ## Now the first argument is a filterResult
+    print("Dispatch on filter and filterResult")   
+    plot(fcs1, c("FSC-H", "SSC-H"))
+    wrap(fun(fres, fcs1, verbose=verbose,
+                lwd=2, lty=3))
+    ## And with channel argument added on top
+    print("Dispatch on filter and filterResult with channels argument")   
+    plot(fcs1, c("SSC-H", "FSC-H"))
+    wrap(fun(fres, fcs1, verbose=verbose,
+                col=5, lwd=2, lty=3, channels=c("SSC-H", "FSC-H")))
+}
 
 
 
 ############################################################################
 ##                            rectangelGates first                        ##
 ############################################################################
-
-## This should cause a warning because we need to guess the
-## plotting parameters
+## lines
+fun <- glines
 rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650),
               "SSC-H" = c(400, 575))
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(rg)
-glines(rg, col=4, verbose=FALSE)
-gpolygon(rg, col=2)
-gpolygon(rg, col=3, verbose=FALSE)
-gpoints(rg, fcs1)
-gpoints(rg, fcs1, verbose=FALSE, pch=20)
-
-## This should fail because we don't know how to match to the plot
+plotGates(rg)
+plotGates(rg, verbose=FALSE)
+rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650),
+              "SSC-H" = c(400, 575), "FL2-H" = c(400, 500))
+plotGates(rg)
+plotGates(rg, verbose=FALSE)
 rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650))
-glines(rg)
-gpolygon(rg, col=2)
-gpoints(rg, fcs1)
-## This should fail because we need a character of lengh 2 as second argument
-glines(rg, "a")
-gpolygon(rg, "a")
-gpoints(rg, fcs1, "a")
-## This should fail because the parameters don't match
-glines(rg, c("a", "b"))
-gpolygon(rg, c("a", "b"))
-gpoints(rg, fcs1, c("a", "b"))
+plotGates(rg)
+plotGates(rg, verbose=FALSE)
 
-
-## This should create a region gate in the y dimension and also know
-## how to deal with infinite values
-plot(fcs1, c("FSC-H", "SSC-H"))
-rg <- rectangleGate(filterId="Rectangle", "SSC-H" = c(300, 600))
-glines(rg, c("FSC-H", "SSC-H"))
-glines(rg, c("FSC-H", "SSC-H"), verbose=FALSE, col=4)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=2)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=3, verbose=FALSE)
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"))
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"), verbose=FALSE, pch=20)
-plot(fcs1, c("FSC-H", "SSC-H"))
-rg <- rectangleGate(filterId="Rectangle", "SSC-H" = c(-Inf, 650))
-glines(rg, c("FSC-H", "SSC-H"))
-glines(rg, c("FSC-H", "SSC-H"), verbose=FALSE, col=4)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=2)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=3, verbose=FALSE)
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"))
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"), verbose=FALSE, pch=20)
-
-## This should create a region gate in the y dimension and also know
-## how to deal with infinite values
-plot(fcs1, c("FSC-H", "SSC-H"))
-rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(300, 600))
-glines(rg, c("FSC-H", "SSC-H"))
-glines(rg, c("FSC-H", "SSC-H"), verbose=FALSE, col=4)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=2)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=3, verbose=FALSE)
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"))
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"), verbose=FALSE, pch=20)
-plot(fcs1, c("FSC-H", "SSC-H"))
-rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(-Inf, 250))
-glines(rg, c("FSC-H", "SSC-H"))
-glines(rg, c("FSC-H", "SSC-H"), verbose=FALSE, col=4)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=2)
-gpolygon(rg, c("FSC-H", "SSC-H"), col=3, verbose=FALSE)
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"))
-gpoints(rg, fcs1, c("FSC-H", "SSC-H"), verbose=FALSE, pch=20)
-
-
-## This should create a warning that we don't need a filter result
-## but still work
+## polygons
+fun <- gpolygon
 rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650),
               "SSC-H" = c(400, 575))
-res <- filter(fcs1, rg)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(rg, res)
-glines(rg, res, col=3, verbose=FALSE)
-gpolygon(rg, res, col=2)
-gpolygon(rg, res, col=4, verbose=FALSE)
-gpoints(rg, fcs1, filterResult=res)
-gpoints(rg, fcs1, filterResult=res, verbose=FALSE, pch=20)
+plotGates(rg)
+plotGates(rg, verbose=FALSE)
+rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650),
+              "SSC-H" = c(400, 575), "FL2-H" = c(400, 500))
+plotGates(rg)
+plotGates(rg, verbose=FALSE)
+rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650))
+plotGates(rg)
+plotGates(rg, verbose=FALSE)
 
-## This should work with the usual warnings
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(res)
-glines(res, col=3, verbose=FALSE)
-gpolygon(res, col=2)
-gpolygon(res, col=4, verbose=FALSE)
-gpoints(res, fcs1)
-gpoints(res, fcs1, verbose=FALSE, pch=20)
+## points
+fun <- gpoints
+rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650),
+              "SSC-H" = c(400, 575))
+plotPoints(rg)
+plotPoints(rg, verbose=FALSE)
+rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650),
+              "SSC-H" = c(400, 575), "FL2-H" = c(400, 500))
+plotPoints(rg)
+plotPoints(rg, verbose=FALSE)
+rg <- rectangleGate(filterId="Rectangle", "FSC-H" = c(250, 650))
+plotPoints(rg)
+plotPoints(rg, verbose=FALSE)
 
 
 ############################################################################
-##                            now polygonGates                            ##
+##                                quadGates                               ##
 ############################################################################
+## lines
+fun <- glines
+qg <- quadGate(filterId="nonDebris", "FSC-H"=500, "SSC-H"=800)
+plotGates(qg)
+plotGates(qg, verbose=FALSE)
 
-## This should cause a warning because we need to guess the
-## plotting parameters
+## polygons
+fun <- gpolygon
+plotGates(qg)
+plotGates(qg, verbose=FALSE)
+
+## points
+fun <- gpoints
+plotPoints(qg)
+plotPoints(qg, verbose=FALSE)
+
+
+############################################################################
+##                               polygonGates                             ##
+############################################################################
+## lines
+fun <- glines
 sqrcut <- matrix(c(300,400,600,500, 200, 50, 100, 300, 400,70),
                  ncol=2)
 colnames(sqrcut) <- c("FSC-H","SSC-H")
 pg <- polygonGate(filterId="nonDebris", boundaries= sqrcut)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(pg)
-glines(pg, col=3, verbose=FALSE)
-gpolygon(pg, col=2)
-gpolygon(pg, col=4, verbose=FALSE)
-gpoints(pg, fcs1)
-gpoints(pg, fcs1, verbose=FALSE, pch=20)
+plotGates(pg)
+plotGates(pg, verbose=FALSE)
 
+## polygons
+fun <- gpolygon
+plotGates(pg)
+plotGates(pg, verbose=FALSE)
 
-## This should create a warning that we don't need a filter result
-## but still work
-res <- filter(fcs1, pg)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(pg, res)
-glines(pg, res, verbose=FALSE, col=3)
-gpolygon(pg, res, col=2)
-gpolygon(pg, res, col=4, verbose=FALSE)
-
-
-## This should work with the usual warnings
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(res)
-glines(res, col=3, verbose=FALSE)
-gpolygon(res, col=2)
-gpolygon(res, col=4, verbose=FALSE)
-gpoints(res, fcs1)
-gpoints(res, fcs1, pch=20, verbose=FALSE)
+## points
+fun <- gpoints
+plotPoints(pg)
+plotPoints(pg, verbose=FALSE)
 
 
 ############################################################################
 ##                               norm2Filter                              ##
 ############################################################################
-
-## This should fail because we need either the raw data or a filter result
-## to plot norm2Filters
+## lines
+fun <- glines
 nf <- norm2Filter(filterId = "BVNorm", "FSC-H", "SSC-H", scale=2)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(nf)
-glines(nf, c("FSC-H", "SSC-H"))
-gpolygon(nf, col=2)
-gpolygon(nf, c("FSC-H", "SSC-H"), col=2)
+plotGates(nf)
+plotGates(nf, verbose=FALSE)
 
+## polygons
+fun <- gpolygon
+plotGates(nf)
+plotGates(nf, verbose=FALSE)
 
-## This should cause a warning because we need to guess the
-## plotting parameters
-res <- filter(fcs1, nf)
-glines(nf, res)
-glines(nf, res, verbose=FALSE, col=3)
-gpolygon(nf, res, col=2)
-gpolygon(nf, res, col=4, verbose=FALSE)
-gpoints(nf, fcs1, filterResult=res)
-gpoints(nf, fcs1, filterResult=res, verbose=FALSE, pch=20)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(nf, fcs1)
-glines(nf, fcs1, col=3, verbose=FALSE)
-gpolygon(nf, fcs1, col=2)
-gpolygon(nf, fcs1, col=4, verbose=FALSE)
-gpoints(nf, fcs1)
-gpoints(nf, fcs1, verbose=FALSE, pch=20)
-
-
-
-## This should work with the usual warnings
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(res)
-glines(res, verbose=FALSE, col=3)
-gpolygon(res, col=2)
-gpolygon(res, col=4, verbose=FALSE)
-gpoints(res, fcs1)
-gpoints(res, fcs1, verbose=FALSE, pch=20)
-
+## points
+fun <- gpoints
+plotPoints(nf)
+plotPoints(nf, verbose=FALSE)
 
 
 ############################################################################
 ##                               curv2Filter                              ##
 ############################################################################
-## This should fail because we need either the raw data or a filter result
-## to plot norm2Filters
-cf <- curv2Filter(filterId = "BVCurv", "FSC-H", "SSC-H")
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(cf)
-glines(nf, c("FSC-H", "SSC-H"))
-gpolygon(nf, col=2)
-gpolygon(nf, c("FSC-H", "SSC-H"), col=2)
+## lines
+fun <- glines
+c2f <- curv2Filter(filterId = "BVCurv", "FSC-H", "SSC-H")
+plotGates(c2f)
+plotGates(c2f, verbose=FALSE)
 
+## polygons
+fun <- gpolygon
+plotGates(c2f)
+plotGates(c2f, verbose=FALSE)
 
-## This should cause a warning because we need to guess the
-## plotting parameters
-res <- filter(fcs1, cf)
-glines(cf, fcs1)
-glines(cf, fcs1, col=3, verbose=FALSE)
-gpolygon(cf, fcs1, col=2)
-gpolygon(cf, fcs1, col=4, verbose=FALSE)
-gpoints(cf, fcs1)
-gpoints(cf, fcs1, verbose=FALSE, pch=20)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(cf, res)
-glines(cf, res, col=3, verbose=FALSE)
-gpolygon(cf, res)
-gpolygon(cf, res, col=4, verbose=FALSE)
-gpoints(cf, fcs1, filterResult=res)
-gpoints(cf, fcs1, filterResult=res, verbose=FALSE, pch=20, col=2)
-
-
-## This should work with the usual warnings
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(res)
-glines(res, col=3, verbose=FALSE)
-gpolygon(res, col=2)
-gpolygon(res, col=4, verbose=FALSE)
-gpoints(res, fcs1)
-gpoints(res, fcs1, verbose=FALSE, pch=20, col=2)
-
+## points
+fun <- gpoints
+plotPoints(c2f)
+plotPoints(c2f, verbose=FALSE)
 
 
 ############################################################################
 ##                               curv1Filter                              ##
 ############################################################################
-## This should fail because we need either the raw data or a filter result
-## to plot norm2Filters
+## lines
+fun <- glines
 c1f <- curv1Filter(filterId = "BVCurv", "SSC-H")
-res <- filter(fcs1, c1f)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(c1f, c("FSC-H", "SSC-H"))
-gpolygon(c1f, c("FSC-H", "SSC-H"))
+plotGates(c1f)
+plotGates(c1f, verbose=FALSE)
 
-## This should fail because we can't match the plotting parameters
-glines(kf, fcs1)
-gpolygon(c1f, fcs1)
+## polygons
+fun <- gpolygon
+plotGates(c1f)
+plotGates(c1f, verbose=FALSE)
 
-## This should work
-glines(c1f, fcs1, channels=c("FSC-H", "SSC-H"))
-glines(res, channels=c("FSC-H", "SSC-H"), col=4)
-gpolygon(c1f, fcs1, channels=c("FSC-H", "SSC-H"))
-gpolygon(res, channels=c("FSC-H", "SSC-H"), col=4)
-gpoints(res, fcs1, c("FSC-H", "SSC-H"), pch=20)
+## points
+fun <- gpoints
+plotPoints(c1f)
+plotPoints(c1f, verbose=FALSE)
 
 
 ############################################################################
 ##                               kmeansFilter                             ##
 ############################################################################
-## All these should fail because we don't know how to plot lines or
-## polygons for kmeansFilter
+## lines
+fun <- glines
 kf <- kmeansFilter("kmfilt", "FSC-H" = c("Low", "High"))
-res <- filter(fcs1, kf)
-plot(fcs1, c("FSC-H", "SSC-H"))
-glines(kf, c("FSC-H", "SSC-H"))
-glines(kf, c("FSC-H", "SSC-H"), verbose=FALSE)
-gpolygon(kf, c("FSC-H", "SSC-H"))
-gpolygon(kf, c("FSC-H", "SSC-H"), verbose=FALSE)
+plotGates(kf)
 
-## This should fail because we can't match the plotting parameters
-gpoints(kf, fcs1)
-gpoints(kf, fcs1, verbose=FALSE, pch=20)
+## polygons
+fun <- gpolygon
+plotGates(kf)
 
-## This should work
-gpoints(kf, fcs1, c("FSC-H", "SSC-H"))
-gpoints(kf, fcs1, c("FSC-H", "SSC-H"), verbose=FALSE, pch=20, col=2)
-plot(fcs1, c("FSC-H", "SSC-H"))
-gpoints(kf, fcs1, c("FSC-H", "SSC-H"), filterResult=res)
-gpoints(kf, fcs1, c("FSC-H", "SSC-H"), filterResult=res, verbose=FALSE,
-        pch=20, col=2)
-
-
-
-
-
-
-## need to fix ellipsoidGates first
-## m <- matrix(c(300, 200, 500, 200),ncol = 2)
-## colnames(m) <- c("FSC-H", "SSC-H")
-## eg <- ellipsoidGate(filterId= "ellipsoidGateIII", m, distance=400)
-## plot(fcs1, c("FSC-H", "SSC-H"))
-## lines(pe)
-## polygon(eg, col=2)
-
-
-
-
+## points
+fun <- gpoints
+plotPoints(kf)
+plotPoints(kf, verbose=FALSE)

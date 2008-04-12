@@ -15,7 +15,8 @@
 setMethod("xyplot",
           signature(x="flowFrame", data="missing"),
           function(x, data, xlab=time, ylab="", time="Time",
-                   layout, panel=panel.xyplot.flowframe,
+                   layout, panel=panel.xyplot.flowframe.time,
+                   prepanel=prepanel.xyplot.flowframe.time,
                    type="discrete", ...)
       {
           ## guess the time parameter
@@ -30,8 +31,7 @@ setMethod("xyplot",
           ## set up stacked layout
           if (missing(layout)) layout <- c(1, ncol(expr) - 1)
           xyplot(channel ~ time | channel, data=fakedf, type=type,
-                 prepanel=prepanel.xyplot.flowframe.time,
-                 panel=panel.xyplot.flowframe.time, layout=layout,
+                 prepanel=prepanel, panel=panel, layout=layout,
                  time.x=time.x, expr=expr, xlab=xlab, ylab=ylab,
                  default.scales=list(y=list(relation="free", rot=0)),
                  ...)
@@ -48,7 +48,8 @@ prepanel.xyplot.flowframe.time <-
          dx=diff(xx), dy=diff(yy))
 }
 
-## Dedicated panel function to do the plotting with different options
+## Dedicated panel function to do the timeline plotting with
+## different options
 panel.xyplot.flowframe.time <- 
     function(x, y, time.x, expr, type="l", nrpoints=0, binSize=100, ...)
 {
@@ -104,16 +105,43 @@ panel.xyplot.flowframe.time <-
 ## the upshot being that all the fancy xyplot formula stuff will be valid.
 setMethod("xyplot",
           signature(x="formula", data="flowFrame"),
-          function(x, data, smooth=TRUE, 
-                   panel=if (smooth) panel.smoothScatter else panel.xyplot,
-                   ...)
+          function(x, data, smooth=TRUE, panel=panel.xyplot.flowframe, ...)
       {
+          ## deparse the formula structure
+          channel.y <- x[[2]]
+          channel.x <- x[[3]]
+          if (length(channel.x) == 3)
+              channel.x <- channel.x[[2]]
+          channel.x.name <- expr2char(channel.x)
+          channel.y.name <- expr2char(channel.y)
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, 
-                 panel=panel, ...)
+                 panel=panel, frame=data, channel.x.name=channel.x.name,
+                 channel.y.name=channel.y.name, ...)
       })
 
 
-
+## Dedicated panel function to be abble to add filters on the plot
+panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
+                                   channel.x.name,  channel.y.name,
+                                   pch=".", ...)
+{
+   
+    if (smooth){
+        panel.smoothScatter(x, y, ...)
+        if(!is.null(filter)){
+            glpolygon(filter, frame,
+                      channels=c(channel.x.name, channel.y.name),
+                      verbose=FALSE, ...)
+        }
+    }else{
+        panel.xyplot(x, y, pch=pch, ...)
+        if(!is.null(filter)){
+            glpoints(filter, frame,
+                     channels=c(channel.x.name, channel.y.name),
+                     verbose=FALSE, pch=pch, col="red", ...)
+        }
+    }
+}
 
 
 
@@ -128,7 +156,7 @@ setMethod("xyplot",
           function(x, data, xlab, ylab, as.table=TRUE,
                    prepanel=prepanel.xyplot.flowset,
                    panel=panel.xyplot.flowset, pch = ".",
-                   smooth=TRUE, filter=NULL, filterResults=NULL,
+                   smooth=TRUE, filter=NULL,
                    displayFilter=TRUE, ...)
       {
           ## ugly hack to suppress warnings about coercion introducing
@@ -164,7 +192,6 @@ setMethod("xyplot",
                       frames=data@frames, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, filter=filter,
-                      filterResults=filterResults, displayFilter=displayFilter,
                       as.table=as.table, xlab=xlab, ylab=ylab,
                       pch=pch, smooth=smooth, ...)
       })
@@ -192,7 +219,7 @@ prepanel.xyplot.flowset <-
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.xyplot.flowset <-
     function(x, frames, channel.x, channel.y, channel.x.name, channel.y.name, 
-             filter=NULL, filterResults=NULL, pch=".", smooth=TRUE, ...)
+             filter=NULL, pch=".", smooth=TRUE, ...)
 {
     x <- as.character(x)
     if (length(x) > 1) stop("must have only one flow frame per panel")

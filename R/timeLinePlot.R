@@ -60,7 +60,7 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
 ## the sum of average positive distances of means for each bin from the global
 ## mean confidence interval, scaled by the variance cutoff:
 ##       sum(z[z>0])/length(z)/varCut
-timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
+timelineplot <- function(x, channel, type=c("stacked", "scaled", "native"),
                          col, ylab=names(x), binSize, varCut=1, ...)
 {
     if(!length(channel)==1)
@@ -69,8 +69,8 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
         stop(channel, " is not a valid channel in this flowSet.")
     ## making sure the sample names fit the axis annotation
     sampleNames(x) <- truncNames(sampleNames(x))
-    ## lets fix ourselves some nioce colors
-    if(missing(col)){
+    ## lets fix ourselves some nice colors
+    if(missing(col) | is.null(col)){
         require(RColorBrewer)
         colp <- brewer.pal(8, "Dark2")
         col <- colorRampPalette(colp)(length(x))
@@ -81,14 +81,11 @@ timeLinePlot <- function(x, channel, type=c("stacked", "scaled", "native"),
             stop("'col' must be color vector of length 1 or same length ",
                  "as the flowSet")
     }
-    ## a reasonable default for the bin size
-    if(missing(binSize))
-        binSize <- min(max(1, floor(median(fsApply(x, nrow)/100))), 500)
-    opar <- par(c("mar", "mgp", "mfcol", "mfrow", "las"))
-    on.exit(par(opar))
     ## bin the data and compute location and variance
     timeData <-  fsApply(x, prepareSet, channel, binSize=binSize,
                          use.exprs=TRUE, simplify=FALSE)
+    opar <- par(c("mar", "mgp", "mfcol", "mfrow", "las"))
+    on.exit(par(opar))
     type <- match.arg(type)
     mr <- range(x[[1]])[,channel]
     mr[1] <- max(mr[1], 0)
@@ -182,13 +179,15 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
     var <- sapply(y, function(z) median(z$var))
     actualRange <- max(c(diff(range)/10, sapply(y, function(x)
                         diff(range(x$smooth[,2], na.rm=TRUE))), var*2))*1.01
-    stacks <- ((1:length(y))-1) * actualRange
+    stacks <- ((length(y):1)-1) * actualRange
     yy <- mapply(function(z, m, s) data.frame(x=z$smooth[,1],
                                               y=z$smooth[,2]-m+s), y,
                  med, stacks, SIMPLIFY=FALSE)
     maxX <- max(sapply(yy, function(z) max(z[,1], na.rm=TRUE)))
     xlim <- c(0, maxX)
-    ylim <- range(sapply(yy, function(z) range(z[,2], na.rm=TRUE)))
+    ylim <- range(c(sapply(yy, function(z) range(z[,2], na.rm=TRUE))),
+                  median(yy[[1]]$y)+var[[1]], median(yy[[length(yy)]]$y) -
+                                        var[length(yy)])
     if(missing(ylab) | is.null(ylab))
        ylab <- names(y)
     if(missing(lwd))
@@ -199,13 +198,13 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
     xl <- xl + c(1,-1)*(diff(xl)*0.01)
     if(length(ylab)>1)
         axis(2, stacks, ylab, cex.axis=0.8)
-    for(j in 1:length(y)){
-        if(varCut>0)
-            rect(xl[1], mean(yy[[j]]$y)-var[[j]]*varCut, xl[2],
-                 mean(yy[[j]]$y)+var[[j]]*varCut,
-                 col=desat("gray", by=30), border=NA)
+    if(varCut>0)
+    for(j in 1:length(y))
+        rect(xl[1], mean(yy[[j]]$y)-var[[j]]*varCut, xl[2],
+             mean(yy[[j]]$y)+var[[j]]*varCut,
+             col=desat("gray", by=30), border=NA)
+    for(j in 1:length(y))
         lines(yy[[j]], col=col[j], lwd=lwd)   
-    }
 }
 
 
@@ -223,10 +222,10 @@ nativePlot <- function(y, p, main=paste("time line for", p),
     xlim <- c(0, maxX)
     m <- mean(sapply(y, function(z) mean(z$smooth[,2])))
     maxY <-  max(c(sapply(y,function(z)
-                          max(abs(range(z$smooth[,2],na.rm=TRUE)))),
+                          max(z$smooth[,2],na.rm=TRUE)),
                    m+max(var)*1.05, m-diff(range)/20))
     minY <-  min(c(sapply(y,function(z)
-                        min(abs(range(z$smooth[,2],na.rm=TRUE)))),
+                        min(z$smooth[,2],na.rm=TRUE)),
                    m-max(var)*1.05, m-diff(range)/20))
     ylim <- c(minY, maxY)
     if(missing(lwd))
@@ -244,3 +243,30 @@ nativePlot <- function(y, p, main=paste("time line for", p),
         lines(y[[j]]$smooth, col=col[j], lwd=lwd, ...)
 }
 
+
+## A method for flowSets
+setMethod("timeLinePlot",
+          signature(x="flowSet", channel="character"),
+          function(x, channel, type=c("stacked", "scaled", "native"),
+                   col=NULL, ylab=names(x), binSize, varCut=1, ...)
+      {
+          ## a reasonable default for the bin size
+          if(missing(binSize))
+              binSize <- min(max(1, floor(median(fsApply(x, nrow)/100))), 500)
+          timelineplot(x, channel, binSize=binSize, col=col, ...)
+      })
+
+
+## A method for flowFrames
+setMethod("timeLinePlot",
+          signature(x="flowFrame", channel="character"),
+          function(x, channel, ...)
+      {
+          timeLinePlot(as(x, "flowSet"), channel=channel, ...)
+      })
+
+## A method for flowFrames
+setMethod("timeLinePlot",
+          signature(x="ANY", channel="missing"),
+          function(x, channel, ...)
+          stop("Argument 'channel' is missing", call.=FALSE))

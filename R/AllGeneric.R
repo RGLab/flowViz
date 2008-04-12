@@ -34,3 +34,14 @@ setGeneric("gpoints", function(x, data, channels, ...)
 setGeneric("glpoints", function(x, data, channels, ...)
            standardGeneric("glpoints"))
 
+
+
+## ===========================================================================
+## timeLinePlot:
+## ---------------------------------------------------------------------------
+setGeneric("timeLinePlot",
+           function(x, channel, ...) standardGeneric("timeLinePlot"))
+          
+
+
+

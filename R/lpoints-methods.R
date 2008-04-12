@@ -14,20 +14,7 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
                       filterResult=NULL, col, ...)
 {
     parms <- parameters(x)
-    if(length(channels) != 2)
-        stop("Plotting parameters need to be character vector of ",
-             "length 2", call.=FALSE)
-    mt <- match(parms, channels)
-    if(any(is.na(mt)))
-        stop("The filter is not defined for the following ",
-             "parameter(s):\n", paste(channels[is.na(mt)], collapse=", "),
-             call.=FALSE)
-    mt2 <- match(channels, colnames(data)) 
-    if(any(is.na(mt2)))
-        stop("The gate definition includes parameters\n",
-             paste(parms, collapse=", "), "\nbut the data only ", 
-             "provides\n", paste(colnames(data), collapse=", "),
-             call.=FALSE)
+    channels <- checkParameterMatch(channels, verbose=verbose)
     ## We check if the filterResult matches the filter and subset with that
     if(!is.null(filterResult)){
         if(!identical(identifier(x), identifier(filterResult)) ||
@@ -53,29 +40,14 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
 ## and pass that on to the next method as a separate argument
 setMethod("glpoints",
           signature(x="filter", data="flowFrame", channels="missing"), 
-          definition=function(x, data, channels, verbose=TRUE,
+          function(x, data, channels, verbose=TRUE,
           filterResult=NULL, ...)
       {
           if(is(x, "filterResult")){
               filterResult <- x
               x <- filterDetails(x)[[1]]$filter
           }
-          parms <- parameters(x)
-          mt <- match(parms, colnames(data))
-          if(length(parms)!=2)
-              stop("The filter definition contains the following parameters:\n",
-                   paste(parms, collapse=", "), "\nDon't know how to match to",
-                   " the plotted data.\nPlease specify plotting parameters as ",
-                   "an additional argument.", call.=FALSE)
-          if(any(is.na(mt)))
-              stop("The gate definition includes parameters\n",
-                   paste(parms, collapse=", "), "\nbut the data only ", 
-                   "provides\n", paste(colnames(data), collapse=", "),
-                   call.=FALSE)
-          if(verbose)
-              warning("The filter is defined for parameters '",
-                      paste(parms, collapse="' and '"), "'.\nPlease make sure ",
-                      "that they match the plotting parameters.", call.=FALSE)
+          channels <- checkParameterMatch(parameters(x), verbose=verbose)
           glpoints(x=x, data=data, channels=parms, verbose=verbose,
                   filterResult=filterResult, ...)
       })
@@ -84,14 +56,30 @@ setMethod("glpoints",
 ## specified
 setMethod("glpoints",
           signature(x="filterResult", data="flowFrame", channels="character"), 
-          definition=function(x, data, channels, verbose=TRUE,
-          filterResult=NULL, ...)
+          function(x, data, channels, verbose=TRUE,
+                   filterResult=NULL, ...)
       {
+          if(x@frameId != identifier(data))
+              stop("The filter was evaluated on flowFrame '",
+                   x@frameId, "'\n  but the frame provided is '",
+                   identifier(data), "'.", call.=FALSE)
           filterResult <- x
           x <- filterDetails(x)[[1]]$filter
+          channels <- checkParameterMatch(channels, verbose=verbose)
           glpoints(x=x, data=data, channels=channels, verbose=verbose,
                    filterResult=filterResult, ...)
       })    
+
+## A useful error message when we don't get what we need
+setMethod("glpoints",
+          signature(x="filter", data="missing", channels="ANY"), 
+          function(x, data, channels, verbose=TRUE,
+          filterResult=NULL, ...)
+      {
+          stop("Need the 'flowFrame' in order to add points.", call.=FALSE)
+      })
+
+
 
 
 ## ==========================================================================
@@ -101,15 +89,46 @@ setMethod("glpoints",
 ## much the default
 setMethod("glpoints",
           signature(x="rectangleGate", data="flowFrame", channels="character"), 
-          definition=function(x, data, channels, verbose=TRUE,
+          function(x, data, channels, verbose=TRUE,
           filterResult=NULL, ...)
       {
-          if(verbose & !is.null(filterResult))
-               warning("No 'filterResult' needed to plot 'rectangleGates'.\n",
-                       "Argument is ignored.", call.=FALSE)
+          if(!is.null(filterResult))
+              dropWarn("filterResult", "rectangleGates", verbose=verbose)
           addLpoints(x=x, data=data, channels=channels, verbose=verbose,
                       filterResult=NULL, ...)
       })
+
+
+
+
+## ==========================================================================
+## for quadGates
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## We plot this as four individual rectangle gates
+setMethod("glpoints",
+          signature(x="quadGate", data="flowFrame", channels="character"), 
+          function(x, data, channels, verbose=TRUE, col, ...)
+      {
+          if(!is.null(filterResult))
+              dropWarn("filterResult", "quadGates", verbose=verbose)
+          parms <- parameters(x)
+          channels <- checkParameterMatch(channels, verbose=verbose)
+          if(missing(col))
+              col <-  colorRampPalette(brewer.pal(9, "Set1"))(4)
+          else
+              col <- rep(col,4)
+          v <- x@boundary[parms[1]]
+          h <- x@boundary[parms[2]]
+          mat <- matrix(c(-Inf, v, h, Inf, v, Inf, h, Inf, -Inf, v, -Inf,
+                          h, v, Inf, -Inf, h), byrow=TRUE, ncol=4)              
+          for(i in 1:4){
+              rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
+                                  dimnames=list(c("min", "max"), parms)))
+              glpoints(rg, data=data, channels=channels, verbose=FALSE,
+                      col=col[i], ...)
+          }
+      })
+
 
 
 
@@ -120,15 +139,16 @@ setMethod("glpoints",
 ## much the default
 setMethod("glpoints",
           signature(x="polygonGate", data="flowFrame", channels="character"), 
-          definition=function(x, data, channels, verbose=TRUE,
+          function(x, data, channels, verbose=TRUE,
           filterResult=NULL, ...)
       {
-          if(verbose & !is.null(filterResult))
-               warning("No 'filterResult' needed to plot 'polygonGates'.\n",
-                       "Argument is ignored.", call.=FALSE)
+          if(!is.null(filterResult))
+              dropWarn("filterResult", "polygonGates", verbose=verbose)
           addLpoints(x=x, data=data, channels=channels, verbose=verbose,
                       filterResult=NULL, ...)
       })
+
+
 
 
 ## ==========================================================================
@@ -138,7 +158,7 @@ setMethod("glpoints",
 ## so no need for a warning here
 setMethod("glpoints",
           signature(x="norm2Filter", data="flowFrame", channels="character"), 
-          definition=function(x, data, channels, verbose=TRUE,
+          function(x, data, channels, verbose=TRUE,
           filterResult=NULL, ...)
       {
           addLpoints(x=x, data=data, channels=channels, verbose=verbose,
@@ -155,10 +175,11 @@ setMethod("glpoints",
 ## Instead, we split the original frame and plot each component separately
 setMethod("glpoints",
           signature(x="curv2Filter", data="flowFrame", channels="character"), 
-          definition=function(x, data, channels, verbose=TRUE,
-          filterResult=NULL, col, ...)
+          function(x, data, channels, verbose=TRUE,
+                   filterResult=NULL, col, ...)
       {
           ## We check that the filterResult matches the filter and split by that
+          channels <- checkParameterMatch(channels, verbose=verbose)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
                  class(x) != class(filterDetails(filterResult)[[1]]$filter))
@@ -174,6 +195,7 @@ setMethod("glpoints",
               col <- rep(col, ld)[1:ld]
           mapply(function(z, co, ...) lpoints(exprs(z)[,channels], col=co, ...),
                  z=datsplit, co=col, MoreArgs=list(...))
+          return(invisible(NULL))
       })
 
 
@@ -186,10 +208,11 @@ setMethod("glpoints",
 ## Instead, we split the original frame and plot each component separately
 setMethod("glpoints",
           signature(x="curv1Filter", data="flowFrame", channels="character"), 
-          definition=function(x, data, channels, verbose=TRUE,
-          filterResult=NULL, col, ...)
+          function(x, data, channels, verbose=TRUE,
+                   filterResult=NULL, col, ...)
       {
           ## We check that the filterResult matches the filter and split by that
+          channels <- checkParameterMatch(channels, verbose=verbose)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
                  class(x) != class(filterDetails(filterResult)[[1]]$filter))
@@ -205,6 +228,7 @@ setMethod("glpoints",
               col <- rep(col, ld)[1:ld]
           mapply(function(z, co, ...) lpoints(exprs(z)[,channels], col=co, ...),
                  z=datsplit, co=col, MoreArgs=list(...))
+          return(invisible(NULL))
       })
 
 
@@ -217,10 +241,11 @@ setMethod("glpoints",
 ## Instead, we split the original frame and plot each component separately
 setMethod("glpoints",
           signature(x="kmeansFilter", data="flowFrame", channels="character"), 
-          definition=function(x, data, channels, verbose=TRUE,
-          filterResult=NULL, col, ...)
+          function(x, data, channels, verbose=TRUE,
+                   filterResult=NULL, col, ...)
       {
           ## We check that the filterResult matches the filter and split by that
+          channels <- checkParameterMatch(channels, verbose=verbose)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
                  class(x) != class(filterDetails(filterResult)[[1]]$filter))
@@ -236,6 +261,7 @@ setMethod("glpoints",
               col <- rep(col, ld)[1:ld]
           mapply(function(z, co, ...) lpoints(exprs(z)[,channels], col=co, ...),
                  z=datsplit, co=col, MoreArgs=list(...))
+          return(invisible(NULL))
       })
 
 

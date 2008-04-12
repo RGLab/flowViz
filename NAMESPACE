@@ -9,18 +9,16 @@ importFrom("lattice",
            splom, parallel)
 
 importFrom("latticeExtra", ecdfplot)
-
+importFrom("geneplotter", "smoothScatter","densCols")
 
 importFrom("MASS", kde2d)
 ## importFrom("KernSmooth", bkde2D)
 
-exportMethods("densityplot", "xyplot", "levelplot", "qqmath",
+exportMethods("densityplot", "xyplot", "levelplot", "qqmath", "plot",
               "splom", "parallel", "ecdfplot", "glines", "gpolygon",
-              "gpoints", "glpoints", "glpolygon")
+              "gpoints", "glpoints", "glpolygon", "flowPlot", "timeLinePlot")
 
 ## prepanel and panel functions
-
-
 export("panel.densityplot.flowset",
        "prepanel.densityplot.flowset", 
        "panel.ecdfplot.flowset",
@@ -29,8 +27,5 @@ export("panel.densityplot.flowset",
        "panel.xyplot.flowset",
        "timeLinePlot")
 
-
-exportMethods("flowPlot")
-#,"contour")
 
 
