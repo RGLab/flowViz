@@ -39,7 +39,7 @@ setMethod("glpolygon",
 ## Extract the filter definiton from a filterResult and pass that on
 ## along with it. We decide later if we really need it or not.
 setMethod("glpolygon",
-          signature(x="filterResult", data="missing"), 
+          signature(x="filterResult", data="ANY"), 
           definition=function(x, data, channels, verbose=TRUE,
           gpar=flowViz.par(), ...)
       {
