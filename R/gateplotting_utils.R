@@ -1,11 +1,16 @@
 ## Helper functions that will be needed for all of the gate plotting functions
-## This is mostly function that do some sanity checking.
+## These are mostly functions that do some sanity checking.
+
+## Store state info in this internal environment
+flowViz.state <- new.env(hash = FALSE)
+flowViz.state[["plotted"]] <- FALSE
+flowViz.state[["par"]] <- get.gpar()
 
 
 ## return the state information from the internal environment
 state <- function(x) flowViz.state[[x]]
 
-## return the state information in the internal environment from a named
+## set the state information in the internal environment from a named
 ## vector or list
 setState <- function(x)
 {
@@ -15,6 +20,18 @@ setState <- function(x)
     for(i in seq_along(x))
         flowViz.state[[names(x)[i]]] <- x[[i]]
 }
+
+## set or return graphical parameters from the internal environment
+flowViz.par <- function(x){
+    if(missing(x))
+        return(flowViz.state[["par"]])
+    if(!is.null(names(flowViz.state[["par"]])))
+        flowViz.state[["par"]][x]
+    else
+        NULL
+}
+set.flowViz.par <- function(x)
+   flowViz.state[["par"]] <- modifyList(flowViz.state[["par"]], x)
 
 
 ## We only know how to add the gate boundaries if the definiton of that gate
@@ -139,4 +156,77 @@ norm2Polygon <- function(fd, parms)
     names(ans) <- parms
     ## create a polygonGate
     polygonGate(boundaries=ans)
+}
+
+
+## A helper function that calls grid.rect in a more user-fiendly way
+glrect <- function (xleft, ybottom, xright, ytop, x=(xleft + xright)/2, 
+                    y=(ybottom + ytop)/2, width=xright - xleft,
+                    height=ytop - ybottom, just="center",
+                    hjust=NULL, vjust=NULL, gp, ...) 
+{
+    class(gp) <- "gpar"
+    grid.rect(x=x, y=y, width=width, height=height, default.units="native", 
+        just=just, hjust=hjust, vjust=vjust, gp=gp)
+}
+
+
+## Default function to plot points for a single gate region. This uses the
+## existing Subset architecture, hence it only works for filters that
+## produce logicalFilterResults so far
+addLpoints <- function(x, data, channels, verbose=TRUE,
+                      filterResult=NULL, gpar, pch=".", ...)
+{
+    parms <- parameters(x)
+    channels <- checkParameterMatch(channels, verbose=verbose)
+    ## We check if the filterResult matches the filter and subset with that
+    if(!is.null(filterResult)){
+        if(!identical(identifier(x), identifier(filterResult)) ||
+           class(x) != class(filterDetails(filterResult)[[1]]$filter))
+            stop("The 'filterResult' and the filter object ",
+                 "don't match.", call.=FALSE)
+        x <- filterResult
+    }
+    exp <- exprs(Subset(data, x))
+    opar <- flowViz.par()
+    if(!is.null(gpar))
+        opar <- modifyList(opar, gpar)
+    class(opar) <- "gpar"
+    grid.points(exp[,channels[1]], exp[,channels[2]],
+               default.units = "native", gp=opar, pch=pch)
+}
+
+
+## Helper function to add points for multipleFilterResults.
+## We check that the filterResult matches the filter and split by that
+## The first component is everything outside not in the filter and we
+## drop that
+multFiltPoints <-  function(x, data, channels, verbose=TRUE,
+                            filterResult=NULL, pch=".", gpar, ...)
+{
+
+    channels <- checkParameterMatch(channels, verbose=verbose)
+    if(!is.null(filterResult)){
+        checkIdMatch(x=x, f=data)
+        x <- filterResult
+    }
+    datsplit <- split(data, x)[-1]
+    ld <- length(datsplit)
+    ## we want to be able to use different colors for each population
+    opar <- flowViz.par()
+    col <- 2:(ld+1)
+    if(!missing(gpar) && !is.null(gpar)){
+        col <-  if(!("col" %in% names(gpar))) nc else rep(gpar$col, ld)
+        opar <- modifyList(opar, gpar)
+    }
+    class(opar) <- "gpar"
+    pch <- rep(pch, ld)
+    for(i in 1:ld){
+        opar$col <- col[i]
+        grid.points(exprs(datsplit[[i]])[,channels[1]],
+                    exprs(datsplit[[i]])[,channels[2]],
+                    default.units = "native", gp=opar,
+                    pch=pch[i])
+    }
+    return(invisible(NULL))
 }

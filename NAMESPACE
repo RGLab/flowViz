@@ -1,22 +1,53 @@
-import("flowCore")
+import(flowCore)
 
 ## export("parallelCoordinates.rgl", "parallelCoord")
 
 
-importFrom("graphics", "lines", "polygon", "points")
-importFrom("lattice",
-           densityplot, xyplot, levelplot, qqmath,
-           splom, parallel)
+importFrom(graphics,
+           "lines",
+           "polygon",
+           "points")
 
-importFrom("latticeExtra", ecdfplot)
-importFrom("geneplotter", "smoothScatter","densCols")
+importFrom(lattice,
+           densityplot,
+           xyplot,
+           levelplot,
+           qqmath,
+           splom,
+           parallel)
 
-importFrom("MASS", kde2d)
-## importFrom("KernSmooth", bkde2D)
+importFrom(grid,
+           "get.gpar",
+           "grid.polygon",
+           "grid.rect",
+           "grid.points")
 
-exportMethods("densityplot", "xyplot", "levelplot", "qqmath", "plot",
-              "splom", "parallel", "ecdfplot", "glines", "gpolygon",
-              "gpoints", "glpoints", "glpolygon", "flowPlot", "timeLinePlot")
+importFrom(latticeExtra,
+           "ecdfplot")
+
+importFrom(geneplotter,
+           "smoothScatter",
+           "densCols",
+           "panel.smoothScatter")
+
+importFrom(MASS,
+           "kde2d")
+
+exportMethods("densityplot",
+              "xyplot",
+              "levelplot",
+              "qqmath",
+              "plot",
+              "splom",
+              "parallel",
+              "ecdfplot",
+              "glines",
+              "gpolygon",
+              "gpoints",
+              "glpoints",
+              "glpolygon",
+              "flowPlot",
+              "timeLinePlot")
 
 ## prepanel and panel functions
 export("panel.densityplot.flowset",

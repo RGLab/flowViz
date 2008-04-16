@@ -1,7 +1,3 @@
-## Store state info in this internal environment
-flowViz.state <- new.env(hash = FALSE)
-flowViz.state[["plotted"]] <- FALSE
-
 ## ==========================================================================
 ## a simple plot method without strange plot parameter and friends. It does
 ## the most intuitive thing: take a flowFrame and do a pairs plot if there

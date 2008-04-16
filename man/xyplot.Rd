@@ -99,6 +99,7 @@ panel.xyplot.flowframe(
     channel.x.name,
     channel.y.name,
     pch=".",
+    gpar,
     ...)
 
 ## panel and prepanel functions for flowSets
@@ -117,8 +118,9 @@ panel.xyplot.flowset(
     channel.x.name,
     channel.y.name, 
     filter=NULL,
-    pch,
-    smooth,
+    pch=".",
+    smooth=TRUE,
+    gpar,
     \dots)
 
 }
@@ -200,6 +202,9 @@ panel.xyplot.flowset(
     applicable. }
   
   \item{frame, frames}{an environment containing frame-specific data. }
+
+  \item{gpar}{an list of graphical parameters that are passed down to
+    the low level grid functions. See \code{\link{gpar}} for details. }
 
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods. }

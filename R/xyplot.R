@@ -105,7 +105,8 @@ panel.xyplot.flowframe.time <-
 ## the upshot being that all the fancy xyplot formula stuff will be valid.
 setMethod("xyplot",
           signature(x="formula", data="flowFrame"),
-          function(x, data, smooth=TRUE, panel=panel.xyplot.flowframe, ...)
+          function(x, data, smooth=TRUE, panel=panel.xyplot.flowframe,
+                   gpar=flowViz.par(), ...)
       {
           ## deparse the formula structure
           channel.y <- x[[2]]
@@ -116,29 +117,29 @@ setMethod("xyplot",
           channel.y.name <- expr2char(channel.y)
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, 
                  panel=panel, frame=data, channel.x.name=channel.x.name,
-                 channel.y.name=channel.y.name, ...)
+                 channel.y.name=channel.y.name, gpar=gpar, ...)
       })
 
 
 ## Dedicated panel function to be abble to add filters on the plot
 panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
                                    channel.x.name,  channel.y.name,
-                                   pch=".", ...)
+                                   pch=".", gpar, ...)
 {
-   
     if (smooth){
         panel.smoothScatter(x, y, ...)
         if(!is.null(filter)){
             glpolygon(filter, frame,
                       channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, ...)
+                      verbose=FALSE, gpar=gpar, ...)
         }
     }else{
         panel.xyplot(x, y, pch=pch, ...)
         if(!is.null(filter)){
             glpoints(filter, frame,
                      channels=c(channel.x.name, channel.y.name),
-                     verbose=FALSE, pch=pch, col="red", ...)
+                     verbose=FALSE, pch=pch, col="red",
+                     gpar=gpar, ...)
         }
     }
 }
@@ -157,7 +158,7 @@ setMethod("xyplot",
                    prepanel=prepanel.xyplot.flowset,
                    panel=panel.xyplot.flowset, pch = ".",
                    smooth=TRUE, filter=NULL,
-                   displayFilter=TRUE, ...)
+                   gpar=NULL, ...)
       {
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
@@ -193,7 +194,7 @@ setMethod("xyplot",
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, filter=filter,
                       as.table=as.table, xlab=xlab, ylab=ylab,
-                      pch=pch, smooth=smooth, ...)
+                      pch=pch, smooth=smooth, gpar=gpar, ...)
       })
 
 
@@ -219,7 +220,7 @@ prepanel.xyplot.flowset <-
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.xyplot.flowset <-
     function(x, frames, channel.x, channel.y, channel.x.name, channel.y.name, 
-             filter=NULL, pch=".", smooth=TRUE, ...)
+             filter=NULL, pch=".", smooth=TRUE, gpar, ...)
 {
     x <- as.character(x)
     if (length(x) > 1) stop("must have only one flow frame per panel")
@@ -239,9 +240,11 @@ panel.xyplot.flowset <-
     if(smooth) {
         panel.smoothScatter(xx, yy, ...)
         if(!is.null(filter)){
+            if(is.null(gpar))
+                gpar <- flowViz.par()
             glpolygon(filter[[nm]], frames[[nm]],
                       channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, ...)
+                      verbose=FALSE, gpar=gpar, ...)
         }
     }
     else{
@@ -250,7 +253,7 @@ panel.xyplot.flowset <-
          if(!is.null(filter)){
              glpoints(filter[[nm]], frames[[nm]],
                       channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, pch=pch, col=col, ...)
+                      verbose=FALSE, gpar=gpar, pch=pch, ...)
          }
     }
 }
