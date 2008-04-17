@@ -45,7 +45,7 @@ setMethod("glpolygon",
       {
           filt <- filterDetails(x)[[1]]$filter
           if(missing(channels))
-              glpolygon(x=filt, data=x, verbose=FALSE, gpar=gpar, ...)
+              glpolygon(x=filt, data=x, verbose=verbose, gpar=gpar, ...)
           else
               glpolygon(x=filt, data=x,
                         channels=checkParameterMatch(channels),
@@ -57,10 +57,13 @@ setMethod("glpolygon",
 ## can check that the IDs are matching before dropping it.
 setMethod("glpolygon",
           signature(x="filterResult", data="flowFrame"), 
-          definition=function(x, data, verbose=TRUE,
+          definition=function(x, data, channels, verbose=TRUE,
           gpar=flowViz.par(), ...){
               checkIdMatch(x=x, f=data)
-              glpolygon(x=x, verbose=verbose, gpar, ...)
+              if(missing(channels))
+                  glpolygon(x=x, verbose=verbose, gpar, ...)
+              else
+                  glpolygon(x=x, verbose=FALSE, gpar, ...) 
               dropWarn("flowFrame", "filterResults", verbose=verbose)
           })
 
@@ -230,7 +233,7 @@ setMethod("glpolygon",
               checkFres(filter=x, fres=data, verbose=verbose)
               fd <- filterDetails(data, identifier(x))
               glpolygon(x=norm2Polygon(fd, parameters(x)),
-                       verbose=verbose, gpar=gpar, ...)
+                       verbose=FALSE, gpar=gpar, ...)
           })
 
 ## Evaluate the filter and pass on to the filterResult method.
