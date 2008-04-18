@@ -129,6 +129,13 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native"),
 truncNames <- function(names){
     nc <- nchar(names)
     names[nc>11] <- paste(substr(names[nc>11], 1, 8), "...", sep="")
+    if(any(duplicated(names))){
+        ns <- split(names, names)
+        is <- split(seq_along(names), names)
+        ns<- lapply(ns, function(x)
+                    if(length(x)>1) paste(x, seq_along(x), sep="_") else x)
+        names <- unlist(ns)[unlist(is)]
+    }
     return(names)
 }
 
