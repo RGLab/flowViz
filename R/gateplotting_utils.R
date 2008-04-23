@@ -216,7 +216,8 @@ multFiltPoints <-  function(x, data, channels, verbose=TRUE,
     opar <- flowViz.par()
     col <- 2:(ld+1)
     if(!missing(gpar) && !is.null(gpar)){
-        col <-  if(!("col" %in% names(gpar))) nc else rep(gpar$col, ld)
+        if("col" %in% names(gpar))
+            col <- rep(gpar$col, ld)
         opar <- modifyList(opar, gpar)
     }
     class(opar) <- "gpar"

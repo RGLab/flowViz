@@ -12,6 +12,7 @@
 \alias{glpoints,polygonGate,flowFrame,character-method}
 \alias{glpoints,quadGate,flowFrame,character-method}
 \alias{glpoints,rectangleGate,flowFrame,character-method}
+\alias{glpoints,filterResult,flowFrame,ANY-method}
 
 
 \title{ Adding points within a gate to a plot }

@@ -12,6 +12,7 @@
 \alias{glpolygon,filter,missing-method}
 \alias{glpolygon,filterResult,flowFrame-method}
 \alias{glpolygon,filterResult,missing-method}
+\alias{glpolygon,filterResult,ANY-method}
 \alias{glpolygon,kmeansFilter,ANY-method}
 \alias{glpolygon,norm2Filter,ANY-method}
 \alias{glpolygon,norm2Filter,flowFrame-method}
