@@ -63,7 +63,7 @@ setMethod("glpolygon",
               if(missing(channels))
                   glpolygon(x=x, verbose=verbose, gpar, ...)
               else
-                  glpolygon(x=x, verbose=FALSE, gpar, ...) 
+                  glpolygon(x=x, verbose=FALSE, gpar, channels=channels, ...) 
               dropWarn("flowFrame", "filterResults", verbose=verbose)
           })
 
