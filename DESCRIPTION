@@ -1,8 +1,8 @@
 Package: flowViz
 Type: Package
 Title: Visualization for flow cytometry
-Version: 1.5.0
-Date: 2008-04-23
+Version: 1.5.1
+Date: 2008-05-01
 Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar
 Maintainer: Florian Hahne <fhahne@fhcrc.org>
 Description: Provides visualization tools for flow cytometry data. 

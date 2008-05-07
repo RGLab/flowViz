@@ -6,7 +6,8 @@ import(flowCore)
 importFrom(graphics,
            "lines",
            "polygon",
-           "points")
+           "points",
+           "contour")
 
 importFrom(lattice,
            densityplot,
@@ -47,7 +48,8 @@ exportMethods("densityplot",
               "glpoints",
               "glpolygon",
               "flowPlot",
-              "timeLinePlot")
+              "timeLinePlot",
+              "contour")
 
 ## prepanel and panel functions
 export("panel.densityplot.flowset",
@@ -56,7 +58,8 @@ export("panel.densityplot.flowset",
        "prepanel.ecdfplot.flowset",
        "prepanel.xyplot.flowset",
        "panel.xyplot.flowset",
-       "timeLinePlot")
+       "timeLinePlot",
+       "contour")
 
 
 

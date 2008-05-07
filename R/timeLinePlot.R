@@ -21,6 +21,11 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
     yy <- x[ord, parm]
     lenx <- length(xx)
     nrBins <- floor(lenx/binSize)
+    ## how many events per time tick
+    nr <- 51
+    timeRange <- seq(min(xx), max(xx), len=nr)
+    freq <- hist(xx, timeRange, plot = FALSE)$counts
+    expEv <- length(xx)/(nr-1)
     ## time parameter is already binned or very sparse events
     if(length(unique(xx)) < nrBins){
         tmpy <- split(yy, xx)
@@ -49,7 +54,10 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
             binSize <- 1
         }
     }
-    return(list(smooth=cbind(xx,yy), variance=var, binSize=binSize))
+    
+    return(list(smooth=cbind(xx,yy), variance=var, binSize=binSize,
+                frequencies=cbind(timeRange[-1], freq),
+                expFrequency=expEv))
 }
 
 
@@ -60,7 +68,12 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
 ## the sum of average positive distances of means for each bin from the global
 ## mean confidence interval, scaled by the variance cutoff:
 ##       sum(z[z>0])/length(z)/varCut
-timelineplot <- function(x, channel, type=c("stacked", "scaled", "native"),
+## For type "frequency", this is the sum of events per time tick for
+## bins where the total number of events is > 2 times the expected average
+## number
+## A spearman rank correlation coefficient is return as an attribute.
+timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
+                                     "frequency"),
                          col, ylab=names(x), binSize, varCut=1, ...)
 {
     if(!length(channel)==1)
@@ -94,8 +107,9 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native"),
     gvars <- sapply(timeData, function(x) mean(x$variance))
     stand <-  mapply(function(z,m,v) abs(z$smooth[,2]-m)/(v*varCut), timeData,
                  med, gvars)
-    ## create teh plot
-    if(length(med)==1){
+    tvals <- lapply(timeData, function(x) x$smooth[,1])
+    ## create the plot
+    if(length(med)==1 && type != "frequency"){
         nativePlot(timeData, p=channel, range=mr, col="darkblue", med=med,
                    varCut=varCut, ...)
         
@@ -109,8 +123,20 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native"),
            ylab=ylab, med=med, varCut=varCut, ...),
            "native"=nativePlot(timeData, p=channel, range=mr, col=col,
            med=med, varCut=varCut, ...),
+           "frequency"={
+               freqPlot(timeData, p=channel, col=col, varCut=varCut,
+                        ylab=ylab)
+               stand <- lapply(timeData, function(x)
+                               x$frequencies[,2] /
+                               (mean(x$frequencies[,2])*varCut)-1)
+               tvals <- lapply(timeData, function(x) x$frequencies[,1])
+           },
            stop("Unknown type"))
+    ## the QA score and correlation coefficient
     qaScore <- sapply(stand, function(z) sum(z[abs(z)>1])/length(z))*100
+    corr <- mapply(cor, tvals, stand, method="spearman")
+
+                       
     par(mar=c(5,3,0,3), las=2)
     on.exit(par(opar))
     top <- 2
@@ -120,6 +146,7 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native"),
     points((wh+wh*0.2)-0.5, rep(top-(top/12), length(wh)), pch=17, col="white",
            cex=0.7)
     attr(qaScore, "binSize") <- binSize
+    attr(qaScore, "correlation") <- corr
     return(qaScore)
 }
 
@@ -251,16 +278,52 @@ nativePlot <- function(y, p, main=paste("time line for", p),
 }
 
 
+
+## plot frequency values for each flowFrame
+freqPlot <- function(y, p, main="time line frequencies",
+                     col, ylab, lwd, varCut, ...){
+    par(mar=c(1,5,3,3), mgp=c(2,0.5,0), las=1)
+    var <- 1
+    stX <- sapply(y, function(x) x$frequencies[,1])
+    stY <- sapply(y, function(x)
+                  x$frequencies[,2] / mean(x$frequencies[,2])) - 1
+    actualRange <- max(diff(range(stY)), var*varCut*2)*1.01
+    stacks <- ((length(y):1)-1) * actualRange
+    stYY <- t(t(stY)+stacks)
+    xlim <- c(0, max(stX))
+    ylim <- range(c(stYY), stacks+var*varCut, stacks-var*varCut)
+    if(missing(ylab) | is.null(ylab))
+       ylab <- names(y)
+    if(missing(lwd))
+        lwd <- 2
+    plot(stX[,1], stYY[,1], xlab="", ylab="", type="n", xaxt="n", 
+         lwd=lwd, xlim=xlim, ylim=ylim, main=main, yaxt="n", ...)
+    xl <- par("usr")[1:2]
+    xl <- xl + c(1,-1)*(diff(xl)*0.01)
+    if(length(ylab)>1)
+        axis(2, stacks, ylab, cex.axis=0.8)
+    if(varCut>0)
+    for(j in 1:length(y))
+        rect(xl[1], stacks[j]-var*varCut, xl[2],
+             stacks[j]+var*varCut,
+             col=desat("gray", by=30), border=NA)
+    for(j in 1:length(y))
+        lines(stX[,j], stYY[,j], col=col[j], lwd=lwd)
+}
+
 ## A method for flowSets
 setMethod("timeLinePlot",
           signature(x="flowSet", channel="character"),
-          function(x, channel, type=c("stacked", "scaled", "native"),
+          function(x, channel, type=c("stacked", "scaled", "native",
+                               "frequency"),
                    col=NULL, ylab=names(x), binSize, varCut=1, ...)
       {
           ## a reasonable default for the bin size
           if(missing(binSize))
               binSize <- min(max(1, floor(median(fsApply(x, nrow)/100))), 500)
-          timelineplot(x, channel, binSize=binSize, col=col, ...)
+          type <- match.arg(type)
+          timelineplot(x, channel, binSize=binSize, col=col,
+                       varCut=varCut, type=type, ...)
       })
 
 

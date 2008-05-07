@@ -21,6 +21,7 @@ setState <- function(x)
         flowViz.state[[names(x)[i]]] <- x[[i]]
 }
 
+
 ## set or return graphical parameters from the internal environment
 flowViz.par <- function(x){
     if(missing(x))
@@ -32,6 +33,15 @@ flowViz.par <- function(x){
 }
 set.flowViz.par <- function(x)
    flowViz.state[["par"]] <- modifyList(flowViz.state[["par"]], x)
+
+
+## record the type of plot in the internal environment
+plotType <- function(type, parms){
+    flowViz.state[["plotted"]] <- TRUE
+    flowViz.state[["type"]] <- type
+    flowViz.state[["parameters"]] <- parms
+    return(invisible(NULL))
+}
 
 
 ## We only know how to add the gate boundaries if the definiton of that gate

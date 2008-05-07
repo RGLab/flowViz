@@ -8,8 +8,11 @@
 ## data, which can be either a character vector, a filterResult or a
 ## flowFrame. The optional channels argument can be used to pass along
 ## the plotting parameters, and it takes precendence over everything else.
-## FIXME: Need to figure out how to make polygon a generic without masking
-##        the default function
+##
+## Most of the methods will just call the next applicable method, the real
+## workhorses are signature(x="rectangleGate", data="character") and
+## signature(x="polygonGate", data="character") since in the end everything
+## boils down to rectangles or polygons.
 
 
 
@@ -60,11 +63,11 @@ setMethod("glpolygon",
           definition=function(x, data, channels, verbose=TRUE,
           gpar=flowViz.par(), ...){
               checkIdMatch(x=x, f=data)
+              dropWarn("flowFrame", "filterResults", verbose=verbose)
               if(missing(channels))
                   glpolygon(x=x, verbose=verbose, gpar, ...)
               else
                   glpolygon(x=x, verbose=FALSE, gpar, channels=channels, ...) 
-              dropWarn("flowFrame", "filterResults", verbose=verbose)
           })
 
 
@@ -78,30 +81,35 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="rectangleGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par(), ...)
+                   gpar=flowViz.par(), plot=TRUE, ...)
       {
           if(!missing(channels))
               data <- channels
           data <- checkParameterMatch(data, verbose=FALSE)
           parms <- parameters(x)
           usr <- rep(c(-1e4, 1e4), 2)
-          if(length(parms)==1){
-              mt <- match(parms, data)## 1D rectangular gate (region gate)
-              if(mt==1)
-                  glrect(fixInf(x@min, usr[1:2]), usr[3],
-                        fixInf(x@max, usr[1:2]), usr[4], gp=gpar, ...)
-              else if(mt==2)
-                  glrect(usr[1], fixInf(x@min, usr[3:4]), usr[2],
-                       fixInf(x@max, usr[3:4]), gp=gpar, ...)
-              else
-                  stop("How did you end up here????")
-          }else{## 2D rectangular gate   
-              bl <- x@min[data]
-              tr <- x@max[data]
-              glrect(fixInf(bl[1], usr[1:2]), fixInf(bl[2], usr[3:4]),
-                   fixInf(tr[1], usr[1:2]),  fixInf(tr[2], usr[3:4]),
-                    gp=gpar, ...)
+          if(plot){
+              if(length(parms)==1){
+                  mt <- match(parms, data)## 1D rectangular gate (region gate)
+                  if(mt==1)
+                      glrect(fixInf(x@min, usr[1:2]), usr[3],
+                             fixInf(x@max, usr[1:2]), usr[4], gp=gpar, ...)
+                  else if(mt==2)
+                      glrect(usr[1], fixInf(x@min, usr[3:4]), usr[2],
+                             fixInf(x@max, usr[3:4]), gp=gpar, ...)
+                  else
+                      stop("How did you end up here????")
+              }else{## 2D rectangular gate   
+                  bl <- x@min[data]
+                  tr <- x@max[data]
+                  glrect(fixInf(bl[1], usr[1:2]), fixInf(bl[2], usr[3:4]),
+                         fixInf(tr[1], usr[1:2]),  fixInf(tr[2], usr[3:4]),
+                         gp=gpar, ...)
+              }
           }
+          res <- rbind(x@min[data], x@max[data])
+          res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
+          return(list(res))
       })
 
 ## We can ignore the filterResult, don't need it to plot the gate.
@@ -141,19 +149,22 @@ setMethod("glpolygon",
           data <- checkParameterMatch(data, verbose=FALSE)
           v <- x@boundary[data[1]]
           h <- x@boundary[data[2]]
-          mat <- matrix(c(-Inf, v, h, Inf, v, Inf, h, Inf, -Inf, v, -Inf,
-                          h, v, Inf, -Inf, h), byrow=TRUE, ncol=4)
+          mat <- matrix(c(-Inf, h, v, Inf, h, Inf, v, Inf, -Inf, h, -Inf,
+                          v, h, Inf, -Inf, v), byrow=TRUE, ncol=4)
           ## we want to be able to use different colors for each population
           fill <- rep(gpar$fill, 4)
           col <- rep(gpar$col, 4)
+          res <- vector(4, mode="list")
           for(i in 1:4){
               gpar$col <- col[i]
               gpar$fill <- fill[i]
               rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
                                   dimnames=list(c("min", "max"),
                                   parameters(x))))
-              glpolygon(x=rg, data=data, verbose=FALSE, gpar=gpar, ...)
+              res[[i]] <- glpolygon(x=rg, data=data, verbose=FALSE,
+                                    gpar=gpar, channels=data, ...)[[1]]
           }
+          res
       })
 
 ## We can ignore the filterResult, don't need it to plot the gate.
@@ -185,7 +196,7 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="polygonGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par(), ...)
+                   gpar=flowViz.par(), plot=TRUE, ...)
       {
           if(!missing(channels))
               data <- channels
@@ -193,7 +204,11 @@ setMethod("glpolygon",
           xp <- x@boundaries[,data[1]]
           yp <- x@boundaries[,data[2]]
           class(gpar) <- "gpar"
-          grid.polygon(xp, yp, default.units = "native", gp=gpar)
+          if(plot)
+              grid.polygon(xp, yp, default.units = "native", gp=gpar)
+          res <- cbind(xp,yp)
+          res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
+          return(list(res))
       })
 
 ## We can ignore the filterResult, don't need it to plot the gate.
@@ -268,15 +283,16 @@ setMethod("glpolygon",
           ## we want to be able to use different colors for each population
           fill <- rep(gpar$fill, lb)
           col <- rep(gpar$col, lb)
+          res <- vector(lb, mode="list")
           for(i in 1:lb){
               tmp <- matrix(bounds[[i]], nrow=2)
               colnames(tmp) <- parameters(x)
               gpar$col <- col[i]
               gpar$fill <- fill[i]
-              glpolygon(x=rectangleGate(.gate=tmp), verbose=FALSE,
-                        gpar=gpar, ...)
+              res[[i]] <- glpolygon(x=rectangleGate(.gate=tmp),
+                                     verbose=FALSE, gpar=gpar, ...)[[1]]
           }
-          return(invisible(NULL))
+          res
       })
               
 ## Evaluate the filter and pass on to the filterResult method.
@@ -312,15 +328,16 @@ setMethod("glpolygon",
           ## we want to be able to use different colors for each population
           fill <- rep(gpar$fill, lf)
           col <- rep(gpar$col, lf)
+          res <- vector(lf, mode="list")
           for(i in 1:lf){
               tmp <- cbind(polygons[[i]]$x, polygons[[i]]$y)
               colnames(tmp) <- parameters(x)
               gpar$col <- col[i]
               gpar$fill <- fill[i]
-              glpolygon(x=polygonGate(boundaries=tmp), verbose=FALSE,
-                        gpar=gpar, ...)
+              res[[i]] <- glpolygon(x=polygonGate(boundaries=tmp),
+                                     verbose=FALSE, gpar=gpar, ...)[[1]]
           }
-          return(invisible(NULL))
+          res
       })
 
 ## Evaluate the filter and pass on to the filterResult method.

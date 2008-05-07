@@ -128,6 +128,9 @@
   ambigious. These methods are meant to be used within lattice panel
   functions and are probably not of much use outside of those. }
 
+\value{The methods will return the outlines of the gate region as
+  polygon vertices.}
+
 \author{ F. Hahne }
 
 \seealso{

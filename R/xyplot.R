@@ -55,7 +55,7 @@ panel.xyplot.flowframe.time <-
 {
     xx <- time.x
     yy <- expr[, as.character(y)]
-    
+    plotType("gtime", c("Time",  as.character(y)))
     if (type == "smooth"){
         ## smoothScatter plot of time vs. parameter (not sure how useful
         ## that is...)
@@ -128,6 +128,7 @@ panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
 {
     if (smooth){
         panel.smoothScatter(x, y, ...)
+        plotType("gsmooth", c(channel.x.name, channel.y.name))
         if(!is.null(filter)){
             glpolygon(filter, frame,
                       channels=c(channel.x.name, channel.y.name),
@@ -135,6 +136,7 @@ panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
         }
     }else{
         panel.xyplot(x, y, pch=pch, ...)
+        plotType("gpoints", c(channel.x.name, channel.y.name))
         if(!is.null(filter)){
             glpoints(filter, frame,
                      channels=c(channel.x.name, channel.y.name),
@@ -239,6 +241,7 @@ panel.xyplot.flowset <-
 
     if(smooth) {
         panel.smoothScatter(xx, yy, ...)
+        plotType("gsmooth", c(channel.x.name, channel.y.name))
         if(!is.null(filter)){
             if(is.null(gpar))
                 gpar <- flowViz.par()
@@ -249,6 +252,7 @@ panel.xyplot.flowset <-
     }
     else{
         panel.xyplot(xx, yy, pch=pch, ...)
+        plotType("gpoints", c(channel.x.name, channel.y.name))
         col = brewer.pal(9, "Set1")
          if(!is.null(filter)){
              glpoints(filter[[nm]], frames[[nm]],
