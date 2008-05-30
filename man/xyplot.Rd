@@ -130,10 +130,10 @@ panel.xyplot.flowset(
   \item{x}{ a formula describing the structure of the plot and the
     variables to be used in the display.  In
     \code{prepanel.xyplot.flowset} and \code{panel.xyplot.flowset}, also
-    the names of \code{\linkS4class{flowFrame}}s. }
+    the names of \code{\link[flowCore:flowFrame-class]{flowFrame}}s. }
   
-  \item{data, y}{ a \code{\linkS4class{flowSet}} or
-    \code{\linkS4class{flowFrame}} object that serves as the source of
+  \item{data, y}{ a \code{\link[flowCore:flowSet-class]{flowSet}} or
+    \code{\link[flowCore:flowFrame-class]{flowFrame}} object that serves as the source of
     data. }
   
   \item{smooth}{ logical. If \code{TRUE},
@@ -154,7 +154,7 @@ panel.xyplot.flowset(
   
   \item{type}{ type of rendering; see
     \code{\link[lattice:panel.xyplot]{panel.xyplot}} for details. For
-    the basic \code{\linkS4class{flowFrame}} method without a detailed
+    the basic \code{\link[flowCore:flowFrame-class]{flowFrame}} method without a detailed
     formula, the addtional type \code{discrete} is available, which
     plots a smoothed average of the flow cytometry values against
     time. }
@@ -168,12 +168,12 @@ panel.xyplot.flowset(
   \item{panel}{ the panel function.  See
     \code{\link[lattice:xyplot]{xyplot}}. }
   
-  \item{filter}{ a \code{\linkS4class{filter}} or
-    \code{\linkS4class{filterResult}} object or a list of such objects
-    of the same length as the \code{\linkS4class{flowSet}} to be
+  \item{filter}{ a \code{\link[flowCore:filter-class]{filter}} or
+    \code{\link[flowCore:filterResult-class]{filterResult}} object or a list of such objects
+    of the same length as the \code{\link[flowCore:flowSet-class]{flowSet}} to be
     superimposed on the plot. The software will figure out whether the
-    \code{\linkS4class{filter}} needs to be evaluated (in which case
-    providing a \code{\linkS4class{filterResult}} can speed up things
+    \code{\link[flowCore:filter-class]{filter}} needs to be evaluated (in which case
+    providing a \code{\link[flowCore:filterResult-class]{filterResult}} can speed up things
     considerably). }
   
   \item{time}{ a character string giving the name of the column
@@ -183,7 +183,7 @@ panel.xyplot.flowset(
   \item{time.x}{ a numeric vector of time values. }
 
   \item{expr}{ a numeric matrix of flow cytometry values, basically a
-    copy of the \code{exprs} slot of a \code{\linkS4class{flowFrame}}. }
+    copy of the \code{exprs} slot of a \code{\link[flowCore:flowFrame-class]{flowFrame}}. }
   
   \item{exclude.time}{ logical, specifying whether to exclude the time
     variable from a scatter plot matrix. Defaults to \code{TRUE}. }
@@ -204,7 +204,7 @@ panel.xyplot.flowset(
   \item{frame, frames}{an environment containing frame-specific data. }
 
   \item{gpar}{an list of graphical parameters that are passed down to
-    the low level grid functions. See \code{\link{gpar}} for details. }
+    the low level grid functions. See \code{\link[grid:gpar]{gpar}} for details. }
 
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods. }

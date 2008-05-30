@@ -8,7 +8,7 @@
 
 \title{ Very basic plotting of flowFrames}
 
-\description{ A basic method to plot \code{\linkS4class{flowFrame}}
+\description{ A basic method to plot \code{\link[flowCore:flowFrame-class]{flowFrame}}
   objects. Depending on the number of dimensions, different types of
   plots are generates. See below for details.  }
 
@@ -17,7 +17,7 @@
   \describe{
 
     \item{x = "flowFrame", y = "ANY"}{ We decide on the number of parameters
-      in the  \code{\linkS4class{flowFrame}}which plot type to use.}
+      in the  \code{\link[flowCore:flowFrame-class]{flowFrame}}which plot type to use.}
       
     \item{x = "flowFrame", y = "missing"}{ see above }
     
@@ -49,7 +49,7 @@
 \seealso{
   
   \code{\link{xyplot}},
-  \code{\linkS4class{flowFrame}}, \code{\link{densityplot}}
+  \code{\link[flowCore:flowFrame-class]{flowFrame}}, \code{\link{densityplot}}
   
 }
 

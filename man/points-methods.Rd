@@ -19,11 +19,11 @@
 
 \description{ These methods extend the basic graphics
   \code{\link{points}} methods for drawing of points contained within a
-  \code{\linkS4class{filter}}. They allow for multiple
-  dispatch, since not all \code{\linkS4class{filter}} types
+  \code{\link[flowCore:filter-class]{filter}}. They allow for multiple
+  dispatch, since not all \code{\link[flowCore:filter-class]{filter}} types
   need to be evaluated for plotting, but this decision should be made
   internally. In any case, we need the raw data in the form of a
-  \code{\linkS4class{flowFrame}}.}
+  \code{\link[flowCore:flowFrame-class]{flowFrame}}.}
 
 
 
@@ -33,7 +33,7 @@
 
     \item{x = "filter", data = "flowFrame", channels = "missing"}{
       General method for all objects inheriting from
-      \code{\linkS4class{filter}}. This is used as the default
+      \code{\link[flowCore:filter-class]{filter}}. This is used as the default
       when no more explicit method is found. It tries to find the
       plotted parameters from the internal \code{flowViz.state}
       environment. This only works if the flow data has been plotted
@@ -45,16 +45,16 @@
 
     \item{x = "filterResult", data = "flowFrame", channels =
       "character"}{ We can get all the information about a
-      \code{\linkS4class{filter}} from its
-      \code{\linkS4class{filterResult}} without the need to
+      \code{\link[flowCore:filter-class]{filter}} from its
+      \code{\link[flowCore:filterResult-class]{filterResult}} without the need to
       re-evaluate.}
     
    
 
     \item{x = "curv1Filter", data = "ANY"}{ We either need a
-      \code{\linkS4class{filterResult}} or the raw data as a
-      \code{\linkS4class{flowFrame}} for
-      \code{\linkS4class{curv1Filter}}s. }
+      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
+      \code{\link[flowCore:flowFrame-class]{flowFrame}} for
+      \code{\link[flowCore:curv1Filter-class]{curv1Filter}}s. }
 
     \item{x = "curv1Filter", data = "flowFrame"}{ see above }
     
@@ -63,14 +63,14 @@
     \item{x = "curv1Filter", data = "multipleFilterResult"}{ see above }
     
     \item{x = "curv2Filter", data = "ANY"}{ We either need a
-      \code{\linkS4class{filterResult}} or the raw data as a
-      \code{\linkS4class{flowFrame}} for
-      \code{\linkS4class{curv2Filter}}s.}
+      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
+      \code{\link[flowCore:flowFrame-class]{flowFrame}} for
+      \code{\link[flowCore:curv2Filter-class]{curv2Filter}}s.}
 
     \item{x = "curv1Filter", data = "flowFrame", channels =
       "character"}{ We evaluate the
-      \code{\linkS4class{filter}} on the
-      \code{\linkS4class{flowFrame}} and plot the subset of
+      \code{\link[flowCore:filter-class]{filter}} on the
+      \code{\link[flowCore:flowFrame-class]{flowFrame}} and plot the subset of
       selected points. By default, every subpopulation (if there are
       any) is colored differently.}
 
@@ -95,10 +95,10 @@
   }
 }
 
-\details{ When plotting code{\linkS4class{flowFrame}}s using the
+\details{ When plotting code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
   \code{plot} method provided by \code{flowViz}, the plotted parameters
   are recorded, which makes it possible to correctly overlay the points
-  within \code{\linkS4class{filter}}s assuming that they are defined for
+  within \code{\link[flowCore:filter-class]{filter}}s assuming that they are defined for
   the repective parameters. Warnings and error will be cast for the
   cases where the parameters are non-distinct or ambigious. }
 
@@ -106,7 +106,7 @@
 
 \seealso{
   
-  \code{\linkS4class{filter}}, \code{\linkS4class{flowFrame}},
+  \code{\link[flowCore:filter-class]{filter}}, \code{\link[flowCore:flowFrame-class]{flowFrame}},
   \code{\link{glines}}, \code{\link{gpolygon}}
   
   

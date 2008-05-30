@@ -20,8 +20,8 @@
   
   \describe{
     
-    \item{x}{An object of class \code{\linkS4class{flowFrame}} or
-      \code{\linkS4class{flowSet}} containing the data to be plotted.}
+    \item{x}{An object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+      \code{\link[flowCore:flowSet-class]{flowSet}} containing the data to be plotted.}
 	
     \item{channel}{The parameter for which the data is to be plotted}
 	
@@ -56,12 +56,12 @@
       message about missing inputs. }
 
     \item{x = "flowFrame", channel = "character"}{ For a
-      \code{\linkS4class{flowFrame}} we only plot a single parameter
+      \code{\link[flowCore:flowFrame-class]{flowFrame}} we only plot a single parameter
       against time. }
     
     \item{x = "flowSet", channel = "character"}{ For a
-      \code{\linkS4class{flowSet}}, we plot the lines for a  single parameter
-      against time for each \code{\linkS4class{flowFrame}} in the set. }
+      \code{\link[flowCore:flowSet-class]{flowSet}}, we plot the lines for a  single parameter
+      against time for each \code{\link[flowCore:flowFrame-class]{flowFrame}} in the set. }
   
   }
 }
@@ -93,7 +93,7 @@
 
 \seealso{
   
-  \code{\linkS4class{flowFrame}}, \code{\linkS4class{flowSet}}
+  \code{\link[flowCore:flowFrame-class]{flowFrame}}, \code{\link[flowCore:flowSet-class]{flowSet}}
   
 }
 
