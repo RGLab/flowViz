@@ -39,7 +39,7 @@ setMethod("glpoints",
       {
           checkIdMatch(x=x, f=data)
           filterResult <- x
-          x <- filterDetails(x)[[1]]$filter
+          x <- filterDetails(x)$filter
           if(missing(channels))
               glpoints(x=x, data=data, verbose=verbose,
                        filterResult=filterResult, ...)

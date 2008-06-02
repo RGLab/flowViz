@@ -37,7 +37,7 @@ setMethod("glines",
           signature(x="filterResult", data="missing"), 
           function(x, data, channels, verbose=TRUE, ...)
       {
-          filt <- filterDetails(x)[[1]]$filter
+          filt <- filterDetails(x)$filter
           parms <- checkParameterMatch(parameters(filt))
           glines(filt, x, verbose=FALSE, ...)
       })

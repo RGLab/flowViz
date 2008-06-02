@@ -43,7 +43,7 @@ setMethod("gpolygon",
           signature(x="filterResult", data="missing"), 
           function(x, data, verbose=TRUE, ...)
       {
-          filt <- filterDetails(x)[[1]]$filter
+          filt <- filterDetails(x)$filter
           parms <- checkParameterMatch(parameters(filt))
           gpolygon(filt, x, verbose=FALSE, ...)
       })

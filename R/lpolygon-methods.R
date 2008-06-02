@@ -46,7 +46,7 @@ setMethod("glpolygon",
           definition=function(x, data, channels, verbose=TRUE,
           gpar=flowViz.par(), ...)
       {
-          filt <- filterDetails(x)[[1]]$filter
+          filt <- filterDetails(x)$filter
           if(missing(channels))
               glpolygon(x=filt, data=x, verbose=verbose, gpar=gpar, ...)
           else
@@ -279,6 +279,8 @@ setMethod("glpolygon",
           checkFres(filter=x, fres=data, verbose=verbose)
           fd <- filterDetails(data, identifier(x))
           bounds <- fd$boundaries
+          if(all(is.na(bounds[[1]])))
+              return(NA)
           lb <- length(bounds)
           ## we want to be able to use different colors for each population
           fill <- rep(gpar$fill, lb)
@@ -290,7 +292,7 @@ setMethod("glpolygon",
               gpar$col <- col[i]
               gpar$fill <- fill[i]
               res[[i]] <- glpolygon(x=rectangleGate(.gate=tmp),
-                                     verbose=FALSE, gpar=gpar, ...)[[1]]
+                                    verbose=FALSE, gpar=gpar, ...)[[1]]
           }
           res
       })

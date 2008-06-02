@@ -8,9 +8,10 @@
 \title{ Contour plots for flow data }
 
 \description{ Basic contour plots for both
-  \code{\linkS4class{flowFrame}}s and \code{\linkS4class{flowSet}}s. The
-  densities for the contours are estimated using the fast kernel density
-  estimation algorithm \code{\link[KernSmooth]{bkde2D}}. }
+  \code{\link[flowCore:flowFrame-class]{flowFrame}}s and
+  \code{\link[flowCore:flowFrame-class]{flowSet}}s. The densities for
+  the contours are estimated using the fast kernel density estimation
+  algorithm \code{\link[KernSmooth]{bkde2D}}. }
 
 
 \usage{
@@ -49,8 +50,9 @@
 
 \arguments{
 
-  \item{x}{ An object of class \code{\linkS4class{flowFrame}} or
-    \code{\linkS4class{flowSet}}. }
+  \item{x}{ An object of class
+    \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+    \code{\link[flowCore:flowFrame-class]{flowSet}}. }
 
   \item{y}{Numeric or character vector of length 2 indicating the
     channels to plot.}
@@ -102,7 +104,8 @@
 \seealso{
   
   \code{\link[KernSmooth]{bkde2D}}, \code{\link[graphics]{contour}},
-  \code{\linkS4class{flowFrame}}, \code{\linkS4class{flowSet}}
+  \code{\link[flowCore:flowFrame-class]{flowFrame}},
+  \code{\link[flowCore:flowFrame-class]{flowSet}}
   
 }
 
