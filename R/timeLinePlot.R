@@ -22,7 +22,7 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
     lenx <- length(xx)
     nrBins <- floor(lenx/binSize)
     ## how many events per time tick
-    nr <- 51
+    nr <- min(length(unique(xx)), max(51, nrBins))
     timeRange <- seq(min(xx), max(xx), len=nr)
     freq <- hist(xx, timeRange, plot = FALSE)$counts
     expEv <- length(xx)/(nr-1)
@@ -31,7 +31,6 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
         tmpy <- split(yy, xx)
         yy <- sapply(tmpy, locM, na.rm=TRUE)
         xx <- unique(xx)
-        var <- sapply(tmpy, varM, na.rm=TRUE)
         binSize <- 1
     }else{
         ## bin values in nrBins bins
@@ -43,17 +42,20 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
             tmpy <- split(yy,cf)
             yy <- sapply(tmpy, locM, na.rm=TRUE)
             xx <- sapply(tmpx, mean, na.rm=TRUE)
-            var <- sapply(tmpy, varM, na.rm=TRUE)
         }else{
             ## very little events
             warning("Low number of events", call.=FALSE)
             tmpy <- split(yy,xx)
             yy <- sapply(tmpy, locM, na.rm=TRUE)
             xx <- unique(xx)
-            var <- sapply(tmpy, varM, na.rm=TRUE)
             binSize <- 1
         }
     }
+    var <- sapply(tmpy, varM, na.rm=TRUE)
+    ## avoid 0 variance estimates created by mad
+    zv <- which(var==0)
+    if(length(zv))
+       var[zv] <- sapply(tmpy[zv], sd, na.rm=TRUE)
     
     return(list(smooth=cbind(xx,yy), variance=var, binSize=binSize,
                 frequencies=cbind(timeRange[-1], freq),
@@ -80,6 +82,8 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
         stop("'channel' must be character scalar")
     if(!channel %in% colnames(x[[1]]))
         stop(channel, " is not a valid channel in this flowSet.")
+    if(tolower(channel) == "time")
+        stop("Argument 'channel' can not be the time channel")
     ## making sure the sample names fit the axis annotation
     sampleNames(x) <- truncNames(sampleNames(x))
     ## lets fix ourselves some nice colors
@@ -110,9 +114,8 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
     tvals <- lapply(timeData, function(x) x$smooth[,1])
     ## create the plot
     if(length(med)==1 && type != "frequency"){
-        nativePlot(timeData, p=channel, range=mr, col="darkblue", med=med,
+        nativePlot(timeData, p=channel, range=mr, col="darkblue",
                    varCut=varCut, ...)
-        
         return((sum(stand[stand>0])/length(stand))/varCut)
     }
     layout(matrix(1:2), heights=c(0.8, 0.2))
@@ -122,7 +125,7 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
            "stacked"=stackedPlot(timeData, p=channel, range=mr, col=col,
            ylab=ylab, med=med, varCut=varCut, ...),
            "native"=nativePlot(timeData, p=channel, range=mr, col=col,
-           med=med, varCut=varCut, ...),
+           varCut=varCut, ...),
            "frequency"={
                freqPlot(timeData, p=channel, col=col, varCut=varCut,
                         ylab=ylab)
@@ -133,24 +136,28 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
            },
            stop("Unknown type"))
     ## the QA score and correlation coefficient
-    qaScore <- sapply(stand, function(z) sum(z[abs(z)>1])/length(z))*100
-    corr <- mapply(cor, tvals, stand, method="spearman")
+    qaScore <- computeQAScore(stand)
+    corr <- mapply(cor, tvals, stand, method="spearman", use="pairwise")
 
-                       
+    ## a legend indicating the problematic samples
     par(mar=c(5,3,0,3), las=2)
     on.exit(par(opar))
     top <- 2
     barplot(qaScore, axes=FALSE, col=col, cex.names=0.7,
-            ylim=c(0, min(c(top, max(qaScore)))), border=col, space=0.2)
+            ylim=c(0, min(c(top, max(qaScore, na.rm=TRUE)))), border=col, space=0.2)
     wh <- which(qaScore >= top)
     points((wh+wh*0.2)-0.5, rep(top-(top/12), length(wh)), pch=17, col="white",
            cex=0.7)
     attr(qaScore, "binSize") <- binSize
     attr(qaScore, "correlation") <- corr
-    return(qaScore)
+    attr(qaScore, "raw") <- stand
+    return(invisible(qaScore))
 }
 
 
+## compute the QA score from the standardised values
+computeQAScore <- function(stand, varCutoff=1)
+    sapply(stand, function(z) sum(z[abs(z) > varCutoff])/length(z))*100
 
 ## truncData
 truncNames <- function(names){
@@ -210,7 +217,7 @@ scaledPlot <- function(y, p, main=paste("time line for", p),
 stackedPlot <- function(y, p, main=paste("time line for", p),
                         range, col, ylab, med, lwd, varCut, ...){
     par(mar=c(1,5,3,3), mgp=c(2,0.5,0), las=1)
-    var <- sapply(y, function(z) median(z$var))
+    var <- sapply(y, function(z) mean(z$var))
     actualRange <- max(c(diff(range)/10, sapply(y, function(x)
                         diff(range(x$smooth[,2], na.rm=TRUE))), var*2))*1.01
     stacks <- ((length(y):1)-1) * actualRange
@@ -245,7 +252,7 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
 
 ## plot values in the "native" dimensions
 nativePlot <- function(y, p, main=paste("time line for", p),
-                       range, col, med, lwd, varCut, ...){
+                       range, col, lwd, varCut, ...){
     par(mar=c(1,2.5,3,2.5), mgp=c(1.5,0.5,0))
     var <- sapply(y, function(z) mean(z$var))
     actualRange <- max(c(diff(range)/10, sapply(y, function(x)
@@ -270,7 +277,7 @@ nativePlot <- function(y, p, main=paste("time line for", p),
         xl <- par("usr")[1:2]
         xl <- xl + c(1,-1)*(diff(xl)*0.01)
         
-        rect(xl[1], m-max(var)*varCut, xl[2], m+max(var)*varCut,
+        rect(xl[1], m-var*varCut, xl[2], m+var*varCut,
              col=desat("gray", by=30), border=NA)
     }
     for(j in 1:length(y))
@@ -284,19 +291,21 @@ freqPlot <- function(y, p, main="time line frequencies",
                      col, ylab, lwd, varCut, ...){
     par(mar=c(1,5,3,3), mgp=c(2,0.5,0), las=1)
     var <- 1
-    stX <- sapply(y, function(x) x$frequencies[,1])
-    stY <- sapply(y, function(x)
-                  x$frequencies[,2] / mean(x$frequencies[,2])) - 1
+    stX <- lapply(y, function(x) x$frequencies[,1])
+    stY <- lapply(y, function(x)
+                  x$frequencies[,2] / mean(x$frequencies[,2])-1) 
     actualRange <- max(diff(range(stY)), var*varCut*2)*1.01
     stacks <- ((length(y):1)-1) * actualRange
-    stYY <- t(t(stY)+stacks)
-    xlim <- c(0, max(stX))
+    stYY <- mapply(function(x,s) x+s, stY, stacks)
+    if(!is.list(stYY))
+        stYY <- list(stYY)
+    xlim <- c(0, max(unlist(stX)))
     ylim <- range(c(stYY), stacks+var*varCut, stacks-var*varCut)
     if(missing(ylab) | is.null(ylab))
        ylab <- names(y)
     if(missing(lwd))
         lwd <- 2
-    plot(stX[,1], stYY[,1], xlab="", ylab="", type="n", xaxt="n", 
+    plot(stX[[1]], stYY[[1]], xlab="", ylab="", type="n", xaxt="n", 
          lwd=lwd, xlim=xlim, ylim=ylim, main=main, yaxt="n", ...)
     xl <- par("usr")[1:2]
     xl <- xl + c(1,-1)*(diff(xl)*0.01)
@@ -308,7 +317,7 @@ freqPlot <- function(y, p, main="time line frequencies",
              stacks[j]+var*varCut,
              col=desat("gray", by=30), border=NA)
     for(j in 1:length(y))
-        lines(stX[,j], stYY[,j], col=col[j], lwd=lwd)
+        lines(stX[[j]], stYY[[j]], col=col[j], lwd=lwd)
 }
 
 ## A method for flowSets
@@ -335,8 +344,9 @@ setMethod("timeLinePlot",
           timeLinePlot(as(x, "flowSet"), channel=channel, ...)
       })
 
-## A method for flowFrames
+## An error if no channel is specified
 setMethod("timeLinePlot",
           signature(x="ANY", channel="missing"),
           function(x, channel, ...)
           stop("Argument 'channel' is missing", call.=FALSE))
+
