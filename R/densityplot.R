@@ -167,7 +167,9 @@ setMethod("densityplot",
           ccall$panel <- panel
           ccall$frames <- data@frames
           ccall$channel <- channel
-          ccall$channel.name <- channel.name
+          ## That is super ugly!!! How do we get to the channel name
+          ## from the formula???
+          ccall$channel.name <- gsub("^.*\\(`|`\\).*$", "", channel.name)
           ccall$as.table <- as.table
           ccall$overlap <- overlap
           ccall$xlab <- xlab
