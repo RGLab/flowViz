@@ -82,7 +82,8 @@ setMethod("glpoints",
 ## We plot this as four individual rectangle gates.
 setMethod("glpoints",
           signature(x="quadGate", data="flowFrame", channels="character"), 
-          function(x, data, channels, verbose=TRUE, gpar, ...)
+          function(x, data, channels, verbose=TRUE, gpar, filterResult=NULL,
+                   ...)
       {
           if(!is.null(filterResult))
               dropWarn("filterResult", "quadGates", verbose=verbose)

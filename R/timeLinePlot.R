@@ -55,7 +55,7 @@ prepareSet <- function(x, parm, binSize, locM=median, varM=mad){
     ## avoid 0 variance estimates created by mad
     zv <- which(var==0)
     if(length(zv))
-       var[zv] <- sapply(tmpy[zv], sd, na.rm=TRUE)
+       var[zv] <- mean(sapply(tmpy, sd, na.rm=TRUE), na.rm=TRUE)
     
     return(list(smooth=cbind(xx,yy), variance=var, binSize=binSize,
                 frequencies=cbind(timeRange[-1], freq),
@@ -190,7 +190,7 @@ scaledPlot <- function(y, p, main=paste("time line for", p),
     par(mar=c(1,2.5,3,2.5), mgp=c(1.5,0.5,0))
     yy <- mapply(function(z, m) data.frame(x=z$smooth[,1], y=z$smooth[,2]-m),
                  y, med, SIMPLIFY=FALSE)
-    var <- sapply(y, function(z) mean(z$var))
+    var <- sapply(y, function(z) mean(z$var, na.rm=TRUE))
     maxX <- max(sapply(yy, function(z) max(z[,1], na.rm=TRUE)), na.rm=TRUE)
     xlim <- c(0, maxX)
     maxY <- max(sapply(yy, function(z) max(abs(range(z[,2], na.rm=TRUE)), 
@@ -217,7 +217,7 @@ scaledPlot <- function(y, p, main=paste("time line for", p),
 stackedPlot <- function(y, p, main=paste("time line for", p),
                         range, col, ylab, med, lwd, varCut, ...){
     par(mar=c(1,5,3,3), mgp=c(2,0.5,0), las=1)
-    var <- sapply(y, function(z) mean(z$var))
+    var <- sapply(y, function(z) mean(z$var, na.rm=TRUE))
     actualRange <- max(c(diff(range)/10, sapply(y, function(x)
                         diff(range(x$smooth[,2], na.rm=TRUE))), var*2))*1.01
     stacks <- ((length(y):1)-1) * actualRange
@@ -254,7 +254,7 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
 nativePlot <- function(y, p, main=paste("time line for", p),
                        range, col, lwd, varCut, ...){
     par(mar=c(1,2.5,3,2.5), mgp=c(1.5,0.5,0))
-    var <- sapply(y, function(z) mean(z$var))
+    var <- sapply(y, function(z) mean(z$var, na.rm=TRUE))
     actualRange <- max(c(diff(range)/10, sapply(y, function(x)
                         diff(range(x$smooth[,2], na.rm=TRUE))),
                          max(var)*2.1))*1.01

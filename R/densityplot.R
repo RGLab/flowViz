@@ -86,13 +86,15 @@ panel.densityplot.flowset <-
             yl <- i + height * c(0, h$y, 0) / max.d
             panel.polygon(x=xl,y=yl, col=col[i], border=NA, alpha=alpha[i])
             ## we indicate piled up data by vertical lines (if > 1%)
+            desat <- function(col, by=75)
+                rgb(t(pmax(0, col2rgb(col)-by)),max=255)
             lx <- length(xx)
             if(sum(pl) > lx/100)
                 panel.lines(rep(rl[1],2), c(i, i+sum(pl)/lx*height),
-                            col=col[i], lwd=3)
+                            col=desat(col[i]), lwd=3)
             if(sum(pr) > lx/100)
                 panel.lines(rep(rl[2],2), c(i, i+sum(pr)/lx*height),
-                            col=col[i], lwd=3)
+                            col=desat(col[i]), lwd=3)
             ## add the filterResult if possible
             if(!is.null(filter[[nm]])){    
                 bounds <- glpolygon(filter[[nm]], frames[[nm]],
@@ -119,14 +121,6 @@ panel.densityplot.flowset <-
                 options(oo)
             }
             panel.lines(x=xl,y=yl, col=border[i], lty=lty[i],lwd=lwd[i])
-           ##  if (ref)
-##             {
-##                 panel.abline(h=i,
-##                              col=reference.line$col,
-##                              lty=reference.line$lty,
-##                              lwd=reference.line$lwd,
-##                              alpha=reference.line$alpha)
-##             }
             panel.lines(rl, rep(i,2), col="black")
         }
     }

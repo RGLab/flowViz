@@ -121,6 +121,7 @@ panel.xyplot.flowset(
     pch=".",
     smooth=TRUE,
     gpar,
+    margin,
     \dots)
 
 }
@@ -204,7 +205,12 @@ panel.xyplot.flowset(
   \item{frame, frames}{an environment containing frame-specific data. }
 
   \item{gpar}{an list of graphical parameters that are passed down to
-    the low level grid functions. See \code{\link[grid:gpar]{gpar}} for details. }
+    the low level grid functions. See \code{\link[grid:gpar]{gpar}} for
+    details. }
+
+  \item{margin}{logical indicating whether to truncate the density
+    estimation on the margins of the measurement range and plot margin
+    events as lines.}
 
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods. }

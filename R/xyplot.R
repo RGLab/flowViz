@@ -106,7 +106,7 @@ panel.xyplot.flowframe.time <-
 setMethod("xyplot",
           signature(x="formula", data="flowFrame"),
           function(x, data, smooth=TRUE, panel=panel.xyplot.flowframe,
-                   gpar=flowViz.par(), ...)
+                   gpar=flowViz.par(), xlim, ylim, ...)
       {
           ## deparse the formula structure
           channel.y <- x[[2]]
@@ -115,19 +115,52 @@ setMethod("xyplot",
               channel.x <- channel.x[[2]]
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
+          ## find useful xlim and ylim defaults
+          if(missing(xlim)){
+              xlim <- unlist(range(data, channel.x.name))
+              xd <- diff(xlim)/20
+              xlim <- xlim + c(-1,1)*xd
+          }
+          if(missing(ylim)){
+              ylim <- unlist(range(data, channel.y.name))
+              yd <- diff(ylim)/20
+              ylim <- ylim + c(-1,1)*yd
+          }
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, 
                  panel=panel, frame=data, channel.x.name=channel.x.name,
-                 channel.y.name=channel.y.name, gpar=gpar, ...)
+                 channel.y.name=channel.y.name, gpar=gpar, xlim=xlim,
+                 ylim=ylim, ...)
       })
 
 
 ## Dedicated panel function to be abble to add filters on the plot
 panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
                                    channel.x.name,  channel.y.name,
-                                   pch=".", gpar, ...)
+                                   pch=".", gpar, margin=TRUE, ...)
 {
     if (smooth){
-        panel.smoothScatter(x, y, ...)
+        ## We remove margin events before computing the density and
+        ## indicate those by lines
+        if(margin){
+            r <- range(frame, c(channel.x.name, channel.y.name))
+            l <- length(x)
+            inc <- apply(r,2,diff)/1e5
+            dots <- list(...)
+            nb <- if("nbin" %in% names(dots)) rep(dots$nbin,2) else rep(64,2)
+            selxL <- x > r[2,channel.x.name]-inc[1]
+            selxS <- x < r[1,channel.x.name]+inc[1]
+            selyL <- y > r[2,channel.y.name]-inc[2]
+            selyS <- y < r[1,channel.y.name]+inc[2]
+            allsel <- !(selxL | selxS | selyL | selyS)
+            panel.smoothScatter(x[allsel], y[allsel],
+                                range.x=list(r[,1], r[,2]), ...)
+            addMargin(r[1,channel.x.name], y[selxS], r, l, nb[1])
+            addMargin(r[2,channel.x.name], y[selxL], r, l, nb[1], b=TRUE)
+            addMargin(x[selyS], r[1,channel.y.name], r, l, nb[2])
+            addMargin(x[selyL], r[2,channel.y.name], r, l, nb[2], b=TRUE)
+        }else{
+            panel.smoothScatter(x, y, ...)
+        }
         plotType("gsmooth", c(channel.x.name, channel.y.name))
         if(!is.null(filter)){
             glpolygon(filter, frame,
@@ -222,7 +255,7 @@ prepanel.xyplot.flowset <-
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.xyplot.flowset <-
     function(x, frames, channel.x, channel.y, channel.x.name, channel.y.name, 
-             filter=NULL, pch=".", smooth=TRUE, gpar, ...)
+             filter=NULL, pch=".", smooth=TRUE, gpar, margin=TRUE, ...)
 {
     x <- as.character(x)
     if (length(x) > 1) stop("must have only one flow frame per panel")
@@ -240,6 +273,26 @@ panel.xyplot.flowset <-
     yy <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
 
     if(smooth) {
+        ## We remove margin events before computing the density and
+        ## indicate those by lines
+        if(margin){
+            r <- range(frames[[nm]], c(channel.x.name, channel.y.name))
+            l <- length(xx)
+            inc <- apply(r,2,diff)/1e5
+            dots <- list(...)
+            nb <- if("nbin" %in% names(dots)) rep(dots$nbin,2) else rep(64,2)
+            selxL <- xx > r[2,channel.x.name]-inc[1]
+            selxS <- xx < r[1,channel.x.name]+inc[1]
+            selyL <- yy > r[2,channel.y.name]-inc[2]
+            selyS <- yy < r[1,channel.y.name]+inc[2]
+            allsel <- !(selxL | selxS | selyL | selyS)
+            panel.smoothScatter(xx[allsel], yy[allsel],
+                                range.x=list(r[,1], r[,2]), ...)
+            addMargin(r[1,channel.x.name], yy[selxS], r, l, nb[1])
+            addMargin(r[2,channel.x.name], yy[selxL], r, l, nb[1], b=TRUE)
+            addMargin(xx[selyS], r[1,channel.y.name], r, l, nb[2])
+            addMargin(xx[selyL], r[2,channel.y.name], r, l, nb[2], b=TRUE)
+        }else
         panel.smoothScatter(xx, yy, ...)
         plotType("gsmooth", c(channel.x.name, channel.y.name))
         if(!is.null(filter)){
@@ -264,7 +317,32 @@ panel.xyplot.flowset <-
 
 
 
-
+addMargin <- function(x, y, r, total, nb, len=200, b=FALSE)
+{
+    if(length(x) & length(y)){
+        dx <-  diff(r[,1])
+        dy <- diff(r[,2])
+        lenx <- dx/len
+        leny <- dy/len
+        addX <- if(b) dx/nb[1]*1.1 else 0
+        addY <- if(b) dy/nb[2]*1.1 else 0
+        n <- 100
+        colvec <- c(NA, colorRampPalette(c("lightgray", "black"))(99)) 
+        if(length(x)==1){
+            hh <- hist(y, n=n, plot=FALSE)
+            xoff <- dx/(nb*2)-addX
+            col <- colvec[pmin(100, as.integer(hh$counts/total*5000)+1)]
+            panel.segments(rep(x-xoff, n), hh$mids, rep(x-xoff-lenx, n),
+                           hh$mids, col=col, lwd=2)
+        }else{
+            hh <- hist(x, n=n, plot=FALSE)
+            yoff <- dy/(nb*2)-addY
+            col <- colvec[pmin(100, as.integer(hh$counts/total*5000)+1)]
+            panel.segments(hh$mids, rep(y-yoff, n), hh$mids,
+                           rep(y-yoff-leny, n), col=col, lwd=2)
+        }
+    }
+}
 
 
 
