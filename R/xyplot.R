@@ -116,12 +116,14 @@ setMethod("xyplot",
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
           ## find useful xlim and ylim defaults
-          if(missing(xlim)){
+          if(missing(xlim) &&
+             !length(grep("`", channel.x.name, fixed=TRUE))){
               xlim <- unlist(range(data, channel.x.name))
               xd <- diff(xlim)/20
               xlim <- xlim + c(-1,1)*xd
           }
-          if(missing(ylim)){
+          if(missing(ylim) &&
+             !length(grep("`", channel.y.name, fixed=TRUE))){
               ylim <- unlist(range(data, channel.y.name))
               yd <- diff(ylim)/20
               ylim <- ylim + c(-1,1)*yd

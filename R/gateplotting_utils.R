@@ -55,33 +55,38 @@ fmatchWarn <- function(parms, verbose=TRUE)
                 "that they match the plotting parameters.", call.=FALSE)
 }
 
-checkParameterMatch <- function(parms, verbose=TRUE)
+checkParameterMatch <- function(parms, channels, verbose=TRUE, ...)
 {
-    if(state("plotted") && length(state("parameters")==2)){
-        sparms <- state("parameters")
-        err <-   function()
-            stop("The flow parameters used in the last plot don't match ",
-                 "the\nparameters provided by the filter or via the ",
-                 "'channels' argument.\n   Plotted: ",
-                 paste(sparms, collapse=" vs. "), "\n   Provided: ",
-                 paste(parms, collapse=", "),
-                 "\nPlease check or redraw the plot.", call.=FALSE)
-        mt <- sparms %in% parms
-        if(length(parms)<2){
-            if(!parms %in% sparms)
-                err()
+    if(missing(channels)){
+        if(state("plotted") && length(state("parameters")==2)){
+            sparms <- state("parameters")
+            err <-   function()
+                stop("The flow parameters used in the last plot don't match ",
+                     "the\nparameters provided by the filter or via the ",
+                     "'channels' argument.\n   Plotted: ",
+                     paste(sparms, collapse=" vs. "), "\n   Provided: ",
+                     paste(parms, collapse=", "),
+                     "\nPlease check or redraw the plot.", call.=FALSE)
+            mt <- sparms %in% parms
+            if(length(parms)<2){
+                if(!parms %in% sparms)
+                    err()
+            }else{
+                if(!all(mt))
+                    err()
+            }
+            return(sparms)
         }else{
-            if(!all(mt))
-                err()
+            fmatchWarn(parms, verbose=verbose)
+            return(parms)
         }
-        return(sparms)
-    }else if(length(parms)!=2)
-        stop("The filter definition contains the following parameters:\n",
-             paste(parms, collapse=", "), "\nDon't know how to match to",
-             " the plotted data.\nPlease specify plotting parameters as ",
-             "an additional argument.", call.=FALSE)
-    else{
-        fmatchWarn(parms=parms, verbose=verbose)
+    }else{
+        parms <- channels
+        if(length(parms)!=2)
+            stop("The filter definition contains the following parameters:\n",
+                 paste(parms, collapse=", "), "\nDon't know how to match to",
+                 " the plotted data.\nPlease specify plotting parameters as ",
+                 "an additional argument.", call.=FALSE)
         return(parms)
     }
 }

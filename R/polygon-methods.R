@@ -25,14 +25,13 @@
 ## contains exactly two dimensions, and even then we need to guess that
 ## they match the plotted data, hence we warn. Supplying the names of the
 ## plotted channels via the "channels" argument always gets precendence.
+## All downstream methods will eventually run across this method, so we only
+## need to check once. 
 setMethod("gpolygon",
           signature(x="filter", data="missing"), 
-          function(x, data, channels, verbose=TRUE, ...)
+          function(x, data, verbose=TRUE, ...)
       {
-          if(missing(channels))
-              parms <- checkParameterMatch(parameters(x), verbose=verbose)
-          else
-              parms <- checkParameterMatch(channels, verbose=FALSE)
+          parms <- checkParameterMatch(parameters(x), verbose=verbose, ...)
           gpolygon(x, parms, ...)
       })
 
@@ -40,21 +39,24 @@ setMethod("gpolygon",
 ## Extract the filter definiton from a filterResult and pass that on
 ## along with it
 setMethod("gpolygon",
-          signature(x="filterResult", data="missing"), 
+          signature(x="filterResult", data="ANY"), 
           function(x, data, verbose=TRUE, ...)
       {
           filt <- filterDetails(x)$filter
-          parms <- checkParameterMatch(parameters(filt))
-          gpolygon(filt, x, verbose=FALSE, ...)
+          if(!missing(data) && is.character(data) &&
+             ! ("channels" %in% names(list(...))))
+              gpolygon(filt, x, verbose=FALSE, channels=data, ...)
+          else
+             gpolygon(filt, x, verbose=FALSE, ...) 
       })
 
 ## We don't need the flowFrame if the filter is already evaluated, but we
 ## can check that the IDs are matching
 setMethod("gpolygon",
           signature(x="filterResult", data="flowFrame"), 
-          function(x, data, verbose=TRUE, channels, ...){
+          function(x, data, verbose=TRUE, ...){
               checkIdMatch(x=x, f=data)
-              gpolygon(x, verbose=verbose, channels=channels, ...)
+              gpolygon(x, verbose=verbose, ...)
               dropWarn("flowFrame", "filterResults", verbose=verbose)
           })
 
@@ -71,7 +73,6 @@ setMethod("gpolygon",
       {
           if(!missing(channels))
               data <- channels
-          data <- checkParameterMatch(data, verbose=FALSE)
           parms <- parameters(x)
           usr <- par("usr")
           if(length(parms)==1){## 1D rectangular gate (region gate)
@@ -104,13 +105,10 @@ setMethod("gpolygon",
 ## we can drop the dataFrame, don't need it for rectangleGates
 setMethod("gpolygon",
           signature(x="rectangleGate", data="flowFrame"), 
-          function(x, data, verbose=TRUE, channels, ...)
+          function(x, data, verbose=TRUE, ...)
       {
           dropWarn("flowFrame", "rectangleGates", verbose=verbose)
-          if(!missing(channels))
-              gpolygon(x, channels, verbose=verbose, ...)
-          else
-              gpolygon(x, verbose=verbose, ...)
+          gpolygon(x, verbose=verbose, ...)
       })
 
 
@@ -126,10 +124,12 @@ setMethod("gpolygon",
       {
           if(!missing(channels))
               data <- channels
-          data <- checkParameterMatch(data, verbose=FALSE)
           parms <- parameters(x)
-          if(missing(col))
-              col <-  colorRampPalette(brewer.pal(9, "Set1"))(4)
+          if(missing(col)){
+               col <-  col2rgb(colorRampPalette(brewer.pal(9, "Set1"))(4),
+                              alpha=TRUE)
+              col <- rgb(col[1,], col[2,], col[3,], 75, max=255)
+          }
           else
               col <- rep(col,4)
           v <- x@boundary[data[1]]
@@ -155,13 +155,10 @@ setMethod("gpolygon",
 ## we can drop the dataFrame, don't need it for rectangleGates
 setMethod("gpolygon",
           signature(x="quadGate", data="flowFrame"), 
-          function(x, data, verbose=TRUE, channels, ...)
+          function(x, data, verbose=TRUE, ...)
       {
           dropWarn("flowFrame", "quadGates", verbose=verbose)
-          if(!missing(channels))
-              gpolygon(x, channels, verbose=verbose, ...)
-          else
-              gpolygon(x, verbose=verbose, ...)
+          gpolygon(x, verbose=verbose, ...)
       })
 
 
@@ -177,7 +174,6 @@ setMethod("gpolygon",
       {
           if(!missing(channels))
               data <- channels
-          data <- checkParameterMatch(data, verbose=FALSE)
           parms <- parameters(x)
           xp <- x@boundaries[,data[1]]
           yp <- x@boundaries[,data[2]]
@@ -196,13 +192,10 @@ setMethod("gpolygon",
 ## we can drop the flowFrame, don't need it for polygonGates
 setMethod("gpolygon",
           signature(x="polygonGate", data="flowFrame"), 
-          function(x, data, verbose=TRUE, channels, ...)
+          function(x, data, verbose=TRUE, ...)
       {
           dropWarn("flowFrame", "polygonGates", verbose=verbose)
-          if(!missing(channels))
-              gpolygon(x, channels, verbose=verbose, ...)
-          else
-              gpolygon(x, verbose=verbose, ...)
+          gpolygon(x, verbose=verbose, ...)
       })
 
 
@@ -258,8 +251,11 @@ setMethod("gpolygon",
           polygons <- fd$polygons
           lf <- length(polygons)
           ## we want to use different colors for each population
-          if(missing(col))
-              col <-  colorRampPalette(brewer.pal(9, "Set1"))(lf)
+          if(missing(col)){
+              col <-  col2rgb(colorRampPalette(brewer.pal(9, "Set1"))(lf),
+                              alpha=TRUE)
+              col <- rgb(col[1,], col[2,], col[3,], 75, max=255)
+          }
           else
               col <- rep(col, lf)[1:lf]
           mapply(function(x, co, ...){
@@ -296,25 +292,25 @@ setMethod("gpolygon",
 ## Filter has been evaluated and the filterResult is provided
 setMethod("gpolygon",
           signature(x="curv1Filter", data="multipleFilterResult"), 
-          function(x, data, channels, verbose=TRUE, col, ...)
+          function(x, data, verbose=TRUE, col, ...)
       {
           checkFres(filter=x, fres=data, verbose=verbose)
           fd <- filterDetails(data, identifier(x))
           parms <- parameters(x)
-          if(missing(channels))
-              channels <- parms
-          channels <- checkParameterMatch(channels, verbose=FALSE)
           bounds <- fd$boundaries
           lb <- length(bounds)
           ## we want to use different colors for each population
-          if(missing(col))
-              col <-  colorRampPalette(brewer.pal(9, "Set1"))(lb)
+          if(missing(col)){
+              col <-  col2rgb(colorRampPalette(brewer.pal(9, "Set1"))(lb),
+                              alpha=TRUE)
+              col <- rgb(col[1,], col[2,], col[3,], 75, max=255)
+          }
           else
               col <- rep(col, lb)[1:lb]
           mapply(function(x, co, ...){
               tmp <- matrix(x, nrow=2)
               colnames(tmp) <- parms
-              gpolygon(rectangleGate(.gate=tmp), channels, col=co, ...)
+              gpolygon(rectangleGate(.gate=tmp), col=co, ...)
           }, x=bounds, co=col, MoreArgs=list(verbose=FALSE, ...))
           return(invisible(NULL))
       })

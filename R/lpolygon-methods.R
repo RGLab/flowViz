@@ -25,17 +25,10 @@
 ## are explicitely provided by the channels argument.
 setMethod("glpolygon",
           signature(x="filter", data="missing"), 
-          function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par(), ...)
+          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
       {
-          if(missing(channels))
-              glpolygon(x=x, data=checkParameterMatch(parameters(x),
-                             verbose=verbose),
-                        gpar=gpar, ...)
-          else
-              glpolygon(x=x, data=checkParameterMatch(channels,
-                             verbose=FALSE),
-                        gpar=gpar, ...)
+          parms <- checkParameterMatch(parameters(x), verbose=verbose)
+          glpolygon(x=x, data=parms, gpar=gpar, ...)
       })
 
 
@@ -43,16 +36,16 @@ setMethod("glpolygon",
 ## along with it. We decide later if we really need it or not.
 setMethod("glpolygon",
           signature(x="filterResult", data="ANY"), 
-          definition=function(x, data, channels, verbose=TRUE,
+          definition=function(x, data, verbose=TRUE,
           gpar=flowViz.par(), ...)
       {
           filt <- filterDetails(x)$filter
-          if(missing(channels))
-              glpolygon(x=filt, data=x, verbose=verbose, gpar=gpar, ...)
+          if(!missing(data) && is.character(data) &&
+             ! ("channels" %in% names(list(...))))
+              glpolygon(filt, x, verbose=FALSE, channels=data,
+                        gpar=gpar, ...)
           else
-              glpolygon(x=filt, data=x,
-                        channels=checkParameterMatch(channels),
-                        verbose=FALSE, gpar=gpar, ...)
+             glpolygon(filt, x, verbose=FALSE, gpar=gpar, ...) 
       })
 
 
@@ -60,14 +53,11 @@ setMethod("glpolygon",
 ## can check that the IDs are matching before dropping it.
 setMethod("glpolygon",
           signature(x="filterResult", data="flowFrame"), 
-          definition=function(x, data, channels, verbose=TRUE,
+          definition=function(x, data, verbose=TRUE,
           gpar=flowViz.par(), ...){
               checkIdMatch(x=x, f=data)
               dropWarn("flowFrame", "filterResults", verbose=verbose)
-              if(missing(channels))
-                  glpolygon(x=x, verbose=verbose, gpar, ...)
-              else
-                  glpolygon(x=x, verbose=FALSE, gpar, channels=channels, ...) 
+              glpolygon(x=x, verbose=verbose, gpar, ...)
           })
 
 
@@ -85,7 +75,6 @@ setMethod("glpolygon",
       {
           if(!missing(channels))
               data <- channels
-          data <- checkParameterMatch(data, verbose=FALSE)
           parms <- parameters(x)
           usr <- rep(c(-1e4, 1e4), 2)
           if(plot){
@@ -146,7 +135,6 @@ setMethod("glpolygon",
       {
           if(!missing(channels))
               data <- channels
-          data <- checkParameterMatch(data, verbose=FALSE)
           v <- x@boundary[data[1]]
           h <- x@boundary[data[2]]
           mat <- matrix(c(-Inf, h, v, Inf, h, Inf, v, Inf, -Inf, h, -Inf,
@@ -200,7 +188,6 @@ setMethod("glpolygon",
       {
           if(!missing(channels))
               data <- channels
-          data <- checkParameterMatch(data, verbose=FALSE)
           xp <- x@boundaries[,data[1]]
           yp <- x@boundaries[,data[2]]
           class(gpar) <- "gpar"
