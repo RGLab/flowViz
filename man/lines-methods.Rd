@@ -11,7 +11,7 @@
 \alias{glines,curv2Filter,multipleFilterResult-method}
 \alias{glines,filter,missing-method}
 \alias{glines,filterResult,flowFrame-method}
-\alias{glines,filterResult,missing-method}
+\alias{glines,filterResult,ANY-method}
 \alias{glines,kmeansFilter,ANY-method}
 \alias{glines,norm2Filter,ANY-method}
 \alias{glines,norm2Filter,flowFrame-method}
@@ -41,26 +41,27 @@
      
     \item{x = "filter", data = "missing"}{ General method for all
       objects inheriting from
-      \code{\link[flowCore:filter-class]{filter}}. This is used as the default
-      when no more explicit method is found. It tries to find the
-      plotted parameters from the internal \code{flowViz.state}
+      \code{\link[flowCore:filter-class]{filter}}. This is used as the
+      default when no more explicit method is found. It tries to find
+      the plotted parameters from the internal \code{flowViz.state}
       environment. This only works if the flow data has been plotted
-      using the \code{plot} methods provided by this \code{flowViz}
-      package. }
+      using the \code{plot} or \code{xyplot} methods provided by this
+      \code{flowViz} package. }
 
-    \item{x = "filterResult", data = "missing"}{ General method for all
-      \code{\link[flowCore:filterResult-class]{filterResult}} object. This basically
-      extracts the \code{\link[flowCore:filter-class]{filter}} from the
-      \code{\link[flowCore:filterResult-class]{filterResult}} and dispatches on
-      that. }
+    \item{x = "filterResult", data = "ANY"}{ General method for all
+      \code{\link[flowCore:filterResult-class]{filterResult}}
+      object. This basically extracts the
+      \code{\link[flowCore:filter-class]{filter}} from the
+      \code{\link[flowCore:filterResult-class]{filterResult}} and
+      dispatches on that. }
 
     \item{x = "filterResult", data = "flowFrame"}{ For some
-      \code{\link[flowCore:filter-class]{filter}} types we need the raw data to
-      re-evaluate the filter. }
+      \code{\link[flowCore:filter-class]{filter}} types we need the raw
+      data to re-evaluate the filter. }
 
     \item{x = "curv1Filter", data = "ANY"}{ We either need a
-      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
-      \code{\link[flowCore:flowFrame-class]{flowFrame}} for
+      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
+      data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
       \code{\link[flowCore:curv1Filter-class]{curv1Filter}}s. }
 
     \item{x = "curv1Filter", data = "flowFrame"}{ see above }
@@ -70,8 +71,8 @@
     \item{x = "curv1Filter", data = "multipleFilterResult"}{ see above }
     
     \item{x = "curv2Filter", data = "ANY"}{ We either need a
-      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
-      \code{\link[flowCore:flowFrame-class]{flowFrame}} for
+      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
+      data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
       \code{\link[flowCore:curv2Filter-class]{curv2Filter}}s.}
 
     \item{x = "curv2Filter", data = "flowFrame"}{ see above }
@@ -79,12 +80,13 @@
     \item{x = "curv2Filter", data = "multipleFilterResult"}{ see above }
 
     \item{x = "kmeansFilter", data = "ANY"}{ We don't know how to plot
-      outlines of a \code{\link[flowCore:kmeansFilter-class]{kmeansFilter}}, hence
-      we warn. }
+      outlines of a
+      \code{\link[flowCore:kmeansFilter-class]{kmeansFilter}}, hence we
+      warn. }
 
     \item{x = "norm2Filter", data = "ANY"}{ We either need a
-      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
-      \code{\link[flowCore:flowFrame-class]{flowFrame}} for
+      \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
+      data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
       \code{\link[flowCore:norm2Filter-class]{norm2Filter}}s.}
 
     \item{x = "norm2Filter", data = "flowFrame"}{ see above }
@@ -118,18 +120,30 @@
   }
 }
 
-\details{ When plotting code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
-  \code{plot} method provided by \code{flowViz}, the plotted parameters
-  are recorded, which makes it possible to correctly overlay the
-  outlines of \code{\link[flowCore:filter-class]{filter}}s assuming that they are
-  defined for the repective parameters. Warnings and error will be cast
-  for the cases where the parameters are non-distinct or ambigious. }
+\details{ When plotting
+  code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
+  \code{plot} or \code{xyplot }methods provided by \code{flowViz}, the
+  plotted parameters are recorded, which makes it possible to correctly
+  overlay the outlines of \code{\link[flowCore:filter-class]{filter}}s
+  assuming that they are defined for the repective parameters. Warnings
+  and error will be cast for the cases where the parameters are
+  non-distinct or ambigious.
+
+  The flow parameters plotted can be passed on to any of the methods
+  through the optional \code{channels} argument, which always gets
+  precedence over automatically detected parameters.
+
+  The methods support all plotting parameters that are available for the
+  code{base} \code{lines} functions.
+  
+}
 
 \author{ F. Hahne }
 
 \seealso{
   
-  \code{\link[flowCore:filter-class]{filter}}, \code{\link[flowCore:flowFrame-class]{flowFrame}},
+  \code{\link[flowCore:filter-class]{filter}},
+  \code{\link[flowCore:flowFrame-class]{flowFrame}},
   \code{\link{glines}}, \code{\link{gpoints}}
   
 }

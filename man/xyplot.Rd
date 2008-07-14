@@ -100,6 +100,7 @@ panel.xyplot.flowframe(
     channel.y.name,
     pch=".",
     gpar,
+    margin=TRUE,
     ...)
 
 ## panel and prepanel functions for flowSets
