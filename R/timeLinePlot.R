@@ -55,6 +55,7 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
     
     ## Standardize to compute meaningful scale-free QA scores
     med <- sapply(timeData, function(z) median(z$smooth[,2], na.rm=TRUE))
+    lm <- length(med)
     gvars <- sapply(timeData, function(x) mean(x$variance))
     stand <-  mapply(function(z,m,v) abs(z$smooth[,2]-m)/(v*varCut), timeData,
                  med, gvars)
@@ -62,12 +63,12 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
     
     ## Create the plot, either one of the 4 possible types. For flowFrames
     ## we always use the native scaling.
-    if(length(med)==1 && type != "frequency"){
+    if(lm==1 && type != "frequency"){
         nativePlot(timeData, p=channel, range=mr, col="darkblue",
                    varCut=varCut, ...)
         return((sum(stand[stand>0])/length(stand))/varCut)
-    }
-    layout(matrix(1:2), heights=c(0.8, 0.2))
+    }else if(lm>1)
+        layout(matrix(1:2), heights=c(0.8, 0.2))
     switch(type,
            "scaled"=scaledPlot(timeData, p=channel, range=mr, col=col,
            med=med, varCut=varCut, ...),
@@ -77,7 +78,7 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
            varCut=varCut, ...),
            "frequency"={
                freqPlot(timeData, p=channel, col=col, varCut=varCut,
-                        ylab=ylab)
+                        ylab=ylab, ...)
                stand <- lapply(timeData, function(x)
                                x$frequencies[,2] /
                                (mean(x$frequencies[,2])*varCut)-1)
@@ -90,15 +91,17 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
     corr <- mapply(cor, tvals, stand, method="spearman", use="pairwise")
 
     ## a legend indicating the problematic samples
-    par(mar=c(5,3,0,3), las=2)
-    on.exit(par(opar))
-    top <- 2
-    barplot(qaScore, axes=FALSE, col=col, cex.names=0.7,
-            ylim=c(0, min(c(top, max(qaScore, na.rm=TRUE)))), border=col,
-            space=0.2)
-    wh <- which(qaScore >= top)
-    points((wh+wh*0.2)-0.5, rep(top-(top/12), length(wh)), pch=17, col="white",
-           cex=0.7)
+    if(lm>1){
+        par(mar=c(5,3,0,3), las=2)
+        on.exit(par(opar))
+        top <- 2
+        barplot(qaScore, axes=FALSE, col=col, cex.names=0.7,
+                ylim=c(0, min(c(top, max(qaScore, na.rm=TRUE)))), border=col,
+                space=0.2)
+        wh <- which(qaScore >= top)
+        points((wh+wh*0.2)-0.5, rep(top-(top/12), length(wh)), pch=17, col="white",
+               cex=0.7)
+    }
 
     ## The return value with attributes attached.
     attr(qaScore, "binSize") <- binSize
