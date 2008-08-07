@@ -57,7 +57,7 @@ setMethod("glpolygon",
           gpar=flowViz.par(), ...){
               checkIdMatch(x=x, f=data)
               dropWarn("flowFrame", "filterResults", verbose=verbose)
-              glpolygon(x=x, verbose=verbose, gpar, ...)
+              glpolygon(x=x, verbose=verbose, gpar=gpar, ...)
           })
 
 
