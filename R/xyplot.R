@@ -156,10 +156,10 @@ panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
             allsel <- !(selxL | selxS | selyL | selyS)
             panel.smoothScatter(x[allsel], y[allsel],
                                 range.x=list(r[,1], r[,2]), ...)
-            addMargin(r[1,channel.x.name], y[selxS], r, l, nb[1])
-            addMargin(r[2,channel.x.name], y[selxL], r, l, nb[1], b=TRUE)
-            addMargin(x[selyS], r[1,channel.y.name], r, l, nb[2])
-            addMargin(x[selyL], r[2,channel.y.name], r, l, nb[2], b=TRUE)
+            addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+            addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+            addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+            addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
         }else{
             panel.smoothScatter(x, y, ...)
         }
@@ -290,10 +290,10 @@ panel.xyplot.flowset <-
             allsel <- !(selxL | selxS | selyL | selyS)
             panel.smoothScatter(xx[allsel], yy[allsel],
                                 range.x=list(r[,1], r[,2]), ...)
-            addMargin(r[1,channel.x.name], yy[selxS], r, l, nb[1])
-            addMargin(r[2,channel.x.name], yy[selxL], r, l, nb[1], b=TRUE)
-            addMargin(xx[selyS], r[1,channel.y.name], r, l, nb[2])
-            addMargin(xx[selyL], r[2,channel.y.name], r, l, nb[2], b=TRUE)
+            addMargin(r[1,channel.x.name], yy[selxS], r, l, nb)
+            addMargin(r[2,channel.x.name], yy[selxL], r, l, nb, b=TRUE)
+            addMargin(xx[selyS], r[1,channel.y.name], r, l, nb)
+            addMargin(xx[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
         }else
         panel.smoothScatter(xx, yy, ...)
         plotType("gsmooth", c(channel.x.name, channel.y.name))
@@ -332,13 +332,13 @@ addMargin <- function(x, y, r, total, nb, len=200, b=FALSE)
         colvec <- c(NA, colorRampPalette(c("lightgray", "black"))(99)) 
         if(length(x)==1){
             hh <- hist(y, n=n, plot=FALSE)
-            xoff <- dx/(nb*2)-addX
+            xoff <- dx/(nb[1]*2)-addX
             col <- colvec[pmin(100, as.integer(hh$counts/total*5000)+1)]
             panel.segments(rep(x-xoff, n), hh$mids, rep(x-xoff-lenx, n),
                            hh$mids, col=col, lwd=2)
         }else{
             hh <- hist(x, n=n, plot=FALSE)
-            yoff <- dy/(nb*2)-addY
+            yoff <- dy/(nb[2]*2)-addY
             col <- colvec[pmin(100, as.integer(hh$counts/total*5000)+1)]
             panel.segments(hh$mids, rep(y-yoff, n), hh$mids,
                            rep(y-yoff-leny, n), col=col, lwd=2)
