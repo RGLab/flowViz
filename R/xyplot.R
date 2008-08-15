@@ -119,13 +119,13 @@ setMethod("xyplot",
           if(missing(xlim) &&
              !length(grep("`", channel.x.name, fixed=TRUE))){
               xlim <- unlist(range(data, channel.x.name))
-              xd <- diff(xlim)/20
+              xd <- diff(xlim)/15
               xlim <- xlim + c(-1,1)*xd
           }
           if(missing(ylim) &&
              !length(grep("`", channel.y.name, fixed=TRUE))){
               ylim <- unlist(range(data, channel.y.name))
-              yd <- diff(ylim)/20
+              yd <- diff(ylim)/15
               ylim <- ylim + c(-1,1)*yd
           }
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, 
@@ -238,7 +238,8 @@ setMethod("xyplot",
 
 ## Dedicated prepanel function to set up dimensions
 prepanel.xyplot.flowset <- 
-    function(x,  frames, channel.x, channel.y, ...)
+    function(x,  frames, channel.x, channel.y, channel.x.name,
+             channel.y.name, ...)
 {
     if (length(nm <- as.character(x)) > 1)
         stop("must have only one flow frame per panel")
@@ -246,7 +247,8 @@ prepanel.xyplot.flowset <-
     {
         xx <- evalInFlowFrame(channel.x, frames[[nm]])
         yy <- evalInFlowFrame(channel.y, frames[[nm]])
-        list(xlim=range(xx, finite=TRUE), ylim=range(yy, finite=TRUE),
+        list(xlim=range(frames[[nm]], channel.x.name),
+             ylim=range(frames[[nm]], channel.y.name),
              dx=diff(xx), dy=diff(yy))
     }
     else list()
@@ -329,19 +331,21 @@ addMargin <- function(x, y, r, total, nb, len=200, b=FALSE)
         addX <- if(b) dx/nb[1]*1.1 else 0
         addY <- if(b) dy/nb[2]*1.1 else 0
         n <- 100
-        colvec <- c(NA, colorRampPalette(c("lightgray", "black"))(99)) 
+        colvec <- colorRampPalette(c("lightgray", "black"))(100) 
         if(length(x)==1){
             hh <- hist(y, n=n, plot=FALSE)
+            sel <- hh$counts > 0
             xoff <- dx/(nb[1]*2)-addX
-            col <- colvec[pmin(100, as.integer(hh$counts/total*5000)+1)]
-            panel.segments(rep(x-xoff, n), hh$mids, rep(x-xoff-lenx, n),
-                           hh$mids, col=col, lwd=2)
+            col <- colvec[pmin(100, as.integer(hh$counts[sel]/total*5000)+1)]
+            panel.segments(rep(x-xoff, n), hh$mids[sel], rep(x-xoff-lenx, n),
+                           hh$mids[sel], col=col, lwd=3, lineend=2)
         }else{
             hh <- hist(x, n=n, plot=FALSE)
+            sel <- hh$counts > 0
             yoff <- dy/(nb[2]*2)-addY
-            col <- colvec[pmin(100, as.integer(hh$counts/total*5000)+1)]
-            panel.segments(hh$mids, rep(y-yoff, n), hh$mids,
-                           rep(y-yoff-leny, n), col=col, lwd=2)
+            col <- colvec[pmin(100, as.integer(hh$counts[sel]/total*5000)+1)]
+            panel.segments(hh$mids[sel], rep(y-yoff, n), hh$mids[sel],
+                           rep(y-yoff-leny, n), col=col, lwd=3, lineend=2)
         }
     }
 }
