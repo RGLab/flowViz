@@ -164,7 +164,13 @@ panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
             panel.smoothScatter(x, y, ...)
         }
         plotType("gsmooth", c(channel.x.name, channel.y.name))
-        if(!is.null(filter)){
+        ## Whenever we have a function call that is part of the formula
+        ## the channel.x.name or channel.y.name arguments are badly
+        ## messed up. Since we are no longer on the original scale in
+        ## which the gate was defined we have no clue how to plot it
+        validName <- !(length(grep("\\(", channel.x.name)) ||
+                       length(grep("\\(", channel.y.name)))
+        if(!is.null(filter) & validName){
             glpolygon(filter, frame,
                       channels=c(channel.x.name, channel.y.name),
                       verbose=FALSE, gpar=gpar, ...)
@@ -172,7 +178,7 @@ panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
     }else{
         panel.xyplot(x, y, pch=pch, ...)
         plotType("gpoints", c(channel.x.name, channel.y.name))
-        if(!is.null(filter)){
+        if(!is.null(filter) & validName){
             glpoints(filter, frame,
                      channels=c(channel.x.name, channel.y.name),
                      verbose=FALSE, pch=pch, col="red",
@@ -243,16 +249,38 @@ prepanel.xyplot.flowset <-
 {
     if (length(nm <- as.character(x)) > 1)
         stop("must have only one flow frame per panel")
+    
     if (length(nm) == 1)
     {
         xx <- evalInFlowFrame(channel.x, frames[[nm]])
         yy <- evalInFlowFrame(channel.y, frames[[nm]])
-        list(xlim=range(frames[[nm]], channel.x.name),
-             ylim=range(frames[[nm]], channel.y.name),
-             dx=diff(xx), dy=diff(yy))
+        ## Whenever we have a function call that is part of the formula
+        ## the channel.x.name or channel.y.name arguments are badly
+        ## messed up. Also we don't store  meaningful ranges in that 
+        ## case, so we have to compute them from the data
+        rx <- if(length(grep("\\(", channel.x.name)))
+            range(xx, finite=TRUE) else range(frames[[nm]], channel.x.name)
+        ry <- if(length(grep("\\(", channel.y.name)))
+            range(yy, finite=TRUE) else range(frames[[nm]], channel.y.name)
+        
+        list(xlim=rx, ylim=ry, dx=diff(xx), dy=diff(yy))
     }
     else list()
 }
+
+
+
+## FIXMES:
+##   - How can we cleanly deparse the formula to get to the channel
+##     names?
+##   - The Formula interface allows for arbitrary functions to be
+##     called on the data before plotting. If that happens, we have no
+##     clue what to do with the gates, since they are still defined in
+##     the old corrdinate system.
+##   - The same is true for the range parameters stored in the flowFrame.
+##     These only make sense in the original coordinates. Do we want to
+##     transform them, and if so, how can we do that? Can we substitute
+##     the flow data by a vector containing the ranges in the formula? 
 
 
 
@@ -264,6 +292,12 @@ panel.xyplot.flowset <-
     x <- as.character(x)
     if (length(x) > 1) stop("must have only one flow frame per panel")
     if (length(x) < 1) return()
+    ## Whenever we have a function call that is part of the formula
+    ## the channel.x.name or channel.y.name arguments are badly
+    ## messed up. Since we are no longer on the original scale in
+    ## which the gate was defined we have no clue how to plot it
+    validName <- !(length(grep("\\(", channel.x.name)) ||
+                   length(grep("\\(", channel.y.name)))
     nm <- x
     if(is(filter, "filter")){
         filter <- list(filter)
@@ -299,7 +333,7 @@ panel.xyplot.flowset <-
         }else
         panel.smoothScatter(xx, yy, ...)
         plotType("gsmooth", c(channel.x.name, channel.y.name))
-        if(!is.null(filter)){
+        if(!is.null(filter) && validName){
             if(is.null(gpar))
                 gpar <- flowViz.par()
             glpolygon(filter[[nm]], frames[[nm]],
@@ -311,7 +345,7 @@ panel.xyplot.flowset <-
         panel.xyplot(xx, yy, pch=pch, ...)
         plotType("gpoints", c(channel.x.name, channel.y.name))
         col = brewer.pal(9, "Set1")
-         if(!is.null(filter)){
+         if(!is.null(filter) && validName){
              glpoints(filter[[nm]], frames[[nm]],
                       channels=c(channel.x.name, channel.y.name),
                       verbose=FALSE, gpar=gpar, pch=pch, ...)

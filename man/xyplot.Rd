@@ -109,6 +109,8 @@ prepanel.xyplot.flowset(
     frames,
     channel.x,
     channel.y,
+    channel.x.name,
+    channel.y.name,
     \dots)
 
 panel.xyplot.flowset(
