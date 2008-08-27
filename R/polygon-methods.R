@@ -333,4 +333,6 @@ setMethod("gpolygon",
 ## We don't know how to plot these, hence we warn
 setMethod("gpolygon",
           signature(x="kmeansFilter", data="ANY"), 
-          function(x, data, verbose=TRUE, ...) nnWarn("kmeansFilter", verbose))
+          function(x, data, verbose=TRUE, ...){
+              nnWarn("kmeansFilter", verbose=verbose)
+          })

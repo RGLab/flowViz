@@ -9,49 +9,63 @@
 ## which will later be useful to figure out the plotting parameters when
 ## adding gate outlines to a plot
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+## helper function to do the actual plotting
+fplot <- function(x, smooth, pch, xlim, ylim, ...)
+{
+    values <- exprs(x)
+    sel <- tolower(colnames(values)) != "time"
+    flowViz.state[["plotted"]] <- TRUE
+    if(missing(pch))
+        pch <- "."
+    l <- ncol(values)
+    if(l==1){
+        hist(values, xlab=colnames(x), ...)
+        flowViz.state[["type"]] <- "hist"
+    }else if (l==2){
+        if(missing(xlim))
+            xlim <- unlist(range(x[,1]))
+        if(missing(ylim))
+            ylim <- unlist(range(x[,2]))
+        if(smooth){
+            smoothScatter(values, pch=pch, xlim=xlim, ylim=ylim, ...)
+            flowViz.state[["type"]] <- "smooth"
+        }else{
+            plot(values, pch=pch, xlim=xlim, ylim=ylim, ...)
+            flowViz.state[["type"]] <- "dot"
+        }
+    }else{
+        if(smooth){
+            x <- x[,sel]
+            print(splom(x, pch=pch, ...))
+            flowViz.state[["type"]] <- "splom"
+        }
+        else{
+            pairs(values[,sel], pch=pch, ...)
+            flowViz.state[["type"]] <- "pairs"
+        }
+    }
+    flowViz.state[["parameters"]] <- colnames(values)
+}
+
+
 ## only one argument: the flowFrame
 setMethod("plot", signature(x="flowFrame", y="missing"),
-          function(x, y, smooth=TRUE, pch, ...)
+          function(x, y, smooth=TRUE, ...)
       {
-          l <- ncol(x)
-          values <- exprs(x)
-          sel <- tolower(colnames(values)) != "time"
-          flowViz.state[["plotted"]] <- TRUE
-          if(missing(pch))
-              pch <- "."
-          if(l==1){
-              hist(values, xlab=colnames(x), ...)
-              flowViz.state[["type"]] <- "hist"
-          }else if (l==2){
-              if(smooth){
-                  smoothScatter(values, pch=pch, ...)
-                  flowViz.state[["type"]] <- "smooth"
-              }else{
-                  plot(values, pch=pch, ...)
-                  flowViz.state[["type"]] <- "smooth"
-              }
-          }else{
-              if(smooth){
-                  x <- x[,sel]
-                  print(splom(x, pch=pch, ...))
-                  flowViz.state[["type"]] <- "splom"
-              }
-              else{
-                  pairs(values[,sel], pch=pch, ...)
-                  flowViz.state[["type"]] <- "pairs"
-              }
-          }
-          flowViz.state[["parameters"]] <- colnames(x)
+          fplot(x, smooth=smooth, ...)
           return(invisible(NULL))
       })
 
 ## second argument contains the parameters(s) to plot
 setMethod("plot",signature(x="flowFrame", y="character"),
-          function(x, y, smooth=TRUE, ...){
-              if(!all(y %in% colnames(x)))
-                  stop("subset out of bounds", call.=FALSE)
-              plot(x[,y], smooth=smooth, ...)
-              #callGeneric(x[,y], smooth=smooth, ...)
+          function(x, y, smooth=TRUE, pch, ...)
+      {
+          if(!all(y %in% colnames(x)))
+              stop("subset out of bounds", call.=FALSE)
+          x <- x[,y]
+          fplot(x, smooth=smooth, pch=pch, ...)
+          return(invisible(NULL))
       })
-         
+
 
