@@ -214,6 +214,25 @@ setMethod("glines",
 
 
 
+## ==========================================================================
+## for ellipsoidGatess
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+## Plotting parameters are specified as a character vector
+setMethod("glines",
+          signature(x="ellipsoidGate", data="character"), 
+          function(x, data, channels, verbose=TRUE, ...)
+      {
+          if(!missing(channels))
+              data <- channels
+          parms <- parameters(x)
+	  ## We coerce to a polygongate and plot that
+          glines(ell2Polygon(fd, parameters(x)), verbose=verbose, ...)      
+      })
+
+
+
+
 
 ## ==========================================================================
 ## for curv2Filters

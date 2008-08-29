@@ -174,6 +174,25 @@ norm2Polygon <- function(fd, parms)
 }
 
 
+## convert an ellipseoidalFilter into a polygonGate
+ell2Polygon <- function(fd, parms)
+{
+    ## get the ellipse lines
+    center <- fd@mean[parms]
+    cov <- fd@cov[parms, parms]
+    radius <- fd@distance
+    chol.cov <- t(chol(cov))
+    t <- seq(0, 2 * base::pi, length = 50)
+    ans <- center +
+        (chol.cov %*% rbind(x = radius * cos(t),
+                            y = radius * sin(t)))
+    ans <- as.data.frame(t(ans))
+    names(ans) <- parms
+    ## create a polygonGate
+    polygonGate(boundaries=ans)
+}
+
+
 ## A helper function that calls grid.rect in a more user-fiendly way
 glrect <- function (xleft, ybottom, xright, ytop, x=(xleft + xright)/2, 
                     y=(ybottom + ytop)/2, width=xright - xleft,
