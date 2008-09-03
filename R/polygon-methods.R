@@ -113,6 +113,47 @@ setMethod("gpolygon",
 
 
 
+## ==========================================================================
+## for ellipsoidGates
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Plotting parameters are specified as a character vector
+setMethod("gpolygon",
+          signature(x="ellipsoidGate", data="character"), 
+          function(x, data, channels, verbose=TRUE, ...)
+      {
+          if(!missing(channels))
+              data <- channels
+          parms <- parameters(x)
+	  ## We coerce to a polygon gate and plot that
+          gpolygon(ell2Polygon(fd, parameters(x)), verbose=verbose, ...)      
+      })
+
+
+## We can ignore the filterResult, don't need it to plot the gate
+setMethod("gpolygon",
+          signature(x="ellipsoidGate", data="filterResult"), 
+          function(x, data, verbose=TRUE, ...)
+      {
+          dropWarn("filterResult",
+                   "ellipsoidGates", verbose=verbose)
+          gpolygon(x, verbose=verbose, ...)
+      })
+
+
+## we can drop the dataFrame, don't need it for ellipsoidGates
+setMethod("gpolygon",
+          signature(x="ellipsoidGate", data="flowFrame"), 
+          function(x, data, verbose=TRUE, ...)
+      {
+          dropWarn("flowFrame", "ellipsoidGates", verbose=verbose)
+          gpolygon(x, verbose=verbose, ...)
+      })
+
+
+
+
+
+
 
 ## ==========================================================================
 ## for quadGates

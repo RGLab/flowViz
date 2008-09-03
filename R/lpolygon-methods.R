@@ -28,7 +28,7 @@ setMethod("glpolygon",
           function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
       {
           parms <- checkParameterMatch(parameters(x), verbose=verbose)
-          glpolygon(x=x, data=parms, gpar=gpar, ...)
+          glpolygon(x=x, data=parms, gpar=gpar, verbose=FALSE, ...)
       })
 
 
@@ -98,7 +98,7 @@ setMethod("glpolygon",
           }
           res <- rbind(x@min[data], x@max[data])
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
-          return(list(res))
+          return(invisible(list(res)))
       })
 
 ## We can ignore the filterResult, don't need it to plot the gate.
@@ -118,6 +118,47 @@ setMethod("glpolygon",
           dropWarn("flowFrame", "rectangleGates", verbose=verbose)
           glpolygon(x=x, verbose=verbose, gpar=gpar, ...)
       })
+
+
+
+
+## ==========================================================================
+## for ellipsoidGates
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Plotting parameters are specified as a character vector
+setMethod("glpolygon",
+          signature(x="ellipsoidGate", data="character"), 
+          function(x, data, channels, verbose=TRUE, gpar=flowViz.par(),
+                   plot=TRUE, ...)
+      {
+          if(!missing(channels))
+              data <- channels
+          parms <- parameters(x)
+	  ## We coerce to a polygon gate and plot that
+          res <- ell2Polygon(fd, parameters(x))
+          glpolygon(res, verbose=verbose, gpar=gpar, plot=plot, ...)
+          return(invisible(res@boundaries))
+      })
+
+
+## We can ignore the filterResult, don't need it to plot the gate.
+setMethod("glpolygon",
+          signature(x="ellipsoidGate", data="filterResult"), 
+          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
+      {
+          dropWarn("filterResult", "ellipsoidGates", verbose=verbose)
+          glpolygon(x=x, verbose=verbose, gpar=gpar, ...)
+      })
+
+## We can drop the flowFrame, don't need it for rectangleGates.
+setMethod("glpolygon",
+          signature(x="ellipsoidGate", data="flowFrame"), 
+          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
+      {
+          dropWarn("flowFrame", "ellipsoidGates", verbose=verbose)
+          glpolygon(x=x, verbose=verbose, gpar=gpar, ...)
+      })
+
 
 
 
@@ -152,7 +193,7 @@ setMethod("glpolygon",
               res[[i]] <- glpolygon(x=rg, data=data, verbose=FALSE,
                                     gpar=gpar, channels=data, ...)[[1]]
           }
-          res
+          return(invisible(res))
       })
 
 ## We can ignore the filterResult, don't need it to plot the gate.
@@ -195,7 +236,7 @@ setMethod("glpolygon",
               grid.polygon(xp, yp, default.units = "native", gp=gpar)
           res <- cbind(xp,yp)
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
-          return(list(res))
+          return(invisible(list(res)))
       })
 
 ## We can ignore the filterResult, don't need it to plot the gate.
@@ -281,7 +322,7 @@ setMethod("glpolygon",
               res[[i]] <- glpolygon(x=rectangleGate(.gate=tmp),
                                     verbose=FALSE, gpar=gpar, ...)[[1]]
           }
-          res
+          return(invisible(res))
       })
               
 ## Evaluate the filter and pass on to the filterResult method.
@@ -326,7 +367,7 @@ setMethod("glpolygon",
               res[[i]] <- glpolygon(x=polygonGate(boundaries=tmp),
                                      verbose=FALSE, gpar=gpar, ...)[[1]]
           }
-          res
+          return(invisible(res))
       })
 
 ## Evaluate the filter and pass on to the filterResult method.
@@ -347,4 +388,5 @@ setMethod("glpolygon",
 ## We don't know how to plot these, hence we warn
 setMethod("glpolygon",
           signature(x="kmeansFilter", data="ANY"), 
-          function(x, data, ...) nnWarn("kmeansFilter", verbose))
+          function(x, data, verbose=TRUE, ...)
+          nnWarn("kmeansFilter", verbose))

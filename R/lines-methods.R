@@ -226,8 +226,27 @@ setMethod("glines",
           if(!missing(channels))
               data <- channels
           parms <- parameters(x)
-	  ## We coerce to a polygongate and plot that
+	  ## We coerce to a polygon gate and plot that
           glines(ell2Polygon(fd, parameters(x)), verbose=verbose, ...)      
+      })
+
+
+## We can ignore the filterResult, don't need it to plot the gate
+setMethod("glines",
+          signature(x="ellipsoidGate", data="filterResult"), 
+          function(x, data, verbose=TRUE, ...)
+      {
+          dropWarn("filterResult", "ellipsoidGates", verbose=verbose)
+          glines(x, verbose=verbose, ...)
+      })
+
+## we can drop the flowFrame, don't need it for ellipsoidGates
+setMethod("glines",
+          signature(x="ellipsoidGate", data="flowFrame"), 
+          function(x, data, verbose=TRUE, ...)
+      {
+          dropWarn("flowFrame", "ellipsoidGates", verbose=verbose)
+          glines(x, verbose=verbose, ...)
       })
 
 

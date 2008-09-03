@@ -77,6 +77,24 @@ setMethod("glpoints",
 
 
 ## ==========================================================================
+## for ellipsoidGates
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## We convert to a polygon gate and pass that on
+setMethod("glpoints",
+          signature(x="ellipsoidGate", data="flowFrame", channels="character"), 
+          function(x, data, channels, verbose=TRUE,
+          filterResult=NULL, ...)
+      {
+          x <- ell2Polygon(fd, parameters(x))
+          if(!is.null(filterResult))
+              dropWarn("filterResult", "ellipsoidGates", verbose=verbose)
+          addLpoints(x=x, data=data, channels=channels, verbose=verbose,
+                     filterResult=NULL, ...)
+      })
+
+
+
+## ==========================================================================
 ## for quadGates
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## We plot this as four individual rectangle gates.

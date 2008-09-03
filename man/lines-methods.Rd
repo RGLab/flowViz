@@ -25,6 +25,9 @@
 \alias{glines,rectangleGate,character-method}
 \alias{glines,rectangleGate,filterResult-method}
 \alias{glines,rectangleGate,flowFrame-method}
+\alias{glines,ellipsoidGate,character-method}
+\alias{glines,ellipsoidGate,filterResult-method}
+\alias{glines,ellipsoidGate,flowFrame-method}
 
 \title{ Drawing filter boundaries }
 
@@ -94,7 +97,7 @@
     \item{x = "norm2Filter", data = "logicalFilterResult"}{ see above }
 
     \item{x = "polygonGate", data = "character"}{ We can plot a
-      code{linkS4class{polygonGate}} directly from the gate
+      \code{\link[flowCore]{polygonGate}} directly from the gate
       definition. }
 
     \item{x = "polygonGate", data = "filterResult"}{ see above }
@@ -102,7 +105,7 @@
     \item{x = "polygonGate", data = "flowFrame"}{ see above }
 
     \item{x = "quadGate", data = "character"}{ We can plot a
-      code{linkS4class{quadGate}} directly from the gate
+      \code{\link[flowCore]{quadGate}} directly from the gate
       definition. }
 
     \item{x = "quadGate", data = "filterResult"}{ see above }
@@ -110,12 +113,21 @@
     \item{x = "quadGate", data = "flowFrame"}{ see above }
 
     \item{x = "rectangleGate", data = "character"}{ We can plot a
-      code{linkS4class{rectangleGate}} directly from the gate
+      \code{\link[flowCore]{rectangleGate}} directly from the gate
       definition. }
 
     \item{x = "rectangleGate", data = "filterResult"}{ see above }
 
     \item{x = "rectangleGate", data = "flowFrame"}{ see above }
+
+    \item{x = "ellipsoidGate", data = "character"}{ We can plot a
+      \code{\link[flowCore]{rectangleGate}} directly from the gate
+      definition. }
+
+    \item{x = "ellipsoidGate", data = "filterResult"}{ see above }
+
+    \item{x = "ellipsoidGate", data = "flowFrame"}{ see above }
+    
     
   }
 }

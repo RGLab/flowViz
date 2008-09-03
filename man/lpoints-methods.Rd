@@ -12,6 +12,7 @@
 \alias{glpoints,polygonGate,flowFrame,character-method}
 \alias{glpoints,quadGate,flowFrame,character-method}
 \alias{glpoints,rectangleGate,flowFrame,character-method}
+\alias{glpoints,ellipsoidGate,flowFrame,character-method}
 \alias{glpoints,filterResult,flowFrame,ANY-method}
 
 
@@ -90,6 +91,9 @@
       see above }
     
     \item{x = "rectangleGate", data = "flowFrame", channels =
+      "character"}{ see above }
+
+    \item{x = "ellipsoidGate", data = "flowFrame", channels =
       "character"}{ see above }
 
   }
