@@ -45,8 +45,8 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
 
     ## Bin the data and compute local variances and locations
     time <- flowCore:::findTimeChannel(xx= exprs(x[[1]]))
-    timeData <- fsApply(x=x, flowCore:::prepareSet, parm=channel, time=time,
-                        binSize=binSize, use.exprs=TRUE, simplify=FALSE)
+    timeData <- fsApply(x, flowCore:::prepareSet, parm=channel, time=time,
+                        binSize=binSize, use.exprs=FALSE, simplify=FALSE)
     opar <- par(c("mar", "mgp", "mfcol", "mfrow", "las"))
     on.exit(par(opar))
     type <- match.arg(type)
@@ -220,7 +220,10 @@ nativePlot <- function(y, p, main=paste("time line for", p),
     m <- mean(sapply(y, function(z)
                  {
                      sel <- z$smooth[,2]>range[1] & z$smooth[,2]<range[2]
-                     mean(z$smooth[sel,2])
+                     if(length(sel))
+                         mean(z$smooth[sel,2])
+                     else
+                         z$smooth[1,2]
                  }))
     maxY <-  max(c(sapply(y,function(z)
                           max(z$smooth[,2],na.rm=TRUE)),
