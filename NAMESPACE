@@ -2,6 +2,7 @@ import(flowCore)
 
 ## export("parallelCoordinates.rgl", "parallelCoord")
 
+useDynLib("flowViz")
 
 importFrom(graphics,
            "lines",
@@ -62,7 +63,8 @@ export("panel.densityplot.flowset",
        "prepanel.xyplot.flowset",
        "panel.xyplot.flowset",
        "timeLinePlot",
-       "contour")
+       "contour",
+       "hexbin")
 
 
 
