@@ -52,7 +52,7 @@ void binHex(int *n, double *x, double *y, int *xBins, int *nBin,
     ybin[i] = 0;
   }
 
-  for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < *n; ++i) {
     double sx = c1 * x[i];
     double sy = c2 * y[i];
     int i1 = (int) (sy + .5);
