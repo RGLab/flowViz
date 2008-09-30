@@ -10,7 +10,7 @@ hexbin <- function(x, y, bins = 50) {
     xbin = rep(0, nB)
     ybin = rep(0, nB)
     counts = rep(0L, nB)
-    res = .Call("binHex", as.integer(length(x)),  x = as.double(x), 
+    res = .C("binHex", as.integer(length(x)),  x = as.double(x), 
        y = as.double(y), as.integer(bins), as.integer(nB), 
        counts = as.integer(counts),
        xbin = xbin, ybin = ybin, PACKAGE="flowViz")

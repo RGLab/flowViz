@@ -5,13 +5,13 @@
 
 #include "flowViz.h"
 
-static const R_CallMethodDef CallEntries[] = {
+static const R_CMethodDef CEntries[] = {
     {"binHex", (DL_FUNC) &binHex, 8},
     {NULL, NULL, 0}
 };
 
 void R_init_flowViz(DllInfo *dll)
 {
-    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_registerRoutines(dll, NULL, CEntries, NULL, NULL);
 }
 
