@@ -325,11 +325,6 @@ splom(GvHD[["s10a07"]], smooth = FALSE,
 ## time plot of individual flowFrames
 xyplot(GvHD[["s5a07"]], time = "Time")
 
-xyplot(`FSC-H` + `SSC-H` + `FL1-H` ~ Time, GvHD[["s5a07"]],
-       aspect = "xy", outer = TRUE,
-       scales = list(y = "free"),
-       type = "l", smooth = FALSE)
-
 
 ## a bivariate scatterplot
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a01"]], nbin = 100)

@@ -71,29 +71,53 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="rectangleGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par(), plot=TRUE, ...)
+                   gpar=flowViz.par(), plot=TRUE, names=FALSE, ...)
       {
           if(!missing(channels))
               data <- channels
           parms <- parameters(x)
-          usr <- rep(c(-1e4, 1e4), 2)
+          xlim <- state("xlim")
+          ylim <- state("ylim")
           if(plot){
+              if(!is.character(names))
+                  n <- paste(identifier(x), "+", sep="")
+              else{
+                  n <- names
+                  names <- TRUE
+              }
               if(length(parms)==1){
                   mt <- match(parms, data)## 1D rectangular gate (region gate)
-                  if(mt==1)
-                      glrect(fixInf(x@min, usr[1:2]), usr[3],
-                             fixInf(x@max, usr[1:2]), usr[4], gp=gpar, ...)
-                  else if(mt==2)
-                      glrect(usr[1], fixInf(x@min, usr[3:4]), usr[2],
-                             fixInf(x@max, usr[3:4]), gp=gpar, ...)
-                  else
+                  if(mt==1){
+                      glrect(fixInf(x@min, xlim*2), ylim[1]*2,
+                             fixInf(x@max, xlim*2), ylim[2]*2, gp=gpar, ...)
+                      if(names){
+                          xx <- c(fixInf(x@min, xlim), fixInf(x@max, xlim))
+                          panel.text(mean(xx), ylim[2], n, pos=1,
+                                     col="#00000040", cex=1.2)
+                      }   
+                  }   
+                  else if(mt==2){
+                      glrect(xlim[1]*2, fixInf(x@min, ylim*2), xlim[2]*2,
+                             fixInf(x@max, ylim*2), gp=gpar, ...)
+                      if(names){
+                          yy <- c(fixInf(x@min, ylim), fixInf(x@max, ylim))
+                          panel.text(xlim[1], mean(yy), n, pos=4,
+                                     col="#00000040", cex=1.2)
+                      }   
+                  }else
                       stop("How did you end up here????")
               }else{## 2D rectangular gate   
                   bl <- x@min[data]
                   tr <- x@max[data]
-                  glrect(fixInf(bl[1], usr[1:2]), fixInf(bl[2], usr[3:4]),
-                         fixInf(tr[1], usr[1:2]),  fixInf(tr[2], usr[3:4]),
+                  glrect(fixInf(bl[1], xlim*2), fixInf(bl[2], ylim*2),
+                         fixInf(tr[1], xlim*2),  fixInf(tr[2], ylim*2),
                          gp=gpar, ...)
+                  if(names){
+                       xx <- c(fixInf(bl[1], xlim), fixInf(tr[1], xlim))
+                       yy <- c(fixInf(bl[2], ylim), fixInf(tr[2], ylim))
+                       panel.text(mean(xx), mean(yy), n, col="#00000040",
+                                  adj=0.5, cex=1.2)
+                   }
               }
           }
           res <- rbind(x@min[data], x@max[data])
@@ -129,14 +153,18 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="ellipsoidGate", data="character"), 
           function(x, data, channels, verbose=TRUE, gpar=flowViz.par(),
-                   plot=TRUE, ...)
+                   plot=TRUE, names=FALSE, ...)
       {
           if(!missing(channels))
               data <- channels
           parms <- parameters(x)
 	  ## We coerce to a polygon gate and plot that
-          res <- ell2Polygon(fd, parameters(x))
+          res <- ell2Polygon(x, parameters(x))
           glpolygon(res, verbose=verbose, gpar=gpar, plot=plot, ...)
+          n <- paste(identifier(x), "+", sep="")
+          if(names)
+              panel.text(x@mean[1], x@mean[2], n, adj=0.5,
+                         col="#00000040", cex=1.2)
           return(invisible(res@boundaries))
       })
 
@@ -172,14 +200,17 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="quadGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par(), ...)
+                   gpar=flowViz.par(), names=NULL, ...)
       {
           if(!missing(channels))
               data <- channels
+          if(!is.null(names) && names==TRUE)
+              stop("Either the data or a filterResult have to be provided ",
+                   "to print names", call.=FALSE)
           v <- x@boundary[data[1]]
           h <- x@boundary[data[2]]
-          mat <- matrix(c(-Inf, h, v, Inf, h, Inf, v, Inf, -Inf, h, -Inf,
-                          v, h, Inf, -Inf, v), byrow=TRUE, ncol=4)
+          mat <- matrix(c(-Inf, v, h, Inf, v, Inf, h, Inf, -Inf, v, -Inf,
+                          h, v, Inf, -Inf, h), byrow=TRUE, ncol=4)
           ## we want to be able to use different colors for each population
           fill <- rep(gpar$fill, 4)
           col <- rep(gpar$col, 4)
@@ -189,29 +220,59 @@ setMethod("glpolygon",
               gpar$fill <- fill[i]
               rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
                                   dimnames=list(c("min", "max"),
-                                  parameters(x))))
+                                  data)))
               res[[i]] <- glpolygon(x=rg, data=data, verbose=FALSE,
                                     gpar=gpar, channels=data, ...)[[1]]
           }
+          if(is.character(names)){
+              xlim <- state("xlim")
+              ylim <- state("ylim")
+              yoff <- diff(ylim)/50
+              trans <- match(colnames(names)[1], data)-1
+              if(trans)
+                  names <- matrix(c(names[2,2], names[2,1], names[1,2],
+                                    names[1,1]), ncol=2)
+              panel.text(c(mean(c(xlim[1], v)), mean(c(v, xlim[2]))),
+                         rep(ylim[2], 2)-yoff, names[1,], adj=c(0.5, 1),
+                         col="#00000040", cex=1.2)
+              panel.text(c(mean(c(xlim[1], v)), mean(c(v, xlim[2]))),
+                         rep(ylim[1], 2)+yoff, names[2,], adj=c(0.5, 0),
+                         col="#00000040", cex=1.2)
+          }
+              
           return(invisible(res))
       })
 
 ## We can ignore the filterResult, don't need it to plot the gate.
 setMethod("glpolygon",
           signature(x="quadGate", data="filterResult"), 
-          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
+          function(x, data, verbose=TRUE, gpar=flowViz.par(),
+                   names=FALSE, ...)
       {
           dropWarn("filterResult", "quadGates", verbose=verbose)
-          glpolygon(x=x, verbose=verbose, gpar=gpar, ...)
+          glpolygon(x=x, verbose=verbose, gpar=gpar,
+                    names=ifelse(names, names(x), NULL), ...)  
       })
 
 ## We can drop the dataFrame, don't need it for rectangleGates.
 setMethod("glpolygon",
           signature(x="quadGate", data="flowFrame"), 
-          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
+          function(x, data, verbose=TRUE, gpar=flowViz.par(),
+                   names=FALSE, ...)
       {
           dropWarn("flowFrame", "quadGates", verbose=verbose)
-          glpolygon(x=x, verbose=verbose, gpar=gpar, ...)
+          names <- if(names){
+              desc <- flowCore:::popNames(data, x)
+              n <- matrix(c(sprintf("%s-%s+", desc[1], desc[2]),
+                            sprintf("%s-%s-", desc[1], desc[2]),
+                            sprintf("%s+%s+", desc[1], desc[2]),
+                            sprintf("%s+%s-", desc[1], desc[2])),
+                          ncol=2)
+              colnames(n) <- names(desc)
+              n
+          } else NULL
+              glpolygon(x=x, verbose=verbose, gpar=gpar,
+                        names=names, ...)
       })
 
 
@@ -225,15 +286,58 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="polygonGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par(), plot=TRUE, ...)
+                   gpar=flowViz.par(), plot=TRUE, names=FALSE,
+                   inverse=FALSE, ...)
       {
           if(!missing(channels))
               data <- channels
           xp <- x@boundaries[,data[1]]
           yp <- x@boundaries[,data[2]]
           class(gpar) <- "gpar"
-          if(plot)
-              grid.polygon(xp, yp, default.units = "native", gp=gpar)
+          if(plot){
+              if(!is.character(names))
+                  n <- paste(identifier(x), "+", sep="")
+              else{
+                  n <- names
+                  names <- TRUE
+              }
+              if(inverse){
+                  mx <- which.min(yp)
+                  xpi <- rep(xp, 2)
+                  ypi <- rep(yp, 2)
+                  nextDiff <- min(which(xpi[-(1:mx)] != xpi[mx]))+mx
+                  if(xpi[nextDiff] < xp[mx]){
+                      xp <- rev(xp)
+                      yp <- rev(yp)
+                      mx <- which.min(yp)
+                  }
+                  xlim <- state("xlim")
+                  ylim <- state("ylim")
+                  xoff <- diff(xlim)
+                  yoff <- diff(ylim)
+                  boundingBox <- cbind(c(rep(xlim-xoff, 2),
+                                         rep(xlim+xoff, 2)),
+                                       c(ylim-yoff, ylim+yoff,
+                                         ylim+yoff, ylim-yoff))
+                  xpi <- c(rep(boundingBox[1,1], 2), xp, xp[1],
+                          boundingBox[,1], boundingBox[1,1])
+                  ypi <- c(boundingBox[1,2], yp[mx], yp, yp[1],
+                          yp[mx], boundingBox[-1,2],
+                             boundingBox[1,2])
+                  #browser()
+                  gpari <- gpar
+                  gpari$col <- "transparent"
+                  grid.polygon(xpi, ypi, default.units = "native", gp=gpari)
+                  gpari$col <- gpar$col
+                  gpari$fill <- "transparent"
+                  grid.polygon(xp, yp, default.units = "native", gp=gpari)
+              }else{
+                  grid.polygon(xp, yp, default.units = "native", gp=gpar)
+              }
+              if(names)
+                  panel.text(mean(xp), mean(yp), n, adj=c(0.5, 0.5),
+                             col="#00000040", cex=1.2)
+          }
           res <- cbind(xp,yp)
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
           return(invisible(list(res)))
@@ -272,11 +376,13 @@ setMethod("glpolygon",
 ## this into a polygon gate and plot that.
 setMethod("glpolygon",
           signature(x="norm2Filter", data="logicalFilterResult"), 
-          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...){
+          function(x, data, verbose=TRUE, gpar=flowViz.par(),
+                   names=FALSE, ...){
               checkFres(filter=x, fres=data, verbose=verbose)
               fd <- filterDetails(data, identifier(x))
-              glpolygon(x=norm2Polygon(fd, parameters(x)),
-                       verbose=FALSE, gpar=gpar, ...)
+              np <- norm2Polygon(fd, parameters(x))
+              identifier(np) <- identifier(x)
+              glpolygon(x=np, verbose=FALSE, gpar=gpar, names=names, ...)
           })
 
 ## Evaluate the filter and pass on to the filterResult method.
@@ -302,7 +408,8 @@ setMethod("glpolygon",
 ## as a series of rectangleGates.
 setMethod("glpolygon",
           signature(x="curv1Filter", data="multipleFilterResult"), 
-          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
+          function(x, data, verbose=TRUE, gpar=flowViz.par(),
+                   names=FALSE, ...)
       {
           checkFres(filter=x, fres=data, verbose=verbose)
           fd <- filterDetails(data, identifier(x))
@@ -314,13 +421,17 @@ setMethod("glpolygon",
           fill <- rep(gpar$fill, lb)
           col <- rep(gpar$col, lb)
           res <- vector(lb, mode="list")
+          n <- names(data)[-1]
           for(i in 1:lb){
               tmp <- matrix(bounds[[i]], nrow=2)
               colnames(tmp) <- parameters(x)
               gpar$col <- col[i]
               gpar$fill <- fill[i]
-              res[[i]] <- glpolygon(x=rectangleGate(.gate=tmp),
-                                    verbose=FALSE, gpar=gpar, ...)[[1]]
+              res[[i]] <- glpolygon(x=rectangleGate(.gate=tmp,
+                                    filterId=n[i]),
+                                    verbose=FALSE, gpar=gpar,
+                                    names=ifelse(names, n[i], FALSE),
+                                    ...)[[1]]
           }
           return(invisible(res))
       })
@@ -349,7 +460,8 @@ setMethod("glpolygon",
 ## as a series of polygonGates.
 setMethod("glpolygon",
           signature(x="curv2Filter", data="multipleFilterResult"), 
-          function(x, data, verbose=TRUE, gpar=flowViz.par(), ...)
+          function(x, data, verbose=TRUE, gpar=flowViz.par(),
+                   names=FALSE, ...)
       {
           checkFres(filter=x, fres=data, verbose=verbose)
           fd <- filterDetails(data, identifier(x))
@@ -359,13 +471,17 @@ setMethod("glpolygon",
           fill <- rep(gpar$fill, lf)
           col <- rep(gpar$col, lf)
           res <- vector(lf, mode="list")
+          n <- names(data)[-1]
           for(i in 1:lf){
               tmp <- cbind(polygons[[i]]$x, polygons[[i]]$y)
               colnames(tmp) <- parameters(x)
               gpar$col <- col[i]
               gpar$fill <- fill[i]
-              res[[i]] <- glpolygon(x=polygonGate(boundaries=tmp),
-                                     verbose=FALSE, gpar=gpar, ...)[[1]]
+              res[[i]] <- glpolygon(x=polygonGate(boundaries=tmp,
+                                     filterId=n[i]),
+                                     verbose=FALSE, gpar=gpar,
+                                    names=ifelse(names, n[i], FALSE),
+                                    ...)[[1]]
           }
           return(invisible(res))
       })
@@ -390,3 +506,18 @@ setMethod("glpolygon",
           signature(x="kmeansFilter", data="ANY"), 
           function(x, data, verbose=TRUE, ...)
           nnWarn("kmeansFilter", verbose))
+
+
+
+## ==========================================================================
+## for complementFilter
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## We have to do this on the level of polygons or rectangles, so here we
+## only set a flag and pass on the basic filter.
+setMethod("glpolygon",
+          signature(x="complementFilter", data="ANY"), 
+          function(x, data, verbose=TRUE, inverse=FALSE, ...)
+      {
+          glpolygon(x@filters[[1]], data, verbose=verbose,
+                    inverse=!inverse, ...)
+      })

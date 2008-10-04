@@ -28,23 +28,27 @@ panel.densityplot.flowset <-
     superpose.polygon <- trellis.par.get("superpose.polygon")
     reference.line <- trellis.par.get("reference.line")
     col.signif <- "red"
-
     ycode <- as.numeric(y)
+    validName <- !length(grep("\\(", channel.name))
     if (any(duplicated(ycode)))
         warning("Some combinations seem to have multiple samples.  \n  ",
                 "Only one will be used.")
     nnm <- as.character(x)
-    if(is(filter, "filter")){
-        fl <- vector(length(nnm), mode="list")
-        names(fl) <- nnm
-        for(n in nnm)
-            fl[[n]] <- filter
-        filter <- fl
-    }
-    if(!is.null(filter) && !all(sapply(filter, is, "filter")))
-        stop("'filter' must inherit from class 'filter' or a be named list of ",
-             "such objects with names matching to frame names.", call.=FALSE)
-    
+    if(!is.null(filter)){
+        if(!is.list(filter)){
+            if(is(filter, "filter")){
+                filter <- list(filter)
+                names(filter) <- nnm
+            }
+        }else if(!is(filter, "filterResultList"))
+            filter <- as(filter, "filterResultList")
+        if(!(nnm %in% names(filter) || !is(filter[[nnm]] ,"filter"))){
+            warning("'filter' must either be a filterResultList, a single\n",
+                    "filter object or a named list of filter objects.",
+                    call.=FALSE)
+            filter <- NULL
+        }
+    }  
     ny <- nlevels(y)
     col <- rep(col, length = ny)
     lty <- rep(lty, length = ny)
@@ -96,7 +100,7 @@ panel.densityplot.flowset <-
                 panel.lines(rep(rl[2],2), c(i, i+sum(pr)/lx*height),
                             col=desat(col[i]), lwd=3)
             ## add the filterResult if possible
-            if(!is.null(filter[[nm]])){    
+            if(!is.null(filter[[nm]]) && validName){    
                 bounds <- glpolygon(filter[[nm]], frames[[nm]],
                                     channels=parm,
                                     verbose=FALSE, plot=FALSE)

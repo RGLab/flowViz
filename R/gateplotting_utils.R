@@ -35,13 +35,21 @@ set.flowViz.par <- function(x)
    flowViz.state[["par"]] <- modifyList(flowViz.state[["par"]], x)
 
 
-## record the type of plot in the internal environment
+## record the type of plot or the limits in the internal environment
 plotType <- function(type, parms){
     flowViz.state[["plotted"]] <- TRUE
     flowViz.state[["type"]] <- type
     flowViz.state[["parameters"]] <- parms
     return(invisible(NULL))
 }
+plotLims <- function(xlim, ylim){
+    if(!missing(xlim))
+       flowViz.state[["xlim"]] <- xlim
+    if(!missing(ylim))
+        flowViz.state[["ylim"]] <- ylim
+    return(invisible(NULL))
+}
+
 
 
 ## We only know how to add the gate boundaries if the definiton of that gate
@@ -95,9 +103,10 @@ checkParameterMatch <- function(parms, channels, verbose=TRUE, ...)
 ## We check that the IDs of a flowFrame and a filter are matching
 checkIdMatch <- function(x, f)
 {
-    if(x@frameId != identifier(f))
-        stop("The filter was evaluated on flowFrame '",
-             x@frameId, "'\n  but the frame provided is '",
+    if(!identifier(f) %in% x@frameId)
+        stop("The filter was evaluated on flowFrame(s)\n'",
+             paste(x@frameId, collapse="', '", sep=),
+             "'\n  but the frame provided is '",
              identifier(f), "'.", call.=FALSE)
 }
 

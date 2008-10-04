@@ -3,6 +3,7 @@
 \alias{glpolygon}
 \alias{glpolygon-methods}
 \alias{glpolygon,curv1Filter,ANY-method}
+\alias{glpolygon,complementFilter,ANY-method}
 \alias{glpolygon,curv1Filter,flowFrame-method}
 \alias{glpolygon,curv1Filter,missing-method}
 \alias{glpolygon,curv1Filter,multipleFilterResult-method}

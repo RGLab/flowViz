@@ -109,6 +109,7 @@ setMethod("xyplot",
                    gpar=flowViz.par(), xlim, ylim, ...)
       {
           ## deparse the formula structure
+          ## FIXME: shouldn't all.vars be helpful here?!?
           channel.y <- x[[2]]
           channel.x <- x[[3]]
           if (length(channel.x) == 3)
@@ -116,18 +117,21 @@ setMethod("xyplot",
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
           ## find useful xlim and ylim defaults
-          if(missing(xlim) &&
-             !length(grep("`", channel.x.name, fixed=TRUE))){
-              xlim <- unlist(range(data, channel.x.name))
-              xd <- diff(xlim)/15
-              xlim <- xlim + c(-1,1)*xd
+          if(missing(xlim)){
+              xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+                  tmp <- unlist(range(data, channel.x.name))
+                  xd <- diff(tmp)/15
+                  tmp + c(-1,1)*xd
+              }else NULL
           }
-          if(missing(ylim) &&
-             !length(grep("`", channel.y.name, fixed=TRUE))){
-              ylim <- unlist(range(data, channel.y.name))
-              yd <- diff(ylim)/15
-              ylim <- ylim + c(-1,1)*yd
+          if(missing(ylim)){
+              ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
+                  tmp <- unlist(range(data, channel.y.name))
+                  yd <- diff(tmp)/15
+                  tmp + c(-1,1)*yd
+              }else NULL
           }
+          plotLims(xlim, ylim)
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, 
                  panel=panel, frame=data, channel.x.name=channel.x.name,
                  channel.y.name=channel.y.name, gpar=gpar, xlim=xlim,
@@ -200,9 +204,16 @@ setMethod("xyplot",
           function(x, data, xlab, ylab, as.table=TRUE,
                    prepanel=prepanel.xyplot.flowset,
                    panel=panel.xyplot.flowset, pch = ".",
-                   smooth=TRUE, filter=NULL,
+                   smooth=TRUE, filter=NULL, xlim, ylim, 
                    gpar=NULL, ...)
       {
+          if (length(x[[3]]) == 1) ## no conditioning variable
+          {
+              tmp <- x[[3]]
+              x[[3]] <- (~dummy | name)[[2]]
+              x[[3]][[2]] <- tmp
+          }
+          
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
@@ -227,6 +238,22 @@ setMethod("xyplot",
           channel.y.name <- expr2char(channel.y)
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
+          ## find useful xlim and ylim defaults
+          if(missing(xlim)){
+              xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+                  tmp <- unlist(range(data[[1]], channel.x.name))
+                  xd <- diff(tmp)/15
+                  tmp + c(-1,1)*xd
+              }else NULL
+          }
+          if(missing(ylim)){
+              ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
+                  tmp <- unlist(range(data[[1]], channel.y.name))
+                  yd <- diff(tmp)/15
+                  tmp + c(-1,1)*yd
+              }else NULL
+          }
+          plotLims(xlim, ylim)
           ## axis annotation
           if (missing(xlab)) xlab <- channel.x.name
           if (missing(ylab)) ylab <- channel.y.name
@@ -237,7 +264,8 @@ setMethod("xyplot",
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, filter=filter,
                       as.table=as.table, xlab=xlab, ylab=ylab,
-                      pch=pch, smooth=smooth, gpar=gpar, ...)
+                      pch=pch, smooth=smooth, gpar=gpar, xlim=xlim,
+                      ylim=ylim, ...)
       })
 
 
@@ -299,14 +327,21 @@ panel.xyplot.flowset <-
     validName <- !(length(grep("\\(", channel.x.name)) ||
                    length(grep("\\(", channel.y.name)))
     nm <- x
-    if(is(filter, "filter")){
-        filter <- list(filter)
-        names(filter) <- nm
+    if(!is.null(filter)){
+        if(!is.list(filter)){
+            if(is(filter, "filter")){
+                filter <- list(filter)
+                names(filter) <- nm
+            }
+        }else if(!is(filter, "filterResultList"))
+            filter <- as(filter, "filterResultList")
+        if(!(nm %in% names(filter) || !is(filter[[nm]] ,"filter"))){
+            warning("'filter' must either be a filterResultList, a single\n",
+                    "filter object or a named list of filter objects.",
+                    call.=FALSE)
+            filter <- NULL
+        }
     }
-    if(!is.null(filter) && (!(nm %in% names(filter) ||
-                              !is(filter[[nm]] ,"filter"))))
-        stop("'filter' must inherit from class 'filter' or a be list of ",
-             "such objects.", call.=FALSE) 
     xx <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     yy <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
 
@@ -330,8 +365,9 @@ panel.xyplot.flowset <-
             addMargin(r[2,channel.x.name], yy[selxL], r, l, nb, b=TRUE)
             addMargin(xx[selyS], r[1,channel.y.name], r, l, nb)
             addMargin(xx[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
-        }else
-        panel.smoothScatter(xx, yy, ...)
+        }else{
+            panel.smoothScatter(xx, yy, ...)
+        }
         plotType("gsmooth", c(channel.x.name, channel.y.name))
         if(!is.null(filter) && validName){
             if(is.null(gpar))
