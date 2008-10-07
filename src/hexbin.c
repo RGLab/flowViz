@@ -1,6 +1,7 @@
 /*
 
-  Code based, very heavily in some parts on the cpp Binner package
+  Code based, very heavily in some parts on the cpp Binner class from
+  the scagnostics package.
 
 which includes this statement:
 ****************
