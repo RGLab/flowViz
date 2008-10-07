@@ -12,6 +12,6 @@ static const R_CMethodDef CEntries[] = {
 
 void R_init_flowViz(DllInfo *dll)
 {
-    R_registerRoutines(dll, NULL, CEntries, NULL, NULL);
+    R_registerRoutines(dll, CEntries, NULL, NULL, NULL);
 }
 
