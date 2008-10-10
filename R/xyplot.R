@@ -315,7 +315,8 @@ prepanel.xyplot.flowset <-
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.xyplot.flowset <-
     function(x, frames, channel.x, channel.y, channel.x.name, channel.y.name, 
-             filter=NULL, pch=".", smooth=TRUE, gpar, margin=TRUE, ...)
+             filter=NULL, pch=".", smooth=TRUE, gpar, margin=TRUE,
+             outline=FALSE, ...)
 {
     x <- as.character(x)
     if (length(x) > 1) stop("must have only one flow frame per panel")
@@ -380,11 +381,17 @@ panel.xyplot.flowset <-
     else{
         panel.xyplot(xx, yy, pch=pch, ...)
         plotType("gpoints", c(channel.x.name, channel.y.name))
-        col = brewer.pal(9, "Set1")
-         if(!is.null(filter) && validName){
-             glpoints(filter[[nm]], frames[[nm]],
-                      channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, gpar=gpar, pch=pch, ...)
+        col <- brewer.pal(9, "Set1")
+        if(is.null(gpar$col))
+            gpar$col <- col
+        if(!is.null(filter) && validName){
+            glpoints(filter[[nm]], frames[[nm]],
+                     channels=c(channel.x.name, channel.y.name),
+                     verbose=FALSE, gpar=gpar, pch=pch, ...)
+            if(outline)
+                glpolygon(filter[[nm]], frames[[nm]],
+                          channels=c(channel.x.name, channel.y.name),
+                          verbose=FALSE, gpar=gpar, ...)
          }
     }
 }
