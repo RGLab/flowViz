@@ -64,13 +64,15 @@ setMethod("glpoints",
 ## much the default.
 setMethod("glpoints",
           signature(x="rectangleGate", data="flowFrame", channels="character"), 
-          function(x, data, channels, verbose=TRUE,
-          filterResult=NULL, ...)
+          function(x, data, channels, verbose=TRUE, filterResult=NULL,
+                   gpar=flowViz.par.get(), names=FALSE, ...)
       {
           if(!is.null(filterResult))
               dropWarn("filterResult", "rectangleGates", verbose=verbose)
           addLpoints(x=x, data=data, channels=channels, verbose=verbose,
-                     filterResult=NULL, ...)
+                     filterResult=NULL, gpar=gpar$gate, ...)
+          ## add names if necessary
+          addName(x, names, channels, gpar$gate.text)
       })
 
 
@@ -82,14 +84,15 @@ setMethod("glpoints",
 ## We convert to a polygon gate and pass that on
 setMethod("glpoints",
           signature(x="ellipsoidGate", data="flowFrame", channels="character"), 
-          function(x, data, channels, verbose=TRUE,
-          filterResult=NULL, ...)
+          function(x, data, channels, verbose=TRUE, filterResult=NULL,
+                   gpar=flowViz.par.get(), names=FALSE, ...)
       {
-          x <- ell2Polygon(fd, parameters(x))
+          xe <- ell2Polygon(x, parameters(x))
           if(!is.null(filterResult))
               dropWarn("filterResult", "ellipsoidGates", verbose=verbose)
-          addLpoints(x=x, data=data, channels=channels, verbose=verbose,
-                     filterResult=NULL, ...)
+          addLpoints(x=xe, data=data, channels=channels, verbose=verbose,
+                     filterResult=NULL, gpar=gpar$gate, ...)
+          addName(x, names, channels, gpar$gate.text)
       })
 
 
@@ -100,8 +103,8 @@ setMethod("glpoints",
 ## We plot this as four individual rectangle gates.
 setMethod("glpoints",
           signature(x="quadGate", data="flowFrame", channels="character"), 
-          function(x, data, channels, verbose=TRUE, gpar, filterResult=NULL,
-                   ...)
+          function(x, data, channels, verbose=TRUE, filterResult=NULL,
+                   gpar=flowViz.par.get(), names=FALSE, ...)
       {
           if(!is.null(filterResult))
               dropWarn("filterResult", "quadGates", verbose=verbose)
@@ -111,20 +114,15 @@ setMethod("glpoints",
           mat <- matrix(c(-Inf, v, h, Inf, v, Inf, h, Inf, -Inf, v, -Inf,
                           h, v, Inf, -Inf, h), byrow=TRUE, ncol=4)
           ## we want to be able to use different colors for each population
-          opar <- flowViz.par()
-          opar$col <- NA
-          if(!missing(gpar))
-              opar <- modifyList(opar, gpar)
-          if(!is.na(opar$col))
-              col <- rep(gpar$col, 4)
-          else
-              col <- 2:5
+          col <- rep(gpar$gate$col, 4)
           for(i in 1:4){
-              gpar$col <- col[i]
+              gpar$gate$col <- col[i]
               rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
-                                  dimnames=list(c("min", "max"), channels)))
+                                               dimnames=list(c("min", "max"),
+                                                             channels)))
               glpoints(x=rg, data=data, channels=channels, verbose=FALSE,
                        gpar=gpar, ...)
+              addName(x, names, data, gp=gpar$gate.text)
           }
       })
 
@@ -139,12 +137,14 @@ setMethod("glpoints",
 setMethod("glpoints",
           signature(x="polygonGate", data="flowFrame", channels="character"), 
           function(x, data, channels, verbose=TRUE,
-                   filterResult=NULL, ...)
+                   filterResult=NULL, gpar=flowViz.par.get(), names=FALSE,
+                   ...)
       {
           if(!is.null(filterResult))
               dropWarn("filterResult", "polygonGates", verbose=verbose)
           addLpoints(x=x, data=data, channels=channels, verbose=verbose,
-                     filterResult=NULL, ...)
+                     filterResult=NULL, gpar=gpar$gate, ...)
+          addName(x, names, channels, gp=gpar$gate.text)
       })
 
 
@@ -157,11 +157,17 @@ setMethod("glpoints",
 ## so no need for a warning here.
 setMethod("glpoints",
           signature(x="norm2Filter", data="flowFrame", channels="character"), 
-          function(x, data, channels, verbose=TRUE,
-                   filterResult=NULL, ...)
+          function(x, data, channels, verbose=TRUE, filterResult=NULL,
+                   names=FALSE, ...)
       {
-          addLpoints(x=x, data=data, channels=channels, verbose=verbose,
-                      filterResult=filterResult, ...)
+          if(is.null(filterResult))
+              filterResult <- filter(data, x)
+          checkFres(filter=x, fres=filterResult, verbose=verbose)
+          fd <- filterDetails(filterResult, identifier(x))
+          np <- norm2Polygon(fd, parameters(x))
+          identifier(np) <- identifier(x)
+          glpoints(x=np, data=data, channels=channels, verbose=FALSE,
+                   names=names, ...)
       })
 
 
@@ -175,10 +181,14 @@ setMethod("glpoints",
 setMethod("glpoints",
           signature(x="curv1Filter", data="flowFrame", channels="character"), 
           function(x, data, channels, verbose=TRUE,
-                   filterResult=NULL, pch=".", ...)  
+                   filterResult=NULL, gpar=flowViz.par.get(), names=FALSE,
+                   ...)  
       {
-           multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
-                         filterResult=filterResult, pch=pch, gpar, ...)
+          if(is.null(filterResult))
+              filterResult <- filter(data, x)
+          multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
+                         filterResult=filterResult, gpar=gpar$gate, ...)
+          addName(x, name=names, data=filterResult, gp=gpar$gate.text)
       })
 
 
@@ -192,10 +202,14 @@ setMethod("glpoints",
 setMethod("glpoints",
           signature(x="curv2Filter", data="flowFrame", channels="character"), 
           function(x, data, channels, verbose=TRUE,
-                   filterResult=NULL, pch=".", ...)
+                   filterResult=NULL, gpar=flowViz.par.get(), names=FALSE,
+                   ...)
       {
+          if(is.null(filterResult))
+              filterResult <- filter(data, x)
           multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
-                         filterResult=filterResult, pch=pch, gpar, ...)
+                         filterResult=filterResult, gpar=gpar$gate, ...)
+          addName(x, name=names, data=filterResult, gp=gpar$gate.text)
       })
 
 
@@ -209,10 +223,15 @@ setMethod("glpoints",
 setMethod("glpoints",
           signature(x="kmeansFilter", data="flowFrame", channels="character"), 
           function(x, data, channels, verbose=TRUE,
-                   filterResult=NULL, pch=".", ...)
+                   filterResult=NULL, gpar=flowViz.par.get(), names=FALSE,
+                   ...)
       {
+          if(is.null(filterResult))
+              filterResult <- filter(data, x)
           multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
-                            filterResult=filterResult, pch=pch, gpar, ...)
+                            filterResult=filterResult, gpar=gpar$gate, ...)
+          addName(x, names, split(data[,channels], filterResult),
+                  gp=gpar$gate.text)
       })
 
 

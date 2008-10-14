@@ -35,6 +35,13 @@ setGeneric("glpoints", function(x, data, channels, ...)
            standardGeneric("glpoints"))
 
 
+## ===========================================================================
+## Our own generic to add gate names
+## ---------------------------------------------------------------------------
+setGeneric("addName", function(x, name, ...)
+           standardGeneric("addName"))
+
+
 
 ## ===========================================================================
 ## timeLinePlot:

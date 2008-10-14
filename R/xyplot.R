@@ -13,48 +13,66 @@
 ##            points added by default)
 ##    none of the above: standard type argument for xyplots, defaults to 'l'
 setMethod("xyplot",
-          signature(x="flowFrame", data="missing"),
-          function(x, data, xlab=time, ylab="", time="Time",
-                   layout, panel=panel.xyplot.flowframe.time,
-                   prepanel=prepanel.xyplot.flowframe.time,
-                   type="discrete", ...)
+          signature=signature(x="flowFrame",
+                              data="missing"),
+          definition=function(x,
+                              data,
+                              time,
+                              xlab,
+                              ylab="",
+                              layout,
+                              prepanel=prepanel.xyplot.flowframe.time,
+                              panel=panel.xyplot.flowframe.time,
+                              type="discrete",
+                              ...)
       {
           ## guess the time parameter
           expr <- exprs(x)
-          if (!(time %in% colnames(expr)))
-              stop("Name of the Time (X) variable must be specified as the ",
-                   "'time' argument")
-          time.x <- expr[, time]
+          if(missing(time))
+              time <- findTimeChannel(expr)
+          if(!(time %in% colnames(expr)))
+              stop("Invalid name of variable (", time, ") recording the ",
+                   "\ntime domain specified as 'time' argument.", call.=FALSE)
+          if(missing(xlab))
+              xlab <- time
           ## set up fake data frame for dispatch
           fakedf <- data.frame(channel=setdiff(colnames(expr), time),
                                time=1)
           ## set up stacked layout
           if (missing(layout)) layout <- c(1, ncol(expr) - 1)
           xyplot(channel ~ time | channel, data=fakedf, type=type,
-                 prepanel=prepanel, panel=panel, layout=layout,
-                 time.x=time.x, expr=expr, xlab=xlab, ylab=ylab,
-                 default.scales=list(y=list(relation="free", rot=0)),
-                 ...)
+                 prepanel=prepanel, panel=panel, layout=layout, frame=x,
+                 time=time, xlab=xlab, ylab=ylab,
+                 default.scales=list(y=list(relation="free", rot=0)), ...)
       })
 
 
-## Dedicated prepanel function to set up dimensions
+## Prepanel function to set up dimensions. We want to use the instrument measurement
+## range instead of the absolute range of the data for the y dimension. The x-dimension
+## is constant since we have the same time recordings for each channel. We also record
+## the data ranges in the internal state environment for further use.
 prepanel.xyplot.flowframe.time <- 
-    function(x, y, time.x, expr, ...)
+    function(x, y, frame, time, ...)
 {
-    xx <- time.x
-    yy <- expr[, as.character(y)]
-    list(xlim=range(xx, finite=TRUE), ylim=range(yy, finite=TRUE),
-         dx=diff(xx), dy=diff(yy))
+    yc <- as.character(y)
+    expr <- exprs(frame)
+    xx <- expr[, time]
+    yy <- expr[, yc]
+    xlim <- range(xx, finite=TRUE)
+    ylim <- unlist(range(frame, yc))
+    plotLims(xlim, ylim)
+    return(list(xlim=xlim, ylim=ylim))
 }
 
-## Dedicated panel function to do the timeline plotting with
-## different options
+## Panel function to do the timeline plotting with several different options
 panel.xyplot.flowframe.time <- 
-    function(x, y, time.x, expr, type="l", nrpoints=0, binSize=100, ...)
+    function(x, y, frame, time, type="l", nrpoints=0, binSize=100, ...)
 {
-    xx <- time.x
-    yy <- expr[, as.character(y)]
+    y <- as.character(y)
+    expr <- exprs(frame)
+    xx <- expr[, time]
+    yy <- expr[, y]
+    ## We record in the state environment which type of plot we produce
     plotType("gtime", c("Time",  as.character(y)))
     if (type == "smooth"){
         ## smoothScatter plot of time vs. parameter (not sure how useful
@@ -104,10 +122,20 @@ panel.xyplot.flowframe.time <-
 ## the drawback being that the expression matrix will be copied,
 ## the upshot being that all the fancy xyplot formula stuff will be valid.
 setMethod("xyplot",
-          signature(x="formula", data="flowFrame"),
-          function(x, data, smooth=TRUE, panel=panel.xyplot.flowframe,
-                   gpar=flowViz.par(), xlim, ylim, ...)
+          signature=signature(x="formula",
+                              data="flowFrame"),
+          definition=function(x,
+                              data,
+                              smooth=TRUE,
+                              prepanel=prepanel.xyplot.flowframe,
+                              panel=panel.xyplot.flowframe,
+                              ...)
       {
+          ## par.settings will not be passed on to the panel functions, so
+          ## we have to fetch it from ... and stick the gate relevant stuff
+          ## back it in there manually
+          gp <- list(...)[["par.settings"]]
+          
           ## deparse the formula structure
           ## FIXME: shouldn't all.vars be helpful here?!?
           channel.y <- x[[2]]
@@ -116,50 +144,85 @@ setMethod("xyplot",
               channel.x <- channel.x[[2]]
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
-          ## find useful xlim and ylim defaults
-          if(missing(xlim)){
-              xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
-                  tmp <- unlist(range(data, channel.x.name))
-                  xd <- diff(tmp)/15
-                  tmp + c(-1,1)*xd
-              }else NULL
-          }
-          if(missing(ylim)){
-              ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
-                  tmp <- unlist(range(data, channel.y.name))
-                  yd <- diff(tmp)/15
-                  tmp + c(-1,1)*yd
-              }else NULL
-          }
-          plotLims(xlim, ylim)
+          ## call data.frame xyplot method with our panel function
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, 
-                 panel=panel, frame=data, channel.x.name=channel.x.name,
-                 channel.y.name=channel.y.name, gpar=gpar, xlim=xlim,
-                 ylim=ylim, ...)
+                 prepanel=prepanel, panel=panel, frame=data,
+                 channel.x.name=channel.x.name,
+                 channel.y.name=channel.y.name,
+                 gp=gp, ...)
       })
 
 
-## Dedicated panel function to be abble to add filters on the plot
-panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
-                                   channel.x.name,  channel.y.name,
-                                   pch=".", gpar, margin=TRUE, ...)
+
+## Prepanel function to set up dimensions. We want to use the instrument measurement
+## range instead of the absolute range of the data. We also record the data ranges
+## in the internal state environment for further use.
+prepanel.xyplot.flowframe <- 
+    function(frame, channel.x.name, channel.y.name, ...)
 {
+    ranges <- range(frame)
+    xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+        tmp <- ranges[, channel.x.name]
+        xd <- diff(tmp)/15
+        tmp + c(-1,1)*xd
+    }else NULL
+    ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
+        tmp <- ranges[, channel.y.name]
+        yd <- diff(tmp)/15
+        tmp + c(-1,1)*yd
+    }else NULL
+    plotLims(xlim, ylim)
+    return(list(xlim=xlim, ylim=ylim))
+}
+
+## Panel function that allows us to add filters on the plot. The actual plotting
+## is done by either the panel.smoothScatter or the default lattice panel.xyplot
+## function
+panel.xyplot.flowframe <- function(x,
+                                   y,
+                                   frame,
+                                   filter=NULL,
+                                   smooth=TRUE,
+                                   margin=TRUE,
+                                   outline=FALSE,
+                                   channel.x.name,
+                                   channel.y.name,
+                                   pch=gpar$flow.symbol$pch,
+                                   cex=gpar$flow.symbol$cex,
+                                   col=gpar$flow.symbol$col,
+                                   gp,
+                                   ...)
+{
+    ## graphical parameter defaults
+    gpar <- flowViz.par.get()
+    if(!is.null(gp))
+        gpar <- lattice:::updateList(gpar, gp)
+    if(is.null(gpar$gate$cex))
+        gpar$gate$cex <- cex
+    if(is.null(gpar$gate$pch))
+        gpar$gate$pch <- pch
+    ## Whenever we have a function call in the formula we might no longer be the
+    ## original scale in which the gate was defined, and we have no clue how to
+    # plot it
+    validName <- !(length(grep("\\(", channel.x.name)) ||
+                   length(grep("\\(", channel.y.name)))
     if (smooth){
-        ## We remove margin events before computing the density and
-        ## indicate those by lines
+        ## We remove margin events before passing on the data to panel.smoothScatter
+        ## and after plotting indicate those events by grayscale lines on the plot
+        ## margins
         if(margin){
             r <- range(frame, c(channel.x.name, channel.y.name))
             l <- length(x)
-            inc <- apply(r,2,diff)/1e5
+            inc <- apply(r, 2, diff)/1e5
             dots <- list(...)
-            nb <- if("nbin" %in% names(dots)) rep(dots$nbin,2) else rep(64,2)
+            nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
             selxL <- x > r[2,channel.x.name]-inc[1]
             selxS <- x < r[1,channel.x.name]+inc[1]
             selyL <- y > r[2,channel.y.name]-inc[2]
             selyS <- y < r[1,channel.y.name]+inc[2]
             allsel <- !(selxL | selxS | selyL | selyS)
-            panel.smoothScatter(x[allsel], y[allsel],
-                                range.x=list(r[,1], r[,2]), ...)
+            panel.smoothScatter(x[allsel], y[allsel], range.x=list(r[,1], r[,2]),
+                                ...)
             addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
             addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
             addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
@@ -168,25 +231,22 @@ panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
             panel.smoothScatter(x, y, ...)
         }
         plotType("gsmooth", c(channel.x.name, channel.y.name))
-        ## Whenever we have a function call that is part of the formula
-        ## the channel.x.name or channel.y.name arguments are badly
-        ## messed up. Since we are no longer on the original scale in
-        ## which the gate was defined we have no clue how to plot it
-        validName <- !(length(grep("\\(", channel.x.name)) ||
-                       length(grep("\\(", channel.y.name)))
         if(!is.null(filter) & validName){
             glpolygon(filter, frame,
                       channels=c(channel.x.name, channel.y.name),
                       verbose=FALSE, gpar=gpar, ...)
         }
     }else{
-        panel.xyplot(x, y, pch=pch, ...)
+        panel.xyplot(x, y, col=col, cex=cex, pch=pch, ...)
         plotType("gpoints", c(channel.x.name, channel.y.name))
-        if(!is.null(filter) & validName){
+        if(!is.null(filter) && validName){
             glpoints(filter, frame,
                      channels=c(channel.x.name, channel.y.name),
-                     verbose=FALSE, pch=pch, col="red",
-                     gpar=gpar, ...)
+                     verbose=FALSE, gpar=gpar, ...)
+            if(outline)
+                glpolygon(filter, frame,
+                          channels=c(channel.x.name, channel.y.name),
+                          verbose=FALSE, gpar=gpar, names=FALSE)
         }
     }
 }
@@ -197,23 +257,32 @@ panel.xyplot.flowframe <- function(x,y, frame, filter=NULL, smooth=TRUE,
 ##############################################################################
 ##                            flowSet methods                               ##
 ##############################################################################
-
 ## xyplot method for flowSets with formula. 
 setMethod("xyplot",
-          signature(x="formula", data="flowSet"),
-          function(x, data, xlab, ylab, as.table=TRUE,
-                   prepanel=prepanel.xyplot.flowset,
-                   panel=panel.xyplot.flowset, pch = ".",
-                   smooth=TRUE, filter=NULL, xlim, ylim, 
-                   gpar=NULL, ...)
+          signature=signature(x="formula",
+                              data="flowSet"),
+          definition=function(x,
+                              data,
+                              smooth=TRUE,
+                              filter=NULL,
+                              as.table=TRUE,
+                              prepanel=prepanel.xyplot.flowset,
+                              panel=panel.xyplot.flowset,
+                              xlab=channel.x.name,
+                              ylab=channel.y.name,
+                              par.settings=NULL,
+                              ...)
       {
-          if (length(x[[3]]) == 1) ## no conditioning variable
-          {
+          ## no conditioning variable, we chose 'name' as default
+          if (length(x[[3]]) == 1){
               tmp <- x[[3]]
               x[[3]] <- (~dummy | name)[[2]]
               x[[3]][[2]] <- tmp
           }
-          
+          ## par.settings will not be passed on to the panel functions, so
+          ## we have to fetch it from ... and stick the gate relevant stuff
+          ## back it in there manually
+          gp <- par.settings
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
@@ -238,62 +307,41 @@ setMethod("xyplot",
           channel.y.name <- expr2char(channel.y)
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
-          ## find useful xlim and ylim defaults
-          if(missing(xlim)){
-              xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
-                  tmp <- unlist(range(data[[1]], channel.x.name))
-                  xd <- diff(tmp)/15
-                  tmp + c(-1,1)*xd
-              }else NULL
-          }
-          if(missing(ylim)){
-              ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
-                  tmp <- unlist(range(data[[1]], channel.y.name))
-                  yd <- diff(tmp)/15
-                  tmp + c(-1,1)*yd
-              }else NULL
-          }
-          plotLims(xlim, ylim)
-          ## axis annotation
-          if (missing(xlab)) xlab <- channel.x.name
-          if (missing(ylab)) ylab <- channel.y.name
           ## use densityplot method with dedicated panel and prepanel
           ## functions to do the actual plotting
           densityplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data@frames, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
-                      channel.y.name=channel.y.name, filter=filter,
-                      as.table=as.table, xlab=xlab, ylab=ylab,
-                      pch=pch, smooth=smooth, gpar=gpar, xlim=xlim,
-                      ylim=ylim, ...)
+                      channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
+                      smooth=smooth, gp=gp, as.table=as.table, filter=filter,
+                      par.settings=par.settings, ...)
       })
 
 
 
-## Dedicated prepanel function to set up dimensions
+## Prepanel function to set up dimensions. We want to use the instrument measurement
+## range instead of the absolute range of the data. We also record the data ranges
+## in the internal state environment for further use.
 prepanel.xyplot.flowset <- 
-    function(x,  frames, channel.x, channel.y, channel.x.name,
-             channel.y.name, ...)
+    function(x, frames, channel.x.name, channel.y.name, ...)
 {
     if (length(nm <- as.character(x)) > 1)
         stop("must have only one flow frame per panel")
-    
-    if (length(nm) == 1)
-    {
-        xx <- evalInFlowFrame(channel.x, frames[[nm]])
-        yy <- evalInFlowFrame(channel.y, frames[[nm]])
-        ## Whenever we have a function call that is part of the formula
-        ## the channel.x.name or channel.y.name arguments are badly
-        ## messed up. Also we don't store  meaningful ranges in that 
-        ## case, so we have to compute them from the data
-        rx <- if(length(grep("\\(", channel.x.name)))
-            range(xx, finite=TRUE) else range(frames[[nm]], channel.x.name)
-        ry <- if(length(grep("\\(", channel.y.name)))
-            range(yy, finite=TRUE) else range(frames[[nm]], channel.y.name)
-        
-        list(xlim=rx, ylim=ry, dx=diff(xx), dy=diff(yy))
+    if (length(nm) == 1){
+        ranges <- range(frames[[nm]])
+        xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+            tmp <- ranges[, channel.x.name]
+            xd <- diff(tmp)/15
+            tmp + c(-1,1)*xd
+        }else NULL
+        ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
+            tmp <- ranges[, channel.y.name]
+            yd <- diff(tmp)/15
+            tmp + c(-1,1)*yd
+        }else NULL
+        plotLims(xlim, ylim)
+        return(list(xlim=xlim, ylim=ylim))
     }
-    else list()
 }
 
 
@@ -304,30 +352,24 @@ prepanel.xyplot.flowset <-
 ##   - The Formula interface allows for arbitrary functions to be
 ##     called on the data before plotting. If that happens, we have no
 ##     clue what to do with the gates, since they are still defined in
-##     the old corrdinate system.
+##     the old coordinate system.
 ##   - The same is true for the range parameters stored in the flowFrame.
 ##     These only make sense in the original coordinates. Do we want to
 ##     transform them, and if so, how can we do that? Can we substitute
 ##     the flow data by a vector containing the ranges in the formula? 
-
-
-
-## Dedicated panel function to do the plotting and add gate boundaries
-panel.xyplot.flowset <-
-    function(x, frames, channel.x, channel.y, channel.x.name, channel.y.name, 
-             filter=NULL, pch=".", smooth=TRUE, gpar, margin=TRUE,
-             outline=FALSE, ...)
+## Panel function that allows us to add filters on the plot. The actual plotting
+## is done by panel.xyplot.flowframe
+panel.xyplot.flowset <- function(x,
+                                 frames,
+                                 filter=NULL,
+                                 channel.x,
+                                 channel.y,
+                                 ...)
 {
-    x <- as.character(x)
-    if (length(x) > 1) stop("must have only one flow frame per panel")
-    if (length(x) < 1) return()
-    ## Whenever we have a function call that is part of the formula
-    ## the channel.x.name or channel.y.name arguments are badly
-    ## messed up. Since we are no longer on the original scale in
-    ## which the gate was defined we have no clue how to plot it
-    validName <- !(length(grep("\\(", channel.x.name)) ||
-                   length(grep("\\(", channel.y.name)))
-    nm <- x
+    nm <- as.character(x)
+    if (length(nm) < 1) return()
+    ## 'filter' either has to be a single filter, or a list of filters matching
+    ## the flowSet, or a filterResultList.
     if(!is.null(filter)){
         if(!is.list(filter)){
             if(is(filter, "filter")){
@@ -343,57 +385,9 @@ panel.xyplot.flowset <-
             filter <- NULL
         }
     }
-    xx <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
-    yy <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
-
-    if(smooth) {
-        ## We remove margin events before computing the density and
-        ## indicate those by lines
-        if(margin){
-            r <- range(frames[[nm]], c(channel.x.name, channel.y.name))
-            l <- length(xx)
-            inc <- apply(r,2,diff)/1e5
-            dots <- list(...)
-            nb <- if("nbin" %in% names(dots)) rep(dots$nbin,2) else rep(64,2)
-            selxL <- xx > r[2,channel.x.name]-inc[1]
-            selxS <- xx < r[1,channel.x.name]+inc[1]
-            selyL <- yy > r[2,channel.y.name]-inc[2]
-            selyS <- yy < r[1,channel.y.name]+inc[2]
-            allsel <- !(selxL | selxS | selyL | selyS)
-            panel.smoothScatter(xx[allsel], yy[allsel],
-                                range.x=list(r[,1], r[,2]), ...)
-            addMargin(r[1,channel.x.name], yy[selxS], r, l, nb)
-            addMargin(r[2,channel.x.name], yy[selxL], r, l, nb, b=TRUE)
-            addMargin(xx[selyS], r[1,channel.y.name], r, l, nb)
-            addMargin(xx[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
-        }else{
-            panel.smoothScatter(xx, yy, ...)
-        }
-        plotType("gsmooth", c(channel.x.name, channel.y.name))
-        if(!is.null(filter) && validName){
-            if(is.null(gpar))
-                gpar <- flowViz.par()
-            glpolygon(filter[[nm]], frames[[nm]],
-                      channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, gpar=gpar, ...)
-        }
-    }
-    else{
-        panel.xyplot(xx, yy, pch=pch, ...)
-        plotType("gpoints", c(channel.x.name, channel.y.name))
-        col <- brewer.pal(9, "Set1")
-        if(is.null(gpar$col))
-            gpar$col <- col
-        if(!is.null(filter) && validName){
-            glpoints(filter[[nm]], frames[[nm]],
-                     channels=c(channel.x.name, channel.y.name),
-                     verbose=FALSE, gpar=gpar, pch=pch, ...)
-            if(outline)
-                glpolygon(filter[[nm]], frames[[nm]],
-                          channels=c(channel.x.name, channel.y.name),
-                          verbose=FALSE, gpar=gpar, ...)
-         }
-    }
+    x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
+    y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
+    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], ...)
 }
 
 

@@ -6,6 +6,30 @@ flowViz.state <- new.env(hash = FALSE)
 flowViz.state[["plotted"]] <- FALSE
 flowViz.state[["par"]] <- get.gpar()
 
+## FIXME: We hardcode a lattice theme for the X11xcairo device for now which will be
+## used for all other devices as well. Later this should follow the example from the
+## lattice package, i.e., real device-specific themes that are set up once the device
+## is first called.
+flowViz.state[["lattice.theme"]] <-
+    list(X11cairo=list(gate=list(alpha=1,
+                                 cex=NULL,
+                                 pch=NULL,
+                                 col="red",
+                                 fill="transparent",
+                                 lwd=1,
+                                 lty="solid"),
+                       gate.text=list(font=1,
+                                      col="#000000",
+                                      alpha=0.4,
+                                      cex=1.2,
+                                      lineheight=1.2),
+                       flow.symbol=list(alpha=1,
+                                        cex=0.8,
+                                        pch=".",
+                                        col="black",
+                                        fill="transparent")))
+                                      
+
 
 ## return the state information from the internal environment
 state <- function(x) flowViz.state[[x]]
@@ -35,7 +59,8 @@ set.flowViz.par <- function(x)
    flowViz.state[["par"]] <- modifyList(flowViz.state[["par"]], x)
 
 
-## record the type of plot or the limits in the internal environment
+## record the type of plot or the plotting dimensions in the internal
+## environment
 plotType <- function(type, parms){
     flowViz.state[["plotted"]] <- TRUE
     flowViz.state[["type"]] <- type
@@ -157,9 +182,9 @@ fixInf <- function(x, replacement)
     for(i in seq_along(x)){
         y <- x[i]
         if(is.infinite(y) && y<0)
-            x[i] <- replacement[1]
+            x[i] <- replacement[1]-diff(replacement)*10
         else if(is.infinite(y) && y>0)
-            x[i] <- replacement[2]
+            x[i] <- replacement[2]+diff(replacement)*10
     }
     return(x)
 }
@@ -179,7 +204,7 @@ norm2Polygon <- function(fd, parms)
     ans <- as.data.frame(t(ans))
     names(ans) <- parms
     ## create a polygonGate
-    polygonGate(boundaries=ans)
+    polygonGate(.gate=ans)
 }
 
 
@@ -198,27 +223,39 @@ ell2Polygon <- function(fd, parms)
     ans <- as.data.frame(t(ans))
     names(ans) <- parms
     ## create a polygonGate
-    polygonGate(boundaries=ans)
+    polygonGate(.gate=ans)
 }
 
 
-## A helper function that calls grid.rect in a more user-fiendly way
-glrect <- function (xleft, ybottom, xright, ytop, x=(xleft + xright)/2, 
-                    y=(ybottom + ytop)/2, width=xright - xleft,
-                    height=ytop - ybottom, just="center",
-                    hjust=NULL, vjust=NULL, gp, ...) 
+## Helper function that calls panel.x in a more user-fiendly way
+glrect <- function (xleft, ybottom, xright, ytop, ..., gp) 
 {
-    class(gp) <- "gpar"
-    grid.rect(x=x, y=y, width=width, height=height, default.units="native", 
-        just=just, hjust=hjust, vjust=vjust, gp=gp)
+    panel.rect(xleft, ybottom,  xright, ytop, col=gp$fill,
+               border=gp$col, lty=gp$lty, lwd=gp$lwd,
+               alpha=gp$alpha, ...)
 }
+
+gltext <- function (x, y, labels, ..., gp) 
+{
+    panel.text(x, y, labels=labels, col=gp$col, cex=gp$cex,
+               linheight=gp$lineheigt, alpha=gp$alpha, font=gp$font)
+}
+
+glpoly <- function (x, y, ..., gp) 
+{
+    panel.polygon(x, y, labels=labels, border=gp$col, col=gp$fill,
+                  lty=gp$lty, lwd=gp$lwd, alpha=gp$alpha, ...)
+}
+
+
+
 
 
 ## Default function to plot points for a single gate region. This uses the
 ## existing Subset architecture, hence it only works for filters that
 ## produce logicalFilterResults so far
 addLpoints <- function(x, data, channels, verbose=TRUE,
-                      filterResult=NULL, gpar, pch=".", ...)
+                      filterResult=NULL, gpar, ...)
 {
     parms <- parameters(x)
     channels <- checkParameterMatch(channels, verbose=verbose)
@@ -235,8 +272,9 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
     if(!is.null(gpar))
         opar <- modifyList(opar, gpar)
     class(opar) <- "gpar"
-    grid.points(exp[,channels[1]], exp[,channels[2]],
-               default.units = "native", gp=opar, pch=pch)
+    panel.points(exp[,channels[1]], exp[,channels[2]],
+                 pch=gpar$pch, cex=gpar$cex, col=gpar$col,
+                 fill=gpar$fill, ...)
 }
 
 
@@ -245,32 +283,78 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
 ## The first component is everything outside not in the filter and we
 ## drop that
 multFiltPoints <-  function(x, data, channels, verbose=TRUE,
-                            filterResult=NULL, pch=".", gpar, ...)
+                            filterResult=NULL, gpar, ...)
 {
 
     channels <- checkParameterMatch(channels, verbose=verbose)
-    if(!is.null(filterResult)){
-        checkIdMatch(x=x, f=data)
-        x <- filterResult
-    }
+    if(is.null(filterResult))
+        filterResult <- filter(data, x)
+    checkIdMatch(x=filterResult, f=data)
+    x <- filterResult 
     datsplit <- split(data, x)[-1]
     ld <- length(datsplit)
     ## we want to be able to use different colors for each population
-    opar <- flowViz.par()
-    col <- 2:(ld+1)
-    if(!missing(gpar) && !is.null(gpar)){
-        if("col" %in% names(gpar))
-            col <- rep(gpar$col, ld)
-        opar <- modifyList(opar, gpar)
-    }
-    class(opar) <- "gpar"
-    pch <- rep(pch, ld)
+    col <- rep(gpar$col, ld)[1:ld]
     for(i in 1:ld){
-        opar$col <- col[i]
-        grid.points(exprs(datsplit[[i]])[,channels[1]],
-                    exprs(datsplit[[i]])[,channels[2]],
-                    default.units = "native", gp=opar,
-                    pch=pch[i])
+        gpar$col <- col[i]
+        panel.points(exprs(datsplit[[i]])[,channels[1]],
+                     exprs(datsplit[[i]])[,channels[2]],
+                     pch=gpar$pch, cex=gpar$cex,
+                     col=gpar$col,
+                     fill=gpar$fill, ...)
     }
     return(invisible(NULL))
+}
+
+
+
+
+## Get and set graphical defaults for plots in flowViz. To a great extend, this uses
+## the trellis.par.get and trellis.par.set infrastructure defined in the lattice package.
+## Currently it is not possible to directly register additional setting there, instead
+## we provide our own wrappers which look for available defaults in lattice first and
+## fetch or set additional defaults within the internal flowViz environment if they can't
+## be found in the lattice defaults.
+flowViz.par.get <- function (name = NULL) 
+{
+    ## FIXME: We want this to be device-specific, needs to be set up in the same
+    ## way as it is done in lattice.
+    lPars <- c(flowViz.state[["lattice.theme"]]$X11cairo, trellis.par.get(name))
+    if (is.null(name)) 
+        lPars
+    else if (name %in% names(lPars)) 
+        lPars[[name]]
+    else NULL
+}
+
+
+flowViz.par.set <- function (name, value, ..., theme, warn = TRUE, strict = FALSE) 
+{
+    if (missing(theme)) {
+        if (!missing(value)) {
+            theme <- list(value)
+            names(theme) <- name
+        }
+        else if (!missing(name) && is.list(name)) {
+            theme <- name
+        }
+        else theme <- list(...)
+    }
+    else {
+        if (is.character(theme)) 
+            theme <- get(theme)
+        if (is.function(theme)) 
+            theme <- theme()
+        if (!is.list(theme)) {
+            warning("Invalid 'theme' specified")
+            theme <- NULL
+        }
+    }
+    fvPars <- names(theme) %in% names(flowViz.state[["lattice.theme"]]$X11cairo)
+    trellis.par.set(theme=theme[!fvPars], warn=warn, strict=strict)
+    if (strict)
+        flowViz.state[["lattice.theme"]]$X11cairo[names(theme[fvPars])] <- theme[fvPars]  
+    else flowViz.state[["lattice.theme"]]$X11cairo <-
+        lattice:::updateList(flowViz.state[["lattice.theme"]]$X11cairo, theme[fvPars])
+    invisible()
 }

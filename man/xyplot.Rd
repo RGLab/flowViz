@@ -5,6 +5,7 @@
 \alias{panel.xyplot.flowset}
 \alias{prepanel.xyplot.flowset}
 \alias{panel.xyplot.flowframe}
+\alias{prepanel.xyplot.flowframe}
 \alias{panel.xyplot.flowframe.time}
 \alias{prepanel.xyplot.flowframe.time}
 \alias{xyplot,formula,flowSet-method}
@@ -76,19 +77,25 @@
 prepanel.xyplot.flowframe.time(
     x,
     y,
-    time.x,
-    expr,
+    frame,
+    time,
     \dots)
 
+prepanel.xyplot.flowframe(
+    frame,
+    channel.x.name,
+    channel.y.name,
+    \dots)
+   
 panel.xyplot.flowframe.time(
     x, 
     y,
-    time.x,
-    expr,
+    frame,
+    time,
     type="l",
     nrpoints=0,
     binSize=100,
-    ...)
+    \dots)
 
 panel.xyplot.flowframe(
     x,
@@ -96,19 +103,21 @@ panel.xyplot.flowframe(
     frame,
     filter=NULL,
     smooth=TRUE,
+    margin=TRUE,
+    outline=FALSE,
     channel.x.name,
     channel.y.name,
-    pch=".",
-    gpar,
-    margin=TRUE,
-    ...)
+    pch=gpar$flow.symbol$pch,
+    cex=gpar$flow.symbol$cex,
+    col=gpar$flow.symbol$col,
+    gp,
+    
+    \dots)
 
 ## panel and prepanel functions for flowSets
 prepanel.xyplot.flowset(
     x,
     frames,
-    channel.x,
-    channel.y,
     channel.x.name,
     channel.y.name,
     \dots)
@@ -116,15 +125,9 @@ prepanel.xyplot.flowset(
 panel.xyplot.flowset(
     x,
     frames,
+    filter=NULL,
     channel.x,
     channel.y,
-    channel.x.name,
-    channel.y.name, 
-    filter=NULL,
-    pch=".",
-    smooth=TRUE,
-    gpar,
-    margin,
     \dots)
 
 }
@@ -136,10 +139,11 @@ panel.xyplot.flowset(
     \code{prepanel.xyplot.flowset} and \code{panel.xyplot.flowset}, also
     the names of \code{\link[flowCore:flowFrame-class]{flowFrame}}s. }
   
-  \item{data, y}{ a \code{\link[flowCore:flowSet-class]{flowSet}} or
-    \code{\link[flowCore:flowFrame-class]{flowFrame}} object that serves as the source of
-    data. }
-  
+  \item{data, y, frame}{ a \code{\link[flowCore:flowSet-class]{flowSet}} or
+    \code{\link[flowCore:flowFrame-class]{flowFrame}} object that serves
+    as the source of data. }
+
+    
   \item{smooth}{ logical. If \code{TRUE},
     \code{\link[geneplotter:panel.smoothScatter]{panel.smoothScatter}}
     is used to display a partially smoothed version of the data.
@@ -154,7 +158,7 @@ panel.xyplot.flowset(
   \item{xlab, ylab}{ Labels for data axes, with suitable defaults taken
     from the formula. }
   
-  \item{pch}{ the plotting character used when \code{smooth=FALSE}. }
+  \item{pch, cex, col}{ Graphical parameters used when \code{smooth=FALSE}. }
   
   \item{type}{ type of rendering; see
     \code{\link[lattice:panel.xyplot]{panel.xyplot}} for details. For
@@ -183,11 +187,10 @@ panel.xyplot.flowset(
   \item{time}{ a character string giving the name of the column
     recording time. If not provided, we try to guess from the parameter
     names. }
-
-  \item{time.x}{ a numeric vector of time values. }
-
-  \item{expr}{ a numeric matrix of flow cytometry values, basically a
-    copy of the \code{exprs} slot of a \code{\link[flowCore:flowFrame-class]{flowFrame}}. }
+  
+  \item{outline}{ logical, specifying whether to add the boundaries of a
+    gate to the plot when \code{smooth=FALSE}. Defaults to
+    \code{TRUE}. }
   
   \item{exclude.time}{ logical, specifying whether to exclude the time
     variable from a scatter plot matrix. Defaults to \code{TRUE}. }
@@ -205,9 +208,9 @@ panel.xyplot.flowset(
     corresponding names, used to match filter parameters if
     applicable. }
   
-  \item{frame, frames}{an environment containing frame-specific data. }
+  \item{frames}{an environment containing frame-specific data. }
 
-  \item{gpar}{an list of graphical parameters that are passed down to
+  \item{gp}{an list of graphical parameters that are passed down to
     the low level grid functions. See \code{\link[grid:gpar]{gpar}} for
     details. }
 

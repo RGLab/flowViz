@@ -11,15 +11,16 @@ importFrom(graphics,
            "contour",
            "plot")
 
-importMethodsFrom(flowCore, "plot")
+importMethodsFrom(flowCore,
+                  "plot")
 
 importFrom(lattice,
-           densityplot,
-           xyplot,
-           levelplot,
-           qqmath,
-           splom,
-           parallel)
+           "densityplot",
+           "xyplot",
+           "levelplot",
+           "qqmath",
+           "splom",
+           "parallel")
 
 importFrom(grid,
            "get.gpar",
@@ -38,7 +39,8 @@ importFrom(geneplotter,
 importFrom(MASS,
            "kde2d")
 
-exportMethods("densityplot",
+exportMethods("addName",
+              "densityplot",
               "xyplot",
               "levelplot",
               "qqmath",
@@ -56,12 +58,14 @@ exportMethods("densityplot",
               "contour")
 
 ## prepanel and panel functions
-export("panel.densityplot.flowset",
-       "prepanel.densityplot.flowset", 
-       "panel.ecdfplot.flowset",
-       "prepanel.ecdfplot.flowset",
+export("prepanel.xyplot.flowframe",
+       "panel.xyplot.flowframe",
        "prepanel.xyplot.flowset",
        "panel.xyplot.flowset",
+       "prepanel.densityplot.flowset", 
+       "panel.densityplot.flowset",
+       "prepanel.ecdfplot.flowset",
+       "panel.ecdfplot.flowset",
        "timeLinePlot",
        "contour",
        "hexbin")
