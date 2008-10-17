@@ -24,6 +24,9 @@ panel.densityplot.flowset <-
              border = superpose.polygon$border,
              gpar=NULL, ...)
 {
+    which.channel <- tail(which.packet(), 1)
+    channel <- channel[[which.channel]]
+    channel.name <- channel.name[which.channel]
     superpose.line <- trellis.par.get("superpose.line")
     superpose.polygon <- trellis.par.get("superpose.polygon")
     reference.line <- trellis.par.get("reference.line")
@@ -131,6 +134,57 @@ panel.densityplot.flowset <-
 }
 
 
+analyzeDensityFormula <- function(x)
+{
+    ans <- list()
+    if (length(x) == 2) {
+        ans$left <- FALSE
+        x <- x[[2]]
+    }
+    else if (length(x) == 3) {
+        ans$left <- TRUE
+        ans$left.symbol <- x[[2]]
+        x <- x[[3]]
+    }
+    else stop("unexpected formula structure")
+    if (length(x) == 1) {
+        ans$conditioned <- FALSE
+        ans$multiple.right <- FALSE
+        ans$right.symbol <- x
+    }
+    else if (length(x) == 3) {
+        switch(as.character(x[[1]]),
+               "+" = {
+                   ans$conditioned <- FALSE
+                   ans$multiple.right <- TRUE
+                   ans$right.symbol <- x
+               },
+               "|" = {
+                   ans$conditioned <- TRUE
+                   ans$cond.symbol <- x[[3]]
+                   ans$right.symbol <- x[[2]]
+                   ans$multiple.right <-
+                       (length(x[[2]]) > 1 &&
+                        as.character(x[[2]][[1]]) == "+")
+               })
+    }
+    else stop("unexpected formula structure")
+    if (ans$multiple.right) {
+        x <- ans$right.symbol
+        right.comps <- list()
+        while ((length(x) > 1) && (as.character(x[[1]]) == "+")) {
+            right.comps <- c(list(x[[3]]), right.comps)
+            x <- x[[2]]
+        }
+        ans$right.comps <- rev(c(list(x), right.comps))
+    }
+    else ans$right.comps <- list(ans$right.symbol)
+    ans
+}
+
+## str(analyzeDensityFormula(y ~ x1 + I(x2+x3) + x4 | a))
+
+
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
           function(x, data, xlab,
@@ -147,24 +201,71 @@ setMethod("densityplot",
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
-          pd[[uniq.name]] <- factor(sampleNames(data),
-                                    levels=unique(sampleNames(data))) 
-          channel <- x[[3]]  
-          if (length(channel) == 3)
-          {
-              channel <- channel[[2]]
-              x[[3]][[2]] <- as.name(uniq.name)
-          }
-          else x[[3]] <- as.name(uniq.name)
-          channel.name <- expr2char(channel)
-          channel <- as.expression(channel)
-          if (missing(xlab)) xlab <- channel.name
-          ccall$x <- x
+          pd[[uniq.name]] <-
+              factor(sampleNames(data),
+                     levels=unique(sampleNames(data))) 
+
+          formula.struct <- analyzeDensityFormula(x)
+
+          ## we want to add a column to pd for each channel, repeating
+          ## pd as necessary.  We might want to skip this if there is
+          ## only one channel, but for now we'll use it for
+          ## conditioning even then.
+
+          channel.name <-
+              ## if (formula.struct$multiple.right) 
+              sapply(formula.struct$right.comps, expr2char)
+##               else
+##                   channel.name <- expr2char(channel)
+          pd <- rep(list(pd), length(channel.name))
+          names(pd) <- channel.name
+          pd <- do.call(lattice::make.groups, pd)
+          ## FIXME: this won't work if pd already has a column named
+          ## 'which'.  Should deal with that case somehow.
+
+          ## Next task is to manipulate the formula.  The details of
+          ## the transformation depends on whether there is a
+          ## conditioning variable alread.
+          ## y ~ channel ==> y ~ sample | which
+          ## y ~ channel | var ==> y ~ sample | which + var
+          
+          new.x <- d1 ~ d2 | d3
+          new.x[[2]] <- ## d1
+              if (formula.struct$left) formula.struct$left.symbol
+              else as.name("name")
+          new.x[[3]][[2]] <- ## d2
+              as.name(uniq.name)
+          new.x[[3]][[3]] <- ## d3
+              if (formula.struct$conditioned) {
+                  ans <- (~.+.)[[2]]
+                  ans[[3]] <- as.name("which")
+                  ans[[2]] <- formula.struct$cond.symbol
+                  ## probably not the ideal order, but I don't see how
+                  ## to easily ake 'which' the first conditioning
+                  ## variable (in case there is more than one
+                  ## conditioning variable to begin with)
+                  ans
+              }
+              else as.name("which")
+
+##           channel <- x[[3]]  
+##           if (length(channel) == 3)
+##           {
+##               channel <- channel[[2]]
+##               x[[3]][[2]] <- as.name(uniq.name)
+##           }
+##           else x[[3]] <- as.name(uniq.name)
+
+##           channel <- as.expression(channel)
+##           if (missing(xlab)) xlab <- channel.name
+##           ccall$x <- x
+          if (missing(xlab)) xlab <- ""
+          ccall$x <- new.x
           ccall$data <- pd
           ccall$prepanel <- prepanel
           ccall$panel <- panel
           ccall$frames <- data@frames
-          ccall$channel <- channel
+          ccall$channel <- formula.struct$right.comps ## channel
           ## That is super ugly!!! How do we get to the channel name
           ## from the formula???
           ccall$channel.name <- gsub("^.*\\(`|`\\).*$", "", channel.name)
