@@ -39,7 +39,8 @@ setMethod("glpoints",
       {
           checkIdMatch(x=x, f=data)
           filterResult <- x
-          x <- filterDetails(x)$filter
+          fd <- filterDetails(x)
+          x <- fd[[length(fd)]]$filter
           if(missing(channels))
               glpoints(x=x, data=data, verbose=verbose,
                        filterResult=filterResult, ...)
@@ -234,6 +235,20 @@ setMethod("glpoints",
                   gp=gpar$gate.text)
       })
 
+
+
+
+# ==========================================================================
+## for subsetFilter
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## For now we just plot the top-level filter.
+## FIXME: We may want to be able to plot all filters
+setMethod("glpoints",
+          signature(x="subsetFilter", data="flowFrame", channels="ANY"), 
+          function(x, data, channels, ...)
+      {
+          glpoints(x@filters[[1]], data, channels, ...)
+      })
 
 
 

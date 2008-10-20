@@ -373,7 +373,7 @@ panel.xyplot.flowset <- function(x,
     if(!is.null(filter)){
         if(!is.list(filter)){
             if(is(filter, "filter")){
-                filter <- list(filter)
+                filter <- lapply(seq_along(nm), function(x) filter)
                 names(filter) <- nm
             }
         }else if(!is(filter, "filterResultList"))
@@ -425,6 +425,56 @@ addMargin <- function(x, y, r, total, nb, len=200, b=FALSE)
 
 
 
+## ==========================================================================
+## Plot a view object. For everything but gates we have the modified data
+## available, hence we can plot directly
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+setMethod("xyplot",
+          signature(x="formula", data="view"),
+          function(x, data, ...) xyplot(x, Data(data), ...))
+
+
+setMethod("xyplot",
+          signature(x="view", data="missing"),
+          function(x, data, ...) xyplot(Data(x), ...))
+
+
+
+## ==========================================================================
+## Plot a gateView object. Essentially, this is calling the plot
+## method on the parent data of the view, adding gates if appropriate.
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+setMethod("xyplot",
+          signature(x="formula", data="gateView"),
+          function(x, data, filter=NULL, par.settings, ...)
+      {
+          fres <-
+              if(!is.null(filter)) filter else get(action(data)@filterResult)
+          ## deparse the formula structure
+          channel.y <- x[[2]]
+          channel.x <- x[[3]]
+          if (length(channel.x) == 3)
+              channel.x <- channel.x[[2]]
+          channel.x.name <- flowViz:::expr2char(channel.x)
+          channel.y.name <- flowViz:::expr2char(channel.y)
+          thisData <- Data(parent(data))
+          if(!is.null(fres) && all(c(channel.x.name, channel.y.name) %in%
+                                   unique(unlist(parameters(fres))))){
+              l <- max(2, if(is(fres, "filterResultList"))
+                       length(fres[[1]]) else length(fres))
+              n <- if(is(fres, "filterResultList")) names(fres[[1]]) else
+              names(fres)
+              col <- rep("#00000030", l)
+              names(col) <- n
+              pop <- data@frEntry
+              col[pop] <- "transparent"
+              if(missing(par.settings))
+                  par.settings <- list(gate=list(fill=col, col="#00000040"))
+              xyplot(x, thisData, filter=fres, par.settings=par.settings, ...)
+          }else{
+              xyplot(x, thisData,  ...)
+          }
+      })
 
 
 

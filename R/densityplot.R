@@ -25,6 +25,7 @@ panel.densityplot.flowset <-
              gpar=NULL, ...)
 {
     which.channel <- tail(which.packet(), 1)
+    lc <- length(channel)
     channel <- channel[[which.channel]]
     channel.name <- channel.name[which.channel]
     superpose.line <- trellis.par.get("superpose.line")
@@ -38,9 +39,17 @@ panel.densityplot.flowset <-
                 "Only one will be used.")
     nnm <- as.character(x)
     if(!is.null(filter)){
+        if(lc > 1){
+            if(!is.list(filter) && is(filter, "filterResultList") ||
+               length(filter) != lc)
+                stop("You are plotting several channels. Argument 'filter'/n",
+                     "must be a list of the same length as number of channels.",
+                     call.=FALSE)
+            filter <- filter[[which.channel]]
+        }
         if(!is.list(filter)){
             if(is(filter, "filter")){
-                filter <- list(filter)
+                filter <- lapply(seq_along(nnm), function(x) filter)
                 names(filter) <- nnm
             }
         }else if(!is(filter, "filterResultList"))
@@ -134,7 +143,7 @@ panel.densityplot.flowset <-
 }
 
 
-analyzeDensityFormula <- function(x)
+analyzeDensityFormula <- function(x, dot.names)
 {
     ans <- list()
     if (length(x) == 2) {
@@ -176,13 +185,17 @@ analyzeDensityFormula <- function(x)
             right.comps <- c(list(x[[3]]), right.comps)
             x <- x[[2]]
         }
-        ans$right.comps <- rev(c(list(x), right.comps))
+        ans$right.comps <- c(list(x), right.comps)
+    }
+    else if (length(ans$right.symbol) == 1 && as.character(ans$right.symbol) == ".") {
+        ans$multiple.right <- TRUE
+        ans$right.comps <- lapply(dot.names, as.symbol)
     }
     else ans$right.comps <- list(ans$right.symbol)
     ans
 }
 
-## str(analyzeDensityFormula(y ~ x1 + I(x2+x3) + x4 | a))
+
 
 
 setMethod("densityplot",
@@ -191,6 +204,8 @@ setMethod("densityplot",
                    as.table = TRUE, overlap = 0.3,
                    prepanel = prepanel.densityplot.flowset,
                    panel = panel.densityplot.flowset,
+                   filter=NULL, scales=list(y=list(draw=F)),
+                   channels,
                    ...)
       {
           ocall <- sys.call(sys.parent())
@@ -204,19 +219,18 @@ setMethod("densityplot",
           pd[[uniq.name]] <-
               factor(sampleNames(data),
                      levels=unique(sampleNames(data))) 
-
-          formula.struct <- analyzeDensityFormula(x)
-
+          if (missing(channels))
+              channels <-
+                  setdiff(colnames(data),
+                          flowCore:::findTimeChannel(data))
+          formula.struct <- analyzeDensityFormula(x, dot.names = channels)
           ## we want to add a column to pd for each channel, repeating
           ## pd as necessary.  We might want to skip this if there is
           ## only one channel, but for now we'll use it for
           ## conditioning even then.
 
           channel.name <-
-              ## if (formula.struct$multiple.right) 
               sapply(formula.struct$right.comps, expr2char)
-##               else
-##                   channel.name <- expr2char(channel)
           pd <- rep(list(pd), length(channel.name))
           names(pd) <- channel.name
           pd <- do.call(lattice::make.groups, pd)
@@ -247,18 +261,6 @@ setMethod("densityplot",
                   ans
               }
               else as.name("which")
-
-##           channel <- x[[3]]  
-##           if (length(channel) == 3)
-##           {
-##               channel <- channel[[2]]
-##               x[[3]][[2]] <- as.name(uniq.name)
-##           }
-##           else x[[3]] <- as.name(uniq.name)
-
-##           channel <- as.expression(channel)
-##           if (missing(xlab)) xlab <- channel.name
-##           ccall$x <- x
           if (missing(xlab)) xlab <- ""
           ccall$x <- new.x
           ccall$data <- pd
@@ -281,3 +283,42 @@ setMethod("densityplot",
           ans$call <- ocall
           ans
       })
+
+
+
+
+
+## ==========================================================================
+## Plot a view object. For everything but gates we have the modified data
+## available, hence we can plot directly
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+setMethod("densityplot",
+          signature(x="formula", data="view"),
+          function(x, data, ...) densityplot(x, Data(data), ...))
+
+
+setMethod("densityplot",
+          signature(x="view", data="missing"),
+          function(x, data, channels, conditional, ...)
+      {
+          dat <- Data(x)
+          if(is.null(dat))
+              stop("Filter has not been applied to this view.\n",
+                   "Run applyParentFilter(view, workflow).")
+          if(missing(channels))
+              channels <- if(is(x, "normalizeView"))
+                  parameters(get(get(x@action)@normalization)) else
+              colnames(dat)
+          if(missing(conditional))
+              conditional <- "name"
+          ## A curv1Filter overlay
+          filter <- if(is(x, "normalizeView")){
+              tmp <- lapply(channels, curv1Filter)
+              names(tmp) <- channels
+              tmp} else NULL
+          ## We construct our own formula
+          densityplot(~ ., data=dat, scales=list(y=list(draw=F)),
+                      channels=channels, filter=filter)
+      })
+
+

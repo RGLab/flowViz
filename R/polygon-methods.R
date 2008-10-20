@@ -42,7 +42,8 @@ setMethod("gpolygon",
           signature(x="filterResult", data="ANY"), 
           function(x, data, verbose=TRUE, ...)
       {
-          filt <- filterDetails(x)$filter
+          fd <- filterDetails(x)
+          filt <- fd[[length(fd)]]$filter
           if(!missing(data) && is.character(data) &&
              ! ("channels" %in% names(list(...))))
               gpolygon(filt, x, verbose=FALSE, channels=data, ...)

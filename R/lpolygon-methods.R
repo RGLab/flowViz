@@ -43,7 +43,8 @@ setMethod("glpolygon",
           definition=function(x, data, verbose=TRUE,
           gpar=flowViz.par.get(), ...)
       {
-          filt <- filterDetails(x)$filter
+          fd <- filterDetails(x)
+          filt <- fd[[length(fd)]]$filter
           if(!missing(data) && is.character(data) &&
              ! ("channels" %in% names(list(...))))
               glpolygon(filt, x, verbose=FALSE, channels=data,
@@ -195,12 +196,14 @@ setMethod("glpolygon",
           mat <- matrix(c(-Inf, v, h, Inf, v, Inf, h, Inf, -Inf, v, -Inf,
                           h, v, Inf, -Inf, h), byrow=TRUE, ncol=4)
           ## we want to be able to use different colors for each population
-          fill <- rep(gpar$fill, 4)
-          col <- rep(gpar$col, 4)
+          fill <- rep(gpar$gate$fill, 4)
+          col <- rep(gpar$gate$col, 4)
+          col <- col[c(2,1,3,4)]
+          fill <- fill[c(2,1,3,4)]
           res <- vector(4, mode="list")
           for(i in 1:4){
-              gpar$col <- col[i]
-              gpar$fill <- fill[i]
+              gpar$gate$col <- col[i]
+              gpar$gate$fill <- fill[i]
               rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
                                   dimnames=list(c("min", "max"),
                                   data)))
@@ -472,4 +475,19 @@ setMethod("glpolygon",
       {
           glpolygon(x@filters[[1]], data, verbose=verbose,
                     inverse=!inverse, ...)
+      })
+
+
+
+
+# ==========================================================================
+## for subsetFilter
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## For now we just plot the top-level filter.
+## FIXME: We may want to be able to plot all filters
+setMethod("glpolygon",
+          signature(x="subsetFilter", data="ANY"), 
+          function(x, data, verbose=TRUE, inverse=FALSE, ...)
+      {
+          glpolygon(x@filters[[1]], data, verbose=verbose, ...)
       })

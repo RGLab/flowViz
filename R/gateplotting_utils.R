@@ -157,14 +157,9 @@ evalError <- function(type)
 checkFres <- function(filter, fres, verbose=TRUE)
 {
     fd <- filterDetails(fres, identifier(filter))
-    if(!identical(identifier(filter), identifier(fres)) ||
-       class(filter) != class(fd$filter))
+    if(!identical(identifier(filter), identifier(fres)))
         stop("The 'filterResult' and the '", class(filter),
              "' don't match.", call.=FALSE)
-    if("transformation" %in% slotNames(fd$filter) &&
-       length(fd$filter@transformation) > 0 && verbose)
-        warning("'result' appears to have been applied on ",
-                "transformed data.\nThese are not supported yet.")
 }
 
 ## We don't know how to draw 'type' filters, hence we warn

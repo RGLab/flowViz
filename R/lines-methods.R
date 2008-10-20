@@ -36,7 +36,8 @@ setMethod("glines",
           signature(x="filterResult", data="ANY"), 
           function(x, data, verbose=TRUE, ...)
       {
-          filt <- filterDetails(x)$filter
+          fd <- filterDetails(x)
+          filt <- filterDetails(x)[[length(fd)]]$filter
           if(!missing(data) && is.character(data) &&
              ! ("channels" %in% names(list(...))))
               glines(filt, x, verbose=FALSE, channels=data, ...)

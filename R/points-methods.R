@@ -17,8 +17,9 @@ addPoints <- function(x, data, channels, verbose=TRUE,
     channels <- checkParameterMatch(channels, verbose=verbose)
     ## We check if the filterResult matches the filter and subset with that
     if(!is.null(filterResult)){
+        fd <- filterDetails(filterResult, identifier(x))
         if(!identical(identifier(x), identifier(filterResult)) ||
-           class(x) != class(filterDetails(filterResult)$filter))
+           class(x) != class(fd$filter))
             stop("The 'filterResult' and the filter object ",
                  "don't match.", call.=FALSE)
         x <- filterResult
@@ -44,7 +45,8 @@ setMethod("gpoints",
       {
           if(is(x, "filterResult")){
               filterResult <- x
-              x <- filterDetails(x)$filter
+              fd <- filterDetails(x)
+              x <- fd[[length(fd)]]$filter
           }
           channels <- checkParameterMatch(parameters(x), verbose=verbose)
           gpoints(x=x, data=data, channels=channels, verbose=verbose,
@@ -63,7 +65,8 @@ setMethod("gpoints",
                    x@frameId, "'\n  but the frame provided is '",
                    identifier(data), "'.", call.=FALSE)
           filterResult <- x
-          x <- filterDetails(x)$filter
+          fd <- filterDetails(x)
+          x <- fd[[length(fd)]]$filter
           channels <- checkParameterMatch(channels, verbose=verbose)
           gpoints(x=x, data=data, channels=channels, verbose=verbose,
                    filterResult=filterResult, ...)
@@ -179,7 +182,8 @@ setMethod("gpoints",
           channels <- checkParameterMatch(channels, verbose=verbose)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
-                 class(x) != class(filterDetails(filterResult)$filter))
+                 class(x) != class(filterDetails(filterResult,
+                                                 identifier(x))$filter))
                   stop("The 'filterResult' and the filter object ",
                        "don't match.", call.=FALSE)
               x <- filterResult
@@ -212,7 +216,8 @@ setMethod("gpoints",
           channels <- checkParameterMatch(channels, verbose=verbose)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
-                 class(x) != class(filterDetails(filterResult)$filter))
+                 class(x) != class(filterDetails(filterResult,
+                                                 identifier(x))$filter))
                   stop("The 'filterResult' and the filter object ",
                        "don't match.", call.=FALSE)
               x <- filterResult
@@ -245,7 +250,8 @@ setMethod("gpoints",
           channels <- checkParameterMatch(channels, verbose=verbose)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
-                 class(x) != class(filterDetails(filterResult)$filter))
+                 class(x) != class(filterDetails(filterResult,
+                                                 identifier(x))$filter))
                   stop("The 'filterResult' and the filter object ",
                        "don't match.", call.=FALSE)
               x <- filterResult
