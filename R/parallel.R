@@ -52,14 +52,17 @@ setMethod("parallel",
           function(x, data,
                    time = "Time", exclude.time = TRUE,
                    filter = NULL,
-                   filterResults = NULL,
                    xlab = NULL, ylab = NULL,
                    ...)
       {
 
-          if (!is.null(filter) && is.null(filterResults))
-              filterResults <- filter(data, filter)
-
+          if(!is.null(filter)){
+              if(!is.list(filter)){
+                  if(is(filter, "filter"))
+                      filter <- filter(data, filter)
+              }else if(!is(filter, "filterResultList"))
+                  filter <- as(filter, "filterResultList")
+          }
           pd <- pData(phenoData(data))
           uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing NAs
@@ -108,9 +111,15 @@ setMethod("parallel",
 
                   nm <- x
                   z <- as.data.frame(exprs(frames[[nm]])[, column.names])
-                  if (!is.null(filterResults))
+                  if(!(nm %in% names(filter) || !is(filter[[nm]] ,"filterResult"))){
+                      warning("'filter' must either be a filterResultList, a single\n",
+                              "filter object or a named list of filter objects.",
+                              call.=FALSE)
+                      filter <- NULL
+                  }
+                  if (!is.null(filter))
                   {
-                      this.filter.result <- filterResults[[nm]]
+                      this.filter.result <- filter[[nm]]
                       groups <- this.filter.result@subSet
                   }
                   else groups <- NULL
