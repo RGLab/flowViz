@@ -81,7 +81,7 @@ generated as the result of applying a filter inherit from class
 
 
 \subsection{Visualization}
-Before we discuss how to visualie gates in \Rpackage{flowViz}, we need
+Before we discuss how to visualize gates in \Rpackage{flowViz}, we need
 to point out that this may only be reasonable for certain types of the
 many possible plots, namely one-dimensional density plots and
 two-dimensional scatter plots. Over time we might add gate-plotting
@@ -108,10 +108,10 @@ also when plotting channels other than those defining the gate.
 
 All data-driven filters depend on the \Rclass{filterResult} to be
 computed in order to plot them. The user doesn't have to worry about
-this fact, as the software will implicitely compute these objects if
+this fact, as the software will implicitly compute these objects if
 necessary. However, realizing filters and creating
 \Rclass{filterResult} is often computationally intense and
-time-consuming, and in many cases makes sense to explicitely create
+time-consuming, and in many cases makes sense to explicitly create
 the \Rclass{filterResult} once and pass it on to the plotting
 functions instead of the input filter. In the course of this manual,
 \Rclass{filter} objects and \Rclass{filterResults} may be used
@@ -123,7 +123,7 @@ interchangeably, unless stated otherwise.
 We use the \Rdata{GvHD} data set to provide some examples. It come as
 a serialized \Rclass{flowSet} with the \Rpackage{flowViz} package and
 the interested user is referred to its documentation for details. For
-the purose of this demonstration it is sufficient to know that the
+the purpose of this demonstration it is sufficient to know that the
 \Robject{phenoData} slot of the \Robject{GvHD} set contains several
 factor variables, \Robject{Patient} and \Robject{Visit} two of the
 most descriptive ones. In general, all \Rclass{flowSets} contain an
@@ -138,15 +138,15 @@ head(pData(GvHD))
 %
 The set is quite large and reducing it to a reasonable subset will
 speed up things for our interactive demonstration purpose. Due to
-various constrains (data size, conplexity of computations, limitations
+various constrains (data size, complexity of computations, limitations
 in the \Rpackage{grid} software underlying the \Rpackage{lattice} and
 \Rpackage{flowViz} packages), rendering plots is usually not
-instantanious. It ususally takes a little bit of time to output
+instantaneous. It usually takes a little bit of time to output
 complex panel layouts. When producing postscript output, the user
 should be aware that file size may become an issue, and we will
 address solutions for this problem at the end of this document.
 
-The \Rpackage{lattice} package offers in-line subsetting capabilities
+The \Rpackage{lattice} package offers inline subsetting capabilities
 for all high level plotting functions though the \Robject{subset}
 argument, and this functionality (like most of the other typical
 \Rpackage{lattice} concepts) is also available for all derived
@@ -163,7 +163,7 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD,
 @ 
 %
 Inline subsetting is useful to change plots on the fly, or to play
-around with various panel arangements. However, we still pass the
+around with various panel arrangements. However, we still pass the
 whole \Robject{GvHD} object down to the plotting function, potentially
 increasing memory usage and decreasing performance due to unnecessary
 heavy copying operations. Since we only want to use the subset for
@@ -390,7 +390,7 @@ This is a good example for a case where passing the
 computation time. Depending on the hardware it can take quite a while
 to complete the extensive computations necessary for the
 identification of siginficant high-density areas in two
-dimensions. Imaging you want to make slight changes to your plot (and
+dimensions. Imagine you want to make slight changes to your plot (and
 producing good graphical output is almost always an iterative
 approach); having to recompute the \Rpackage{filterResult} on each
 iteration would be very time-cosuming and annoying at best.
@@ -462,7 +462,7 @@ plot(trellis.last.object())
 Note that by default the scale of the x axis has been adjusted for
 each panel. This is contrary to the default settings in the
 \Rpackage{lattice} package and can be reversed using appropriate
-settings in in the \Robject{scale} argument.
+settings in in the \Robject{scales} argument.
 
 \section{Plotting parameters}
 \Rpackage{Lattice} graphics are a great tool to easily create
@@ -470,18 +470,19 @@ informative and consise data visualization with a minimal amount of
 code. Most of its default graphical parameters are well thought
 through. However, there is also a wealth of customization available,
 and we refer readers to the package's documentation as well as
-Deepayan Sarkar's excellent book \citet{Sarkar} for details. With
+%% Deepayan Sarkar's excellent book 
+\citet{Sarkar} for details. With
 respect to \Rpackage{flowViz}, it should suffice to mention that
-customization follows the exact same principals defined in the
+customization follows the exact same principles defined in the
 \Rpackage{lattice} package. As a matter of fact, most customization
-actually happens at the level of the underlaying \Rpackage{lattice}
+actually happens at the level of the underlying \Rpackage{lattice}
 software. The facts to mention are:
 
 \begin{itemize}
 \item There are session-wide global defaults that can be queried and
-  set using the \Rfunction{flowViz.get.par} and
-  \Rfunction{flowViz.set.par} functions. These are extensions to the
-  \Rfunction{trellis.get.par} and \Rfunction{trellis.set.par}
+  set using the \Rfunction{flowViz.par.get} and
+  \Rfunction{flowViz.par.set} functions. These are extensions to the
+  \Rfunction{trellis.par.get} and \Rfunction{trellis.par.set}
   functions in the \Rpackage{lattice} package, and work in exactly the
   same way. All graphical parameters that are not defined in
   \Rpackage{flowViz} are directly passed on to \Rpackage{lattice}.
@@ -517,7 +518,7 @@ plot(trellis.last.object())
 \end{center}
 
 
-We could have archived the same customization by changing the session defaults:
+We could have achieved the same customization by changing the session defaults:
 <<plotPars2, eval=FALSE>>=
 flowViz.par.set(gate=list(fill="black", alpha=0.2))
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate)
@@ -530,7 +531,7 @@ scatter plots (and also the outline if \Robject{outline=TRUE}). In the
 following code sample we try to make use of partial transparency to
 address the problem of overplotting. Dense regions of the plot with
 many overplotted points will apprear darker. Although this is better
-than using opque colors, lots of the underlying structure could still
+than using opaque colors, lots of the underlying structure could still
 be hidden and we strongly emphasize the advantages of smoothed scatter
 plots for vizualization of FCM data.
 
@@ -599,7 +600,7 @@ plot(trellis.last.object())
 We mentioned before that all elements of the formulae used in
 \Rpackage{flowViz} are evaluated in the context of either the raw data
 matrix or the \Robject{phenoData} slot. This implies that formula
-components can themselve be valid R expressions including fuction
+components can themselves be valid R expressions including function
 calls. To a certain extend this is true, and the user might be able to
 produce reasonable graphical output by evaluating expressions on
 existing data or annotation objects, however we strongly discourage
@@ -611,7 +612,7 @@ which case the gate representation doesn't make much sense
 anymore. Furthermore, FCM data is naturally censored (by the available
 measurement range of the instrument) and we try to protect the user
 from irritating visual artifacts caused by the piling up of events on
-the margins of the data range. This is most notably in the
+the margins of the data range. This is most notable in the
 one-dimensional densityplots, where densities are only computed within
 the data range, and margin events are added as vertical
 bars. Similarily, in the two-dimensional smoothed scatter plots, we
@@ -619,10 +620,10 @@ display margin events as ticks around the actual data display. Again,
 changing the scale of the data would potentially invalidate many of
 the necessary computations.
 
-\Rpackage{lattice} encourages the use of expressions in the formula
+In summary, \Rpackage{lattice} encourages the use of expressions in the formula
 interface and for the sake of customizability we didn't want to
-exclude this feature completely in the \Rpackage{flowViz} methods,
-however the tool has to be used with great care, particularily when
+exclude this feature completely in the \Rpackage{flowViz} methods.
+However, the tool has to be used with great care, particularly when
 plotting gates.
 
 

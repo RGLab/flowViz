@@ -68,7 +68,10 @@ export("prepanel.xyplot.flowframe",
        "panel.ecdfplot.flowset",
        "timeLinePlot",
        "contour",
-       "hexbin")
+       "hexbin",
+       "flowViz.par.set",
+       "flowViz.par.get")
+
 
 
 
