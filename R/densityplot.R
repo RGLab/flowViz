@@ -5,9 +5,12 @@
 
 ## Dedicated prepanel function to set up dimensions
 prepanel.densityplot.flowset <- 
-    function(x, y, darg=list(n=50), frames, channel, channel.name,
-             overlap=0.3, ...)
+    function(x, y, darg=list(n=50), frames, 
+             overlap=0.3, subscripts, ...,
+             which.channel)
 {
+    channel.name <- unique(which.channel[subscripts])
+    stopifnot(length(channel.name) == 1)
     xl <- range(eapply(frames, range, channel.name), finite=TRUE)
     list(xlim=xl + c(-1,1)*0.07*diff(xl))   
 }
@@ -275,6 +278,10 @@ setMethod("densityplot",
           ccall$overlap <- overlap
           ccall$xlab <- xlab
           ccall$horizontal <- TRUE
+          ccall$subscripts <- TRUE
+          ccall$default.scales <- list(x = list(relation = "free"))
+          ccall$which.channel <-
+              gsub("^.*\\(`|`\\).*$", "", as.character(pd$which))
           ccall$lattice.options <-
               list(axis.padding =
                    list(factor = c(0.6, 1 + 2 * overlap)))

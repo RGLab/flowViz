@@ -14,6 +14,7 @@
 \alias{glpoints,rectangleGate,flowFrame,character-method}
 \alias{glpoints,ellipsoidGate,flowFrame,character-method}
 \alias{glpoints,filterResult,flowFrame,ANY-method}
+\alias{glpoints,subsetFilter,flowFrame,ANY-method}
 
 
 \title{ Adding points within a gate to a plot }

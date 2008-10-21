@@ -30,6 +30,7 @@
 \alias{glpolygon,ellipsoidGate,character-method}
 \alias{glpolygon,ellipsoidGate,filterResult-method}
 \alias{glpolygon,ellipsoidGate,flowFrame-method}
+\alias{glpolygon,subsetFilter,ANY-method}
 
 
 \title{ Drawing filter regions }

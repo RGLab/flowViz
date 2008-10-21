@@ -188,6 +188,7 @@ panel.xyplot.flowframe <- function(x,
                                    channel.x.name,
                                    channel.y.name,
                                    pch=gpar$flow.symbol$pch,
+                                   alpha=gpar$flow.symbol$alpha,
                                    cex=gpar$flow.symbol$cex,
                                    col=gpar$flow.symbol$col,
                                    gp,
@@ -237,15 +238,13 @@ panel.xyplot.flowframe <- function(x,
                       verbose=FALSE, gpar=gpar, ...)
         }
     }else{
-       
-       
         if(!is.null(filter) && validName){
             if(!is(filter, "filterResukt"))
                 filter <- filter(frame, filter)
             rest <- Subset(frame, !filter)
             x <- exprs(rest[,channel.x.name])
             y <- exprs(rest[,channel.y.name])
-            panel.xyplot(x, y, col=col, cex=cex, pch=pch, ...)
+            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
             glpoints(filter, frame,
                      channels=c(channel.x.name, channel.y.name),
                      verbose=FALSE, gpar=gpar, ...)
@@ -254,7 +253,7 @@ panel.xyplot.flowframe <- function(x,
                           channels=c(channel.x.name, channel.y.name),
                           verbose=FALSE, gpar=gpar, names=FALSE)
         }else{
-            panel.xyplot(x, y, col=col, cex=cex, pch=pch, ...)
+            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
         }
         plotType("gpoints", c(channel.x.name, channel.y.name))
     }

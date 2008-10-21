@@ -269,7 +269,7 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
     class(opar) <- "gpar"
     panel.points(exp[,channels[1]], exp[,channels[2]],
                  pch=gpar$pch, cex=gpar$cex, col=gpar$col,
-                 fill=gpar$fill, ...)
+                 fill=gpar$fill, alpha=gpar$alpha, ...)
 }
 
 
@@ -295,7 +295,7 @@ multFiltPoints <-  function(x, data, channels, verbose=TRUE,
         panel.points(exprs(datsplit[[i]])[,channels[1]],
                      exprs(datsplit[[i]])[,channels[2]],
                      pch=gpar$pch, cex=gpar$cex,
-                     col=gpar$col,
+                     col=gpar$col, alpha=gpar$alpha,
                      fill=gpar$fill, ...)
     }
     return(invisible(NULL))

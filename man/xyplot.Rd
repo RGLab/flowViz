@@ -11,6 +11,10 @@
 \alias{xyplot,formula,flowSet-method}
 \alias{xyplot,flowFrame,missing-method}
 \alias{xyplot,formula,flowFrame-method}
+\alias{xyplot,formula,gateView-method}
+\alias{xyplot,formula,view-method}
+\alias{xyplot,view,missing-method}
+
 \alias{splom,flowFrame,missing-method}
 
 \title{ Method implementing Lattice xyplots for flow data }
@@ -108,6 +112,7 @@ panel.xyplot.flowframe(
     channel.x.name,
     channel.y.name,
     pch=gpar$flow.symbol$pch,
+    alpha=gpar$flow.symbol$alpha,
     cex=gpar$flow.symbol$cex,
     col=gpar$flow.symbol$col,
     gp,
@@ -158,7 +163,7 @@ panel.xyplot.flowset(
   \item{xlab, ylab}{ Labels for data axes, with suitable defaults taken
     from the formula. }
   
-  \item{pch, cex, col}{ Graphical parameters used when \code{smooth=FALSE}. }
+  \item{pch, cex, col, alpha}{ Graphical parameters used when \code{smooth=FALSE}. }
   
   \item{type}{ type of rendering; see
     \code{\link[lattice:panel.xyplot]{panel.xyplot}} for details. For
