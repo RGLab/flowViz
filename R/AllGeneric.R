@@ -6,8 +6,6 @@
 
 
 
-
-
 ## ===========================================================================
 ## Our own generic for polygons:
 ## ---------------------------------------------------------------------------
@@ -15,15 +13,12 @@ setGeneric("gpolygon", function(x, data, ...)
            standardGeneric("gpolygon"))
 setGeneric("glpolygon", function(x, data, ...)
            standardGeneric("glpolygon"))
-#setGeneric("polygon", function(x, ...) standardGeneric("polygon"), 
-#           useAsDefault=FALSE)
 
 
 ## ===========================================================================
 ## Our own generic for lines:
 ## ---------------------------------------------------------------------------
 setGeneric("glines", function(x, data, ...) standardGeneric("glines"))
-setGeneric("gllines", function(x, data, ...) standardGeneric("gllines"))
 
 
 ## ===========================================================================
@@ -42,20 +37,23 @@ setGeneric("addName", function(x, name, ...)
            standardGeneric("addName"))
 
 
-
 ## ===========================================================================
 ## timeLinePlot:
 ## ---------------------------------------------------------------------------
 setGeneric("timeLinePlot",
            function(x, channel, ...) standardGeneric("timeLinePlot"))
-          
+
+
+## ===========================================================================
+## flowPlot:
+## ---------------------------------------------------------------------------
+setGeneric("flowPlot",function(x,...) standardGeneric("flowPlot"))
 
 
 ## ===========================================================================
 ## contour plots:
 ## ---------------------------------------------------------------------------
 setGeneric("contour", function(x,...) standardGeneric("contour"))
-
 
 
 ## ===========================================================================

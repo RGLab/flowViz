@@ -2,7 +2,6 @@
 ## ==========================================================================
 ## Basic plot for fcsFrame object
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-setGeneric("flowPlot",function(x,...) standardGeneric("flowPlot"))
 setMethod("flowPlot",
           ## basic plot without a gate specified
           signature(x="flowFrame"),

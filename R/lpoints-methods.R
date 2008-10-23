@@ -17,17 +17,14 @@
 ## for all filters
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## We only know how to add points within the gate if the definiton of that
-## gate fits the parameters of the data provided. We also need to know
-## about the plotted parameters, guess if there are only two in the gate,
-## or rely on the optional channels argument.
+## gate fits the parameters of the data provided.
 setMethod("glpoints",
           signature(x="filter", data="flowFrame", channels="missing"), 
           function(x, data, channels, verbose=TRUE,
           filterResult=NULL, ...)
       {
-          channels <- checkParameterMatch(parameters(x), verbose=verbose)
           glpoints(x=x, data=data, channels=parms, verbose=verbose,
-                  filterResult=filterResult, ...)
+                   filterResult=filterResult, strict=strict, ...)
       })
 
 ## Extract the filter definiton from a filterResult and pass that on
@@ -105,11 +102,10 @@ setMethod("glpoints",
 setMethod("glpoints",
           signature(x="quadGate", data="flowFrame", channels="character"), 
           function(x, data, channels, verbose=TRUE, filterResult=NULL,
-                   gpar=flowViz.par.get(), names=FALSE, ...)
+                   gpar=flowViz.par.get(), names=FALSE, strict=TRUE, ...)
       {
           if(!is.null(filterResult))
               dropWarn("filterResult", "quadGates", verbose=verbose)
-          channels <- checkParameterMatch(channels, verbose=verbose)
           v <- x@boundary[channels[1]]
           h <- x@boundary[channels[2]]
           mat <- matrix(c(-Inf, v, h, Inf, v, Inf, h, Inf, -Inf, v, -Inf,

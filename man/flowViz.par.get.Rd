@@ -1,0 +1,134 @@
+\name{flowViz.par.get}
+\alias{flowViz.par.get}
+\alias{flowViz.par.set}
+
+\title{ Query and set session-wide graphical parameter defaults. }
+
+\description{
+
+  \code{flowViz.par.get} is the equivalent to
+  \code{\link[lattice]{trellis.par.get}}. It queries the session wide
+  defaults for all \code{lattice} and \code{flowViz} graphical
+  parameters.
+
+  \code{flowViz.par.set} is the equivalent to
+  \code{\link[lattice]{trellis.par.set}}. It sets the same set of
+  graphical parameters, either in the \code{flowViz} package or directly
+  in \code{lattice}.
+
+}
+\usage{
+
+flowViz.par.get(name = NULL)
+
+flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
+
+}
+
+\arguments{
+  
+  \item{name}{The name of a parameter category to set. }
+  
+  \item{value}{ A named list of values to set for category \code{name}
+    or a list of such lists if \code{name} is missing.  }
+  
+  \item{\dots}{Further arguments that get passed on. }
+
+  \item{theme}{ The theme to set. See
+    \code{\link[lattice]{trellis.par.set}} for details. }
+
+  \item{warn}{ This gets passed on directly to \code{trellis.par.set}. }
+
+  \item{strict}{ This gets passed on directly to \code{trellis.par.set}. }
+}
+
+\details{
+  
+  Getting and setting graphical parameters in \code{flowViz} follows
+  exactly the mechanism of the \code{lattice} package. For all purpose
+  and intentions, \code{flowViz.par.get} and \code{flowViz.par.get} can
+  be viewed as wrappers around their \code{lattice} counterparts
+  \code{\link[lattice]{trellis.par.get}} and
+  \code{\link[lattice]{trellis.par.set}} and you should consult their
+  documentation for further details.
+
+  We introduce three new categories of graphical parameters that are
+  relevant for \code{flowViz} plots:
+
+  \item{gate}{Controls the appearance of gate boundaries (if
+    \code{smooth=TRUE}) or of the points within a gate region
+    (\code{smooth=FALSE}).  Available parameters are \code{col},
+    \code{cex},\code{pch},\code{alpha},\code{lwd},\code{lty} and
+    \code{fill}. }
+
+  \item{flow.symbol}{Controls the appearance of 'regular' points in a
+    \code{flowViz} plot.  Available parameters are \code{col},
+    \code{cex},\code{pch},\code{alpha} and \code{fill}. }
+
+  
+  \item{gate.text}{Controls the appearance of the text used for gate
+    names.  Available parameters are \code{col},
+    \code{cex},\code{font},\code{alpha} and \code{lineheight}. }
+
+}
+
+\value{
+  
+  \code{flowViz.par.get} returns a list of graphical parameter
+  defaults, if \code{name} is not empty, only for this particular
+  category. For an empty \code{name} argument, the function returns all
+  parameter defaults, including the ones specified in the lattice
+  package.
+
+  \code{flowViz.par.set} is called for its side-effects of setting
+  default parameters.
+  
+}
+
+\note{
+
+  Because parameter settings in \code{lattice} are device-dependent,
+  \code{flowViz.par.get} will open a (default) device none is open at the
+  time of the query.
+
+}
+
+\references{
+  Lattice, Multivariate Data Visualization with R.
+
+  Deepayan Sarkar
+
+  Springer, New York, 2008}
+
+\author{ F. Hahne}
+
+
+\seealso{
+
+  \code{\link[lattice]{trellis.par.get}} and
+  \code{\link[lattice]{trellis.par.set}}
+
+}
+
+\examples{
+
+## Return all available parameters, including lattice ones
+flowViz.par.get()
+
+## Set the font for gate names 
+flowViz.par.set("gate.text", list(font=2))
+
+## Query only the gate.text category
+flowViz.par.get("gate.text")
+
+## Set a lattice parameter
+trellis.par.get("plot.symbol")
+flowViz.par.set("plot.symbol", list(col="red"))
+trellis.par.get("plot.symbol")
+
+## undo all settings
+flowViz.par.set(list(plot.symbol="#0080ff"), gate.text=list(font=1))
+
+}
+
+

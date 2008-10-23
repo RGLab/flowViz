@@ -222,26 +222,3 @@ setMethod("qqmath",
 
 
 
-setMethod("splom",
-          signature(x = "flowFrame", data = "missing"),
-          function(x, data, 
-                   pscales = 0,
-                   smooth = TRUE, pch = ".",
-                   time = "Time", exclude.time = TRUE,
-                   panel = function(x, y, smooth, ...) {
-                       if (smooth) panel.smoothScatter(x, y, ...)
-                       else panel.xyplot(x, y, ...)
-                   },
-                   ...)
-      {
-          expr <- exprs(x)
-          column.names <- colnames(expr)
-          if (exclude.time) column.names <- column.names[column.names != time]
-          splom(exprs(x[, column.names]),
-                pscales = pscales, 
-                panel = panel,
-                smooth = smooth, pch = pch,
-                ...)
-      })
-
-

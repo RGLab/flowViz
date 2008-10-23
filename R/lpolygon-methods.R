@@ -29,10 +29,13 @@
 ## are explicitely provided by the channels argument.
 setMethod("glpolygon",
           signature(x="filter", data="missing"), 
-          function(x, data, verbose=TRUE, gpar=flowViz.par.get(), ...)
+          function(x, data, verbose=TRUE, gpar=flowViz.par.get(),
+                   strict=TRUE, ...)
       {
-          parms <- checkParameterMatch(parameters(x), verbose=verbose)
-          glpolygon(x=x, data=parms, gpar=gpar, verbose=FALSE, ...)
+          parms <- checkParameterMatch(parameters(x), verbose=verbose,
+                                       strict=strict)
+          if(!all(is.na(parms)))
+              glpolygon(x=x, data=parms, gpar=gpar, verbose=FALSE, ...)
       })
 
 

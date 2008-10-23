@@ -29,7 +29,7 @@ setMethod("xyplot",
           ## guess the time parameter
           expr <- exprs(x)
           if(missing(time))
-              time <- findTimeChannel(expr)
+              time <- flowCore:::findTimeChannel(expr)
           if(!(time %in% colnames(expr)))
               stop("Invalid name of variable (", time, ") recording the ",
                    "\ntime domain specified as 'time' argument.", call.=FALSE)
@@ -66,7 +66,7 @@ prepanel.xyplot.flowframe.time <-
 
 ## Panel function to do the timeline plotting with several different options
 panel.xyplot.flowframe.time <- 
-    function(x, y, frame, time, type="l", nrpoints=0, binSize=100, ...)
+    function(x, y, frame, time, type="discrete", nrpoints=0, binSize=100, ...)
 {
     y <- as.character(y)
     expr <- exprs(frame)
@@ -235,23 +235,25 @@ panel.xyplot.flowframe <- function(x,
         if(!is.null(filter) & validName){
             glpolygon(filter, frame,
                       channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, gpar=gpar, ...)
+                      verbose=FALSE, gpar=gpar, strict=FALSE, ...)
         }
     }else{
         if(!is.null(filter) && validName){
-            if(!is(filter, "filterResukt"))
+            if(!is(filter, "filterResult"))
                 filter <- filter(frame, filter)
             rest <- Subset(frame, !filter)
             x <- exprs(rest[,channel.x.name])
             y <- exprs(rest[,channel.y.name])
             panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+            
             glpoints(filter, frame,
                      channels=c(channel.x.name, channel.y.name),
-                     verbose=FALSE, gpar=gpar, ...)
+                     verbose=FALSE, gpar=gpar, strict=FALSE, ...)
             if(outline)
                 glpolygon(filter, frame,
                           channels=c(channel.x.name, channel.y.name),
-                          verbose=FALSE, gpar=gpar, names=FALSE)
+                          verbose=FALSE, gpar=gpar, names=FALSE,
+                          strict=FALSE)
         }else{
             panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
         }

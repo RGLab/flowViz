@@ -88,25 +88,29 @@ fmatchWarn <- function(parms, verbose=TRUE)
                 "that they match the plotting parameters.", call.=FALSE)
 }
 
-checkParameterMatch <- function(parms, channels, verbose=TRUE, ...)
+checkParameterMatch <- function(parms, channels, verbose=TRUE, strict=TRUE, ...)
 {
     if(missing(channels)){
         if(state("plotted") && length(state("parameters")==2)){
             sparms <- state("parameters")
-            err <-   function()
-                stop("The flow parameters used in the last plot don't match ",
-                     "the\nparameters provided by the filter or via the ",
-                     "'channels' argument.\n   Plotted: ",
-                     paste(sparms, collapse=" vs. "), "\n   Provided: ",
-                     paste(parms, collapse=", "),
-                     "\nPlease check or redraw the plot.", call.=FALSE)
+            err <-   function(strict=TRUE){
+                if(strict)
+                    stop("The flow parameters used in the last plot don't match ",
+                         "the\nparameters provided by the filter or via the ",
+                         "'channels' argument.\n   Plotted: ",
+                         paste(sparms, collapse=" vs. "), "\n   Provided: ",
+                         paste(parms, collapse=", "),
+                         "\nPlease check or redraw the plot.", call.=FALSE)
+            }
             mt <- sparms %in% parms
             if(length(parms)<2){
-                if(!parms %in% sparms)
-                    err()
-            }else{
-                if(!all(mt))
-                    err()
+                if(!parms %in% sparms){
+                    err(strict)
+                    return(NA)
+                }
+            }else if(!all(mt)){
+                err(strict)
+                return(NA)
             }
             return(sparms)
         }else{
@@ -115,7 +119,7 @@ checkParameterMatch <- function(parms, channels, verbose=TRUE, ...)
         }
     }else{
         parms <- channels
-        if(length(parms)!=2)
+        if(length(parms)!=2 && strict)
             stop("The filter definition contains the following parameters:\n",
                  paste(parms, collapse=", "), "\nDon't know how to match to",
                  " the plotted data.\nPlease specify plotting parameters as ",
@@ -250,10 +254,8 @@ glpoly <- function (x, y, ..., gp)
 ## existing Subset architecture, hence it only works for filters that
 ## produce logicalFilterResults so far
 addLpoints <- function(x, data, channels, verbose=TRUE,
-                      filterResult=NULL, gpar, ...)
+                       filterResult=NULL, gpar, ...)
 {
-    parms <- parameters(x)
-    channels <- checkParameterMatch(channels, verbose=verbose)
     ## We check if the filterResult matches the filter and subset with that
     if(!is.null(filterResult)){
         if(!identical(identifier(x), identifier(filterResult)) ||
@@ -264,12 +266,10 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
     }
     exp <- exprs(Subset(data, x))
     opar <- flowViz.par()
-    if(!is.null(gpar))
-        opar <- modifyList(opar, gpar)
-    class(opar) <- "gpar"
     panel.points(exp[,channels[1]], exp[,channels[2]],
                  pch=gpar$pch, cex=gpar$cex, col=gpar$col,
                  fill=gpar$fill, alpha=gpar$alpha, ...)
+    return(invisible(NULL))
 }
 
 
@@ -280,8 +280,6 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
 multFiltPoints <-  function(x, data, channels, verbose=TRUE,
                             filterResult=NULL, gpar, ...)
 {
-
-    channels <- checkParameterMatch(channels, verbose=verbose)
     if(is.null(filterResult))
         filterResult <- filter(data, x)
     checkIdMatch(x=filterResult, f=data)

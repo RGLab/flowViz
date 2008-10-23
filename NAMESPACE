@@ -1,76 +1,92 @@
 import(flowCore)
 
-## export("parallelCoordinates.rgl", "parallelCoord")
 
 useDynLib("flowViz")
 
+
 importFrom(graphics,
-           "lines",
-           "polygon",
-           "points",
            "contour",
-           "plot")
+           "lines",
+           "plot",
+           "points",
+           "polygon")
+
 
 importMethodsFrom(flowCore,
                   "plot")
 
 importFrom(lattice,
            "densityplot",
-           "xyplot",
            "levelplot",
+           "parallel",
            "qqmath",
            "splom",
-           "parallel")
+           "xyplot")
+
 
 importFrom(grid,
            "get.gpar",
+           "grid.points",
            "grid.polygon",
            "grid.rect",
-           "grid.points")
+           "current.viewport")
+
 
 importFrom(latticeExtra,
            "ecdfplot")
 
+
 importFrom(geneplotter,
-           "smoothScatter",
            "densCols",
-           "panel.smoothScatter")
+           "panel.smoothScatter",
+           "smoothScatter")
+
 
 importFrom(MASS,
            "kde2d")
 
+
 exportMethods("addName",
+              "contour",
               "densityplot",
-              "xyplot",
-              "levelplot",
-              "qqmath",
-              "splom",
-              "parallel",
-              "plot",
               "ecdfplot",
+              "flowPlot",
               "glines",
-              "gpolygon",
               "gpoints",
+              "gpolygon",
               "glpoints",
               "glpolygon",
-              "flowPlot",
+              "levelplot",
+              "parallel",
+              "plot",
+              "qqmath",
+              "splom",
               "timeLinePlot",
-              "contour")
+              "xyplot")
 
-## prepanel and panel functions
-export("prepanel.xyplot.flowframe",
-       "panel.xyplot.flowframe",
-       "prepanel.xyplot.flowset",
-       "panel.xyplot.flowset",
-       "prepanel.densityplot.flowset", 
-       "panel.densityplot.flowset",
-       "prepanel.ecdfplot.flowset",
-       "panel.ecdfplot.flowset",
-       "timeLinePlot",
-       "contour",
-       "hexbin",
+
+export("addName",
        "flowViz.par.set",
-       "flowViz.par.get")
+       "flowViz.par.get",
+       "glines",
+       "gpoints",
+       "glpoints",
+       "glpolygon",
+       "gpolygon",
+       "hexbin",
+       "panel.densityplot.flowset",
+       "panel.ecdfplot.flowset",
+       "panel.xyplot.flowframe",
+       "panel.xyplot.flowframe.time",
+       "panel.xyplot.flowset",
+       "prepanel.ecdfplot.flowset",
+       "prepanel.densityplot.flowset", 
+       "prepanel.xyplot.flowframe",
+       "prepanel.xyplot.flowframe.time",
+       "prepanel.xyplot.flowset",
+       "timeLinePlot")
+       
+
 
 
 
