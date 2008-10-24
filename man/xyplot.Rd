@@ -138,13 +138,29 @@ panel.xyplot.flowset(
     channel.y,
     \dots)
 
+
+## method for various workflow objects
+\S4method{xyplot}{formula,view}(
+    x,
+    data,
+    \dots)
+
+
+setMethod(xyplot,
+\S4method{xyplot}{view,missing}(
+    x,
+    data,
+    \dots) 
+
+
+\S4method{xyplot}{formula,gateView}(
+    x,
+    data,
+    filter=NULL,
+    par.settings,
+    \dots)
+      
 }
-
-
-
-
-
-
 
 \arguments{
 
@@ -157,7 +173,9 @@ panel.xyplot.flowset(
   
   \item{data, y, frame}{ a \code{flowSet} or
     \code{\link[flowCore:flowFrame-class]{flowFrame}} object that serves
-    as the source of data. }
+    as the source of data. For the workflow methods, this can also be
+    various \code{\link[flowCore]{view}} or
+    \code{\link[flowCore]{actionItem}} objects.}
 
   
   \item{time}{ A character string giving the name of the data column
@@ -229,7 +247,7 @@ panel.xyplot.flowset(
   
   \item{pch, cex, col, alpha}{ Graphical parameters used when
     \code{smooth=FALSE}. These mostly exist for conveniance and much
-    more control is available trought the \code{lattice}-like
+    more control is available throught the \code{lattice}-like
     \code{par.setting} and \code{flowViz.par.set} customization. See
     \code{\link{flowViz.par.set}} for details. }
 
@@ -258,7 +276,7 @@ panel.xyplot.flowset(
     multiple columns from the data, however this usage is discouraged. }
 
 
-  \item{frames}{an environment containing frame-specific data. }
+  \item{frames}{An environment containing frame-specific data. }
 
   
   \item{\dots}{ More arguments, usually passed on to the underlying
@@ -268,6 +286,7 @@ panel.xyplot.flowset(
 
 
 \section{Methods}{
+
   \describe{
 
     \item{xyplot}{\code{signature(x = "flowFrame", data = "missing")}:
@@ -317,13 +336,28 @@ panel.xyplot.flowset(
       \code{flowSet}. All additional arguments that apply to the
       \code{flowFrame} method are also valid for \code{flowSets}. }
 
-    
-    \item{splom}{\code{signature(x = "flowFrame", data = "missing")}:
-      draws a scatter plot matrix of all channels (excluding time, by
-      default) of a \code{flowFrame} object.  }
 
-  }
+    \item{xyplot}{\code{signature(x = "formula", data = "view")}:
+      Scatter plots from a \code{view} object. Depending on the
+      particulars of the view, the method tries to come up with
+      reasonable defaults. Full customization is also available though
+      all the before mentioned arguments. }
+
+
+    \item{xyplot}{\code{signature(x = "view", data = "missing")}:
+      Scatter plots from a \code{view} object. This is the fallback
+      method in the case of absolutely no customization. It serves as
+      the default plot method for all \code{views}.  }
+
+
+    \item{xyplot}{\code{signature(x = "formula", data = "gateView")}:
+      Scatter plots from a \code{gateView} object. This allows for
+      customization of the \code{gateView} plots but still provides
+      reasonable defaults, e.g., for added gates. }
+
+} 
 }
+
 
 
 \details{

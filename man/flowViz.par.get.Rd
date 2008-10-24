@@ -55,16 +55,19 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
   We introduce three new categories of graphical parameters that are
   relevant for \code{flowViz} plots:
 
-  \item{gate}{Controls the appearance of gate boundaries (if
-    \code{smooth=TRUE}) or of the points within a gate region
-    (\code{smooth=FALSE}).  Available parameters are \code{col},
+  \item{gate}{Controls the appearance of gate boundaries in
+    \code{xyplots} (if \code{smooth=TRUE}) or of the points within a gate
+    region (\code{smooth=FALSE}).  Available parameters are \code{col},
     \code{cex},\code{pch},\code{alpha},\code{lwd},\code{lty} and
     \code{fill}. }
+
+  \item{gate.density}{Controls the appearance of gate boundaries in
+    \code{densityplots}.  Available parameters are \code{col},
+    \code{alpha},\code{lwd},\code{lty} and \code{fill}. }
 
   \item{flow.symbol}{Controls the appearance of 'regular' points in a
     \code{flowViz} plot.  Available parameters are \code{col},
     \code{cex},\code{pch},\code{alpha} and \code{fill}. }
-
   
   \item{gate.text}{Controls the appearance of the text used for gate
     names.  Available parameters are \code{col},

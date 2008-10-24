@@ -1,14 +1,8 @@
 \name{lattice-methods}
 \docType{methods}
-\alias{densityplot}
 \alias{qqmath}
 \alias{levelplot}
 \alias{parallel}
-\alias{densityplot,formula,flowSet-method}
-\alias{densityplot,formula,view-method}
-\alias{densityplot,view,missing-method}
-\alias{panel.densityplot.flowset}
-\alias{prepanel.densityplot.flowset}
 \alias{qqmath,formula,flowSet-method}
 \alias{levelplot,formula,flowSet-method}
 \alias{parallel,flowFrame,missing-method}
@@ -17,9 +11,6 @@
 \title{ Methods implementing Lattice displays for flow data }
 
 %% things documented here:
-
-% setMethod("densityplot",
-%           signature(x = "formula", data = "flowSet"),
 % setMethod("qqmath",
 %           signature(x = "formula", data = "flowSet"),
 % setMethod("levelplot",
@@ -30,77 +21,87 @@
 
 
 \description{
+
   Various methods implementing multipanel visualizations for flow data
   using infrastructure provided in the lattice package.  The original
   generics for these methods are defined in lattice, and these S4
   methods (mostly) dispatch on a formula and the \code{data} argument
-  which must be of class \code{flowSet} or \code{flowFrame}.  The formula
-  has to be fairly basic: conditioning can be done using phenodata
-  variables and channel names (the \code{colnames} slot) can be used as
-  panel variables.  In the case of the \code{densityplot} method, a
-  phenodata variable must be used on the left hand side of the formula
-  as a panel variable to stack the densities.  See examples below for
-  sample usage.
+  which must be of class \code{flowSet} or \code{flowFrame}.  The
+  formula has to be fairly basic: conditioning can be done using
+  phenodata variables and channel names (the \code{colnames} slot) can
+  be used as panel variables. See examples below for sample usage.
+
 }
 
 \usage{
 
 ## methods for 'flowSet' objects
+\S4method{qqmath}{formula,flowSet}(
+    x,
+    data,
+    xlab,
+    ylab,
+    f.value = function(n) ppoints(ceiling(sqrt(n))),
+    distribution = qnorm,
+    \dots)
 
-\S4method{densityplot}{formula,flowSet}(x, data, 
-            xlab, as.table = TRUE, overlap = 0.3,
-            prepanel = prepanel.densityplot.flowset,
-            panel = panel.densityplot.flowset,
-            \dots)
 
-\S4method{qqmath}{formula,flowSet}(x, data, xlab, ylab,
-       f.value = function(n) ppoints(ceiling(sqrt(n))),
-       distribution = qnorm, \dots)
-
-\S4method{levelplot}{formula,flowSet}(x, data, xlab, ylab,
-          as.table = TRUE, contour = TRUE, labels = FALSE,
-          n = 50, \dots)
+\S4method{levelplot}{formula,flowSet}(
+    x,
+    data,
+    xlab,
+    ylab,
+    as.table = TRUE,
+    contour = TRUE,
+    labels = FALSE,
+    n = 50,
+    \dots)
 
 
 ## methods for 'flowFrame' objects
-
-\S4method{parallel}{flowFrame,missing}(x, data, 
-         reorder.by = function(x) var(x, na.rm = TRUE),
-         time = "Time", exclude.time = TRUE,
-         \dots)
+\S4method{parallel}{flowFrame,missing}(
+    x,
+    data, 
+    reorder.by = function(x) var(x, na.rm = TRUE),
+    time = "Time",
+    exclude.time = TRUE,
+    \dots)
 
 }
 
 \arguments{
+  
   \item{x}{ a formula describing the structure of the plot and the
-    variables to be used in the display.   }
-  \item{data}{ a \code{flowSet} object that serves as a source of data }
+    variables to be used in the display. }
+  
+  \item{data}{ a \code{flowSet} object that serves as a source of data. }
+  
   \item{xlab, ylab}{ Labels for data axes, with suitable defaults taken
     from the formula }
-  \item{overlap}{ the amount of overlap between stacked density plots }
-  \item{prepanel}{ the prepanel function.  See
-    \code{\link[lattice:xyplot]{xyplot}} }
-  \item{panel}{ the panel function.  See
-    \code{\link[lattice:xyplot]{xyplot}} }
+  
   \item{f.value, distribution}{ number of points used in Q-Q plot, and
     the reference distribution used.  See
     \code{\link[lattice:qqmath]{qqmath}} for details.  }
+  
   \item{n}{ the number of bins on each axis to be used when evaluating
     the density }
 
-  \item{as.table, contour, labels}{ These
-    arguments are passed unchanged to the corresponding methods in
-    lattice, and are listed here only because they provide different
-    defaults.  See documentation for the original methods for details.
-  }
+  \item{as.table, contour, labels}{ These arguments are passed unchanged
+    to the corresponding methods in lattice, and are listed here only
+    because they provide different defaults.  See documentation for the
+    original methods for details.}
+  
   \item{time}{ A character string giving the name of the column
     recording time. }
+  
   \item{exclude.time}{ logical, specifying whether to exclude the time
     variable from a scatter plot matrix or parallel coordinates plot.
     It is rarely meaningful not to do so. }
+  
   \item{reorder.by}{ a function, which is applied to each column.  The
     columns are ordered by the results.  Reordering can be suppressed by
     setting this to \code{NULL}.  }
+  
   \item{\dots}{ more arguments, usually passed on to the underlying
     lattice methods. }
 }
@@ -108,12 +109,6 @@
 
 \section{Methods}{
   \describe{
-
-    \item{densityplot}{\code{signature(x = "formula", data =
-	"flowSet")}: creates density plots for a given channel, with
-      samples stacked according to a phenodata variable.  Colors are
-      used to indicate common values of this covariate across panels.
-    }
 
     \item{qqmath}{\code{signature(x = "formula", data = "flowSet")}:
       creates theoretical quantile plots of a given channel, with one or
@@ -147,19 +142,6 @@
 \examples{
 
 data(GvHD)
-
-densityplot(Visit ~ `FSC-H` | Patient, GvHD)
-
-densityplot(Visit ~ asinh(`FSC-H`) | Patient, GvHD,
-            panel = function(...) {
-                ylim <- current.panel.limits()$ylim
-                v <- c(5.5, 7)
-                panel.rect(v[1], ylim[1],
-                           v[2], ylim[2],
-                           col = "grey")
-                panel.densityplot.flowset(...)
-            })
-
 
 qqmath( ~ `FSC-H` | factor(Patient), GvHD,
        grid = TRUE, type = "l",

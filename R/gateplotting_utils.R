@@ -27,7 +27,12 @@ flowViz.state[["lattice.theme"]] <-
                                         cex=0.8,
                                         pch=".",
                                         col="black",
-                                        fill="transparent")))
+                                        fill="transparent"),
+                       gate.density=list(alpha=1,
+                                         fill="#FFFFFFB3",
+                                         col="black",
+                                         lwd=1,
+                                         lty="dotted")))
                                       
 
 

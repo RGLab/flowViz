@@ -16,25 +16,22 @@ prepanel.densityplot.flowset <-
 }
 
 
+##FIXME: enable groups 
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.densityplot.flowset <-
-    function(x, y, darg=list(n=50), ref=FALSE, frames, channel,
+    function(x, y, darg=list(n=50), frames, channel,
              overlap = 0.3, channel.name, filter=NULL,
-             col = superpose.polygon$col,
-             lty = superpose.polygon$lty,
-             lwd = superpose.polygon$lwd,
-             alpha = superpose.polygon$alpha,
-             border = superpose.polygon$border,
-             gpar=NULL, ...)
+             fill=superpose.polygon$col,
+             lty=superpose.polygon$lty,
+             lwd=superpose.polygon$lwd,
+             alpha=superpose.polygon$alpha,
+             col=superpose.polygon$border,
+             gpar, ...)
 {
     which.channel <- tail(which.packet(), 1)
     lc <- length(channel)
     channel <- channel[[which.channel]]
     channel.name <- channel.name[which.channel]
-    superpose.line <- trellis.par.get("superpose.line")
-    superpose.polygon <- trellis.par.get("superpose.polygon")
-    reference.line <- trellis.par.get("reference.line")
-    col.signif <- "red"
     ycode <- as.numeric(y)
     validName <- !length(grep("\\(", channel.name))
     if (any(duplicated(ycode)))
@@ -65,25 +62,16 @@ panel.densityplot.flowset <-
         }
     }  
     ny <- nlevels(y)
-    col <- rep(col, length = ny)
+    superpose.polygon <- trellis.par.get("superpose.polygon")
+    border <- rep(col, length = ny)
+    col <- rep(fill, length = ny)
     lty <- rep(lty, length = ny)
     lwd <- rep(lwd, length = ny)
     alpha <- rep(alpha, length = ny)
-    border <- rep(border, length = ny)
     x <- as.character(x)
     height <- (1 + overlap)
     parm <- gsub("`", "", as.character(channel))
     plotType("gdensity", parm)
-    if(is.null(gpar)){
-        gpar <- flowViz.par()
-        gpar$lty <- "dotted"
-        gpar$fill <- rgb(1,1,1,0.7)
-    }
-    else if(! "lty" %in% names(gpar))
-        gpar$lty <- "dotted"
-    else if(! "fill" %in% names(gpar))
-        gpar$fill <- rgb(1,1,1,0.7)
-    class(gpar) <- "gpar"
     for (i in rev(seq_len(ny))){
         if (i %in% ycode)
         {
@@ -105,8 +93,6 @@ panel.densityplot.flowset <-
             yl <- i + height * c(0, h$y, 0) / max.d
             panel.polygon(x=xl,y=yl, col=col[i], border=NA, alpha=alpha[i])
             ## we indicate piled up data by vertical lines (if > 1%)
-            desat <- function(col, by=75)
-                rgb(t(pmax(0, col2rgb(col)-by)),max=255)
             lx <- length(xx)
             if(sum(pl) > lx/100)
                 panel.lines(rep(rl[1],2), c(i, i+sum(pl)/lx*height),
@@ -114,7 +100,8 @@ panel.densityplot.flowset <-
             if(sum(pr) > lx/100)
                 panel.lines(rep(rl[2],2), c(i, i+sum(pr)/lx*height),
                             col=desat(col[i]), lwd=3)
-            ## add the filterResult if possible
+            ## add the filterResult if possible, we get them from the output of
+            ## glpolygon (with plot=FALSE)
             if(!is.null(filter[[nm]]) && validName){    
                 bounds <- glpolygon(filter[[nm]], frames[[nm]],
                                     channels=parm,
@@ -122,6 +109,7 @@ panel.densityplot.flowset <-
                 oo <- options(warn=-1)
                 on.exit(options(oo))
                 if(!is.na(bounds)){
+                    ## iterate over gate regions
                     for(j in seq_along(bounds)){
                         tb <- bounds[[j]]
                         if(ncol(tb) == 1 && colnames(tb) == parm){
@@ -131,8 +119,9 @@ panel.densityplot.flowset <-
                                 xr <- c(min(tb), seq(min(tb), max(tb), len=100),
                                         max(tb))
                                 yr <- c(i, afun(xr[-c(1, length(xr))]), i)
-                                grid.polygon(xr, yr, default.units = "native",
-                                             gp=gpar)
+                                panel.polygon(xr, yr, border=gpar$col, col=gpar$fill,
+                                              alpha=gpar$alpha, lwd=gpar$lwd,
+                                              lty=gpar$lty)
                             }
                         }
                     }
@@ -203,13 +192,11 @@ analyzeDensityFormula <- function(x, dot.names)
 
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, xlab,
+          function(x, data, channels, xlab,
                    as.table = TRUE, overlap = 0.3,
                    prepanel = prepanel.densityplot.flowset,
                    panel = panel.densityplot.flowset,
-                   filter=NULL, scales=list(y=list(draw=F)),
-                   channels,
-                   ...)
+                   filter=NULL, scales=list(y=list(draw=F)), ...)
       {
           ocall <- sys.call(sys.parent())
           ccall <- match.call(expand.dots = FALSE)
@@ -264,7 +251,13 @@ setMethod("densityplot",
                   ans
               }
               else as.name("which")
-          if (missing(xlab)) xlab <- ""
+          if (missing(xlab))
+              xlab <- ""
+          gp <- list(...)[["par.settings"]]
+          gpar <- flowViz.par.get()
+          if(!is.null(gp))
+              gpar <- lattice:::updateList(gpar, gp)
+          ccall$gpar <- gpar$gate.density
           ccall$x <- new.x
           ccall$data <- pd
           ccall$prepanel <- prepanel
@@ -306,7 +299,7 @@ setMethod("densityplot",
 
 setMethod("densityplot",
           signature(x="view", data="missing"),
-          function(x, data, channels, conditional, ...)
+          function(x, data, channels, ...)
       {
           dat <- Data(x)
           if(is.null(dat))
@@ -316,8 +309,6 @@ setMethod("densityplot",
               channels <- if(is(x, "normalizeView"))
                   parameters(get(get(x@action)@normalization)) else
               colnames(dat)
-          if(missing(conditional))
-              conditional <- "name"
           ## A curv1Filter overlay
           filter <- if(is(x, "normalizeView")){
               tmp <- lapply(channels, curv1Filter)
