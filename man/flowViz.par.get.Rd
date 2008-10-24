@@ -122,12 +122,12 @@ flowViz.par.set("gate.text", list(font=2))
 flowViz.par.get("gate.text")
 
 ## Set a lattice parameter
-trellis.par.get("plot.symbol")
+plot.symbol <- trellis.par.get("plot.symbol")
 flowViz.par.set("plot.symbol", list(col="red"))
 trellis.par.get("plot.symbol")
 
 ## undo all settings
-flowViz.par.set(list(plot.symbol="#0080ff"), gate.text=list(font=1))
+flowViz.par.set(list(plot.symbol=plot.symbol, gate.text=list(font=1)))
 
 }
 

@@ -434,15 +434,6 @@ plot(update(ssc.time[8:14], layout = c(1, 7)),
      split = c(1, 2, 1, 2), newpage = FALSE)
 
 
-## scatter plot matrix of individual flowFrames
-splom(GvHD[["s10a07"]], smooth = FALSE)
-
-splom(GvHD[["s10a07"]], smooth = FALSE,
-      prepanel.limits = function(x) quantile(as.numeric(x), c(0.0, 0.99)))
-
-
-
-
 ## displaying filters
 n2gate <- norm2Filter("SSC-H", "FSC-H")
 
