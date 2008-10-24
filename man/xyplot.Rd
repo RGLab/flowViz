@@ -146,7 +146,6 @@ panel.xyplot.flowset(
     \dots)
 
 
-setMethod(xyplot,
 \S4method{xyplot}{view,missing}(
     x,
     data,
