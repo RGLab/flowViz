@@ -11,7 +11,7 @@ setMethod("flowPlot",
           	showFilter=TRUE,gate.fill="transparent",gate.border="black",
           	xlab,ylab,xlim,ylim,...){
           	require(geneplotter)
-            data <- x@exprs
+            data <- exprs(x)
             ncells <- nrow(data)
             if(missing(xlab)){
               if(is.character(plotParameters)){
