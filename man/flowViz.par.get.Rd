@@ -52,7 +52,7 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
   \code{\link[lattice]{trellis.par.set}} and you should consult their
   documentation for further details.
 
-  We introduce three new categories of graphical parameters that are
+  We introduce four new categories of graphical parameters that are
   relevant for \code{flowViz} plots:
 
   \item{gate}{Controls the appearance of gate boundaries in

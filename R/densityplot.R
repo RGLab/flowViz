@@ -26,6 +26,7 @@ panel.densityplot.flowset <-
              lwd=superpose.polygon$lwd,
              alpha=superpose.polygon$alpha,
              col=superpose.polygon$border,
+             groups=NULL, refline=NULL,
              gpar, ...)
 {
     which.channel <- tail(which.packet(), 1)
@@ -65,6 +66,8 @@ panel.densityplot.flowset <-
     superpose.polygon <- trellis.par.get("superpose.polygon")
     border <- rep(col, length = ny)
     col <- rep(fill, length = ny)
+    if(!is.null(groups))
+        col <- col[groups]
     lty <- rep(lty, length = ny)
     lwd <- rep(lwd, length = ny)
     alpha <- rep(alpha, length = ny)
@@ -132,6 +135,8 @@ panel.densityplot.flowset <-
             panel.lines(rl, rep(i,2), col="black")
         }
     }
+    if(!is.null(refline))
+        panel.abline(v=refline)
 }
 
 
@@ -196,7 +201,8 @@ setMethod("densityplot",
                    as.table = TRUE, overlap = 0.3,
                    prepanel = prepanel.densityplot.flowset,
                    panel = panel.densityplot.flowset,
-                   filter=NULL, scales=list(y=list(draw=F)), ...)
+                   filter=NULL, scales=list(y=list(draw=F)),
+                   groups, ...)
       {
           ocall <- sys.call(sys.parent())
           ccall <- match.call(expand.dots = FALSE)
@@ -257,6 +263,8 @@ setMethod("densityplot",
           gpar <- flowViz.par.get()
           if(!is.null(gp))
               gpar <- lattice:::updateList(gpar, gp)
+          if(!missing(groups))
+              ccall$groups <- as.factor(eval(substitute(groups), pData(data)))
           ccall$gpar <- gpar$gate.density
           ccall$x <- new.x
           ccall$data <- pd

@@ -63,6 +63,8 @@ panel.densityplot.flowset(
     lwd=superpose.polygon$lwd,
     alpha=superpose.polygon$alpha,
     col=superpose.polygon$border,
+    groups=NULL,
+    refline=NULL,
     gpar,
     \dots)
 
@@ -148,7 +150,15 @@ panel.densityplot.flowset(
     \code{flowViz.par.set} customization. The relevant parameter
     category for density plots is \code{gate.density} with available
     parameters \code{col, \code{fill}, \code{lwd} \code{alpha} and
-    \code{lty}}. See \code{\link{flowViz.par.set}} for details.}
+      \code{lty}}. See \code{\link{flowViz.par.set}} for details.}
+  
+  \item{groups}{Use identical colors for grouping. The value of the
+    argument is expected to be a phenotypic variable in the
+    \code{flowSet}. }
+
+  \item{refline}{ Add one ore more vertical reference lines to the plot.
+    This argument is directly passed to
+    \code{\link[lattice]{panel.abline}}. }
 
   \item{gpar}{ A list of graphical parameters that are passed down to
     the low level panel functions. This is for internal use only. The

@@ -493,14 +493,14 @@ software. The facts to mention are:
   
 \item Parameters are split up into logical categories and have to be
   provided as named lists or lists of lists. The categories directly
-  relevant for filter plotting are \Robject{gate} and
-  \Robject{gate.text}, the basic \Rpackage{flowViz} settings are
-  controlled by the \Robject{flow.symbol} category. See the
-  documentation for \Rfunction{flowViz.par.set} for a complete list of
-  available parameters. All additional graphical parameters (like
-  \Robject{cex}, \Robject{pch} and \Robject{col}) known from the
-  \Rpackage{lattice} high-level plotting functions are also still
-  available.
+  relevant for filter plotting are \Robject{gate},
+  \Robject{gate.density}, and \Robject{gate.text}, the basic
+  \Rpackage{flowViz} settings are controlled by the
+  \Robject{flow.symbol} category. See the documentation for
+  \Rfunction{flowViz.par.set} for a complete list of available
+  parameters. All additional graphical parameters (like \Robject{cex},
+  \Robject{pch} and \Robject{col}) known from the \Rpackage{lattice}
+  high-level plotting functions are also still available.
   
 \end{itemize}
 
