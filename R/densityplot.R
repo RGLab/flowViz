@@ -86,15 +86,6 @@ panel.densityplot.flowset <-
             pl <- xx<=r[1]
             pr <- xx>=r[2]
             xxt <- xx[!(pl | pr)]
-            ## we need a smaller bandwidth than the default and keep it constant
-            if(!("bw" %in% names(darg)))
-                darg$bw <- diff(r)/50
-            h <- do.call(density, c(list(x=xxt), darg))
-            n <- length(h$x)
-            max.d <- max(h$y)
-            xl <- h$x[c(1, 1:n, n)]
-            yl <- i + height * c(0, h$y, 0) / max.d
-            panel.polygon(x=xl,y=yl, col=col[i], border=NA, alpha=alpha[i])
             ## we indicate piled up data by vertical lines (if > 1%)
             lx <- length(xx)
             if(sum(pl) > lx/100)
@@ -103,36 +94,49 @@ panel.densityplot.flowset <-
             if(sum(pr) > lx/100)
                 panel.lines(rep(rl[2],2), c(i, i+sum(pr)/lx*height),
                             col=desat(col[i]), lwd=3)
-            ## add the filterResult if possible, we get them from the output of
-            ## glpolygon (with plot=FALSE)
-            if(!is.null(filter[[nm]]) && validName){    
-                bounds <- glpolygon(filter[[nm]], frames[[nm]],
-                                    channels=parm,
-                                    verbose=FALSE, plot=FALSE)
-                oo <- options(warn=-1)
-                on.exit(options(oo))
-                if(!is.na(bounds)){
-                    ## iterate over gate regions
-                    for(j in seq_along(bounds)){
-                        tb <- bounds[[j]]
-                        if(ncol(tb) == 1 && colnames(tb) == parm){
-                            sel <- xl >= min(tb) & xl <= max(tb)
-                            if(any(sel)){
-                                afun <- approxfun(xl, yl)
-                                xr <- c(min(tb), seq(min(tb), max(tb), len=100),
-                                        max(tb))
-                                yr <- c(i, afun(xr[-c(1, length(xr))]), i)
-                                panel.polygon(xr, yr, border=gpar$col, col=gpar$fill,
-                                              alpha=gpar$alpha, lwd=gpar$lwd,
-                                              lty=gpar$lty)
+            ## we need a smaller bandwidth than the default and keep it constant
+            if(length(xxt)){
+                if(!("bw" %in% names(darg)))
+                    darg$bw <- diff(r)/50
+                h <- do.call(density, c(list(x=xxt), darg))
+                n <- length(h$x)
+                max.d <- max(h$y)
+                xl <- h$x[c(1, 1:n, n)]
+                yl <- i + height * c(0, h$y, 0) / max.d
+                panel.polygon(x=xl,y=yl, col=col[i], border=NA, alpha=alpha[i])
+                ## add the filterResult if possible, we get them from the output of
+                ## glpolygon (with plot=FALSE)
+                if(!is.null(filter[[nm]]) && validName){    
+                    bounds <- glpolygon(filter[[nm]], frames[[nm]],
+                                        channels=parm,
+                                        verbose=FALSE, plot=FALSE)
+                    oo <- options(warn=-1)
+                    on.exit(options(oo))
+                    if(!is.na(bounds)){
+                        ## iterate over gate regions
+                        for(j in seq_along(bounds)){
+                            tb <- bounds[[j]]
+                            if(ncol(tb) == 1 && colnames(tb) == parm){
+                                sel <- xl >= min(tb) & xl <= max(tb)
+                                if(any(sel)){
+                                    afun <- approxfun(xl, yl)
+                                    xr <- c(min(tb), seq(min(tb), max(tb), len=100),
+                                            max(tb))
+                                    yr <- c(i, afun(xr[-c(1, length(xr))]), i)
+                                    panel.polygon(xr, yr, border=gpar$col, col=gpar$fill,
+                                                  alpha=gpar$alpha, lwd=gpar$lwd,
+                                                  lty=gpar$lty)
+                                }
                             }
                         }
                     }
+                    options(oo)
                 }
-                options(oo)
+                panel.lines(x=xl,y=yl, col=border[i], lty=lty[i],lwd=lwd[i])
+                panel.lines(rl, rep(i,2), col="black")
+            }else{
+                panel.lines(rl, rep(i,2), col="black")
             }
-            panel.lines(x=xl,y=yl, col=border[i], lty=lty[i],lwd=lwd[i])
-            panel.lines(rl, rep(i,2), col="black")
         }
     }
     if(!is.null(refline))
