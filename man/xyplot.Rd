@@ -199,14 +199,14 @@ panel.xyplot.flowset(
     average of the flow cytometry values against time. }
 
   
-  \item{nrpoints} {The number of points plotted on the smoothed plot in
+  \item{nrpoints}{The number of points plotted on the smoothed plot in
     sparse regions. This is only listed here because we use a different
     default. See
     \code{\link[geneplotter:panel.smoothScatter]{panel.smoothScatter}}
     for details. }
 
   
-  \item{binSize} {The size of a bin (i.e., the number of events within a
+  \item{binSize}{The size of a bin (i.e., the number of events within a
     bin) used for the smoothed average timeline plots. }
 
   
