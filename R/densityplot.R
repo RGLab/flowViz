@@ -5,7 +5,7 @@
 
 ## Dedicated prepanel function to set up dimensions
 prepanel.densityplot.flowset <- 
-    function(x, y, darg=list(n=50), frames, 
+    function(x, y, darg=list(n=50, na.rm=TRUE), frames, 
              overlap=0.3, subscripts, ...,
              which.channel)
 {
@@ -19,7 +19,7 @@ prepanel.densityplot.flowset <-
 ##FIXME: enable groups 
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.densityplot.flowset <-
-    function(x, y, darg=list(n=50), frames, channel,
+    function(x, y, darg=list(n=50, na.rm=TRUE), frames, channel,
              overlap = 0.3, channel.name, filter=NULL,
              fill=superpose.polygon$col,
              lty=superpose.polygon$lty,
@@ -82,17 +82,19 @@ panel.densityplot.flowset <-
             xx <- evalInFlowFrame(channel, frames[[nm]])
             r <- unlist(range(frames[[nm]], channel.name))
             ## we ignore data that has piled up on the margins
-            rl <- r + c(-1,1)*0.06*diff(r)
+            rl <- r + c(-1,1)*min(100, 0.06*diff(r))
             pl <- xx<=r[1]
             pr <- xx>=r[2]
             xxt <- xx[!(pl | pr)]
             ## we indicate piled up data by vertical lines (if > 1%)
             lx <- length(xx)
-            if(sum(pl) > lx/100)
-                panel.lines(rep(rl[1],2), c(i, i+sum(pl)/lx*height),
+            spl <- sum(pl, na.rm=TRUE)
+            if(spl > lx/100)
+                panel.lines(rep(rl[1],2), c(i, i+spl/lx*height),
                             col=desat(col[i]), lwd=3)
-            if(sum(pr) > lx/100)
-                panel.lines(rep(rl[2],2), c(i, i+sum(pr)/lx*height),
+            spr <- sum(pr, na.rm=TRUE)
+            if(spr > lx/100)
+                panel.lines(rep(rl[2],2), c(i, i+spr/lx*height),
                             col=desat(col[i]), lwd=3)
             ## we need a smaller bandwidth than the default and keep it constant
             if(length(xxt)){

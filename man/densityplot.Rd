@@ -42,7 +42,7 @@
 prepanel.densityplot.flowset(
     x,
     y,
-    darg=list(n=50),
+    darg=list(n=50, na.rm=TRUE),
     frames, 
     overlap=0.3,
     subscripts,
@@ -52,7 +52,7 @@ prepanel.densityplot.flowset(
 panel.densityplot.flowset(
     x,
     y,
-    darg=list(n=50),
+    darg=list(n=50, na.rm=TRUE),
     frames,
     channel,
     overlap = 0.3,
