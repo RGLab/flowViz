@@ -217,6 +217,8 @@ ell2Polygon <- function(fd, parms)
 {
     ## get the ellipse lines
     center <- fd@mean[parms]
+    if(is.null(rownames(fd@cov)))
+      rownames(fd@cov) <- colnames(fd@cov)
     cov <- fd@cov[parms, parms]
     radius <- fd@distance
     chol.cov <- t(chol(cov))
