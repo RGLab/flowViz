@@ -133,7 +133,7 @@
 }
 
 \details{ When plotting
-  code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
+  \code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
   \code{plot} or \code{xyplot }methods provided by \code{flowViz}, the
   plotted parameters are recorded, which makes it possible to correctly
   overlay the outlines of \code{\link[flowCore:filter-class]{filter}}s
@@ -146,7 +146,7 @@
   precedence over automatically detected parameters.
 
   The methods support all plotting parameters that are available for the
-  code{base} \code{lines} functions.
+  \code{base} \code{lines} functions.
   
 }
 

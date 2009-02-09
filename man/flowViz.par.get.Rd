@@ -54,7 +54,8 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
 
   We introduce four new categories of graphical parameters that are
   relevant for \code{flowViz} plots:
-
+  
+  \describe{
   \item{gate}{Controls the appearance of gate boundaries in
     \code{xyplots} (if \code{smooth=TRUE}) or of the points within a gate
     region (\code{smooth=FALSE}).  Available parameters are \code{col},
@@ -72,7 +73,7 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
   \item{gate.text}{Controls the appearance of the text used for gate
     names.  Available parameters are \code{col},
     \code{cex},\code{font},\code{alpha} and \code{lineheight}. }
-
+  }
 }
 
 \value{

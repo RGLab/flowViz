@@ -374,7 +374,7 @@ panel.xyplot.flowset(
   (separated by the tilde) have to be valid parameter names. Please note
   that frequently used variants like \code{FSC-H} and \code{SSC-H} are
   not syntatically correct R symbols, and need to be wrapped in
-  \code{`}. E.g., \code{`FSC-H`}. For \code{flowSets}, the use of a
+  \code{` '}. E.g., \code{`FSC-H`}. For \code{flowSets}, the use of a
   conditioning variable is optional. We implicitely condition on
   \code{flowFrames} and the default is to arrange panels by sample
   names.

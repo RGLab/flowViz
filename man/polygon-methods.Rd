@@ -132,7 +132,7 @@
 
 
 \details{ When plotting
-  code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
+ \ code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
   \code{plot} method provided by \code{flowViz}, the plotted parameters
   are recorded, which makes it possible to correctly overlay the
   outlines of \code{\link[flowCore:filter-class]{filter}}s assuming that
@@ -145,7 +145,7 @@
   precedence over automatically detected parameters.
 
   The methods support all plotting parameters that are available for the
-  code{base} \code{polygon} functions.
+  \code{base} \code{polygon} functions.
   
 }
 

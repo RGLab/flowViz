@@ -100,12 +100,12 @@
   }
 }
 
-\details{ When plotting code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
-  \code{plot} method provided by \code{flowViz}, the plotted parameters
-  are recorded, which makes it possible to correctly overlay the points
-  within \code{\link[flowCore:filter-class]{filter}}s assuming that they are defined for
-  the repective parameters. Warnings and error will be cast for the
-  cases where the parameters are non-distinct or ambigious. These
+\details{ When plotting \code{\link[flowCore:flowFrame-class]{flowFrame}}s
+  using the \code{plot} method provided by \code{flowViz}, the plotted
+  parameters are recorded, which makes it possible to correctly overlay the
+  points within \code{\link[flowCore:filter-class]{filter}}s assuming that
+  they are defined for the repective parameters. Warnings and error will be
+  cast for the cases where the parameters are non-distinct or ambigious. These
   methods are meant to be used within lattice panel functions and are
   probably not of much use outside of those.}
 
