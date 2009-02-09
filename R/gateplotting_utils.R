@@ -213,7 +213,7 @@ norm2Polygon <- function(fd, parms)
 
 
 ## convert an ellipseoidalFilter into a polygonGate
-ell2Polygon <- function(fd, parms)
+ell2Polygon <- function(fd, parms=parameters(fd))
 {
     ## get the ellipse lines
     center <- fd@mean[parms]

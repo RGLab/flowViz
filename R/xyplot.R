@@ -289,6 +289,8 @@ setMethod("xyplot",
               x[[3]] <- (~dummy | name)[[2]]
               x[[3]][[2]] <- tmp
           }
+          if(! "name" %in% names(pData(data)))
+              pData(data)$name <- sampleNames(data)
           ## par.settings will not be passed on to the panel functions, so
           ## we have to fetch it from ... and stick the gate relevant stuff
           ## back it in there manually
@@ -379,7 +381,7 @@ panel.xyplot.flowset <- function(x,
     nm <- as.character(x)
     if (length(nm) < 1) return()
     ## 'filter' either has to be a single filter, or a list of filters matching
-    ## the flowSet, or a filterResultList.
+    ## the flowSet's sample names, or a filterResultList.
     if(!is.null(filter)){
         if(!is.list(filter)){
             if(is(filter, "filter")){
@@ -388,7 +390,7 @@ panel.xyplot.flowset <- function(x,
             }
         }else if(!is(filter, "filterResultList"))
             filter <- as(filter, "filterResultList")
-        if(!(nm %in% names(filter) || !is(filter[[nm]] ,"filter"))){
+        if(!nm %in% names(filter) || !is(filter[[nm]] ,"filter")){
             warning("'filter' must either be a filterResultList, a single\n",
                     "filter object or a named list of filter objects.",
                     call.=FALSE)
