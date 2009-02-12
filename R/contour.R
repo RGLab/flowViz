@@ -7,7 +7,7 @@ setMethod("contour",
           if(length(y) != 2)
               stop("You must specify two dimensions!")
           if(is.character(y))
-              y <- match(y, colnames(x))
+              y <- match(y[1:2], colnames(x))
           if (missing(bw))
               bw <- diff(apply(exprs(x[,y]), 2, quantile, probs=c(0.05, 0.95),
                                na.rm=TRUE)) / 25
@@ -15,12 +15,12 @@ setMethod("contour",
               xlab <- colnames(x)[y[1]]
           if(missing(ylab))
               ylab <- colnames(x)[y[2]]
-          exp <- exprs(x)
+          exp <- exprs(x[,y])
           ## compute the bivariate density and the contour lines
           xr <- range(exp[,1], na.rm=TRUE)
           yr <- range(exp[,2], na.rm=TRUE)
           range <- list(xr+c(-1,1)*bw[1]*2.5, yr+c(-1,1)*bw[2]*2.5)
-          z <- bkde2D(exp[,y], bw, grid.size, range.x=range)
+          z <- bkde2D(exp, bw, grid.size, range.x=range)
           ll <- contourLines(z$x1, z$x2, z$fhat, nlevels=nlevels)
           ## plot everything as polygons
           if(!add) 
@@ -43,7 +43,7 @@ setMethod("contour",
           if(length(y) != 2)
               stop("You must specify two dimensions!")
           if(is.character(y))
-              y <- match(y, colnames(x))
+              y <- match(y[1:2], colnames(x))
            if(missing(xlab))
               xlab <- colnames(x)[y[1]]
           if(missing(ylab))
