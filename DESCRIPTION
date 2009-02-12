@@ -1,7 +1,7 @@
 Package: flowViz
 Type: Package
 Title: Visualization for flow cytometry
-Version: 1.7.7
+Version: 1.7.8
 Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar
 Maintainer: Florian Hahne <fhahne@fhcrc.org>
 Description: Provides visualization tools for flow cytometry data. 
@@ -9,4 +9,27 @@ Depends: R (>= 2.7.0), flowCore (>= 1.5.17), RColorBrewer, lattice,
 	 latticeExtra,methods 
 Imports: flowCore, graphics, lattice, latticeExtra, geneplotter, MASS, grid
 License: Artistic-2.0
+Collate: AllGeneric.R
+	 utilities.R
+	 addNames-methods.R  
+	 flowPlot.R            
+	 lpoints-methods.R  
+	 points-methods.R	
+	 gateplotting_utils.R  
+	 lpolygon-methods.R  
+	 polygon-methods.R  
+	 xyplot.R
+	 contour.R           
+	 hexbin.R              
+	 parallel.R          
+	 splom.R            
+	 densityplot.R       
+	 latticeMethods.R      
+	 parallel.rgl.R      
+	 timeLinePlot.R
+	 ecdfplot.R          
+	 lines-methods.R       
+	 plot-methods.R    
+   	 zzz.R
+
 biocViews:  Infrastructure, Flowcytometry, CellBasedAssays, Visualization

@@ -211,8 +211,11 @@ setMethod("densityplot",
                    groups, ...)
       {
           ocall <- sys.call(sys.parent())
-          ccall <- match.call(expand.dots = FALSE)
-          ccall <- manipulate.call(ocall, ccall)
+          ccall <- match.call(expand.dots = TRUE)
+          ## ccall <- match.call(expand.dots = FALSE)
+          ## ccall <- manipulate.call(ocall, ccall)
+          if(! "name" %in% names(pData(data)))
+              pData(data)$name <- sampleNames(data)
           pd <- pData(phenoData(data))
           uniq.name <- createUniqueColumnName(pd)
           ## ugly hack to suppress warnings about coercion introducing
@@ -244,7 +247,8 @@ setMethod("densityplot",
           ## conditioning variable alread.
           ## y ~ channel ==> y ~ sample | which
           ## y ~ channel | var ==> y ~ sample | which + var
-          
+
+         
           new.x <- d1 ~ d2 | d3
           new.x[[2]] <- ## d1
               if (formula.struct$left) formula.struct$left.symbol
