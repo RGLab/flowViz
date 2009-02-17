@@ -46,6 +46,9 @@ importFrom(MASS,
            "kde2d")
 
 
+importFrom(KernSmooth,
+           "bkde2D")
+
 exportMethods("addName",
               "contour",
               "densityplot",
