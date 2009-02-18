@@ -635,7 +635,7 @@ other contexts.  So far, only the \Rfunction{parallel} method supports
 this syntax.
 
 <<parCoord>>=
-parallel(~ . | Visit,GvHD, filter=n2Filter.results, alpha = 0.01)
+parallel(~ . | Visit, GvHD, filter=n2Filter.results, alpha = 0.01)
 @ 
 
 \begin{center}
