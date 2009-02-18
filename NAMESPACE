@@ -1,53 +1,126 @@
-import(flowCore)
-
-
 useDynLib("flowViz")
 
+import(flowCore)
 
-importFrom(graphics,
-           "contour",
-           "lines",
-           "plot",
-           "points",
-           "polygon")
+importClassesFrom(methods,
+                  ANY,
+                  character,
+                  formula,
+                  logical,
+                  matrix,
+                  missing)
 
+importMethodsFrom(Biobase,
+                  exprs,
+                  pData,
+                  "pData<-",
+                  phenoData,
+                  sampleNames,
+                  "sampleNames<-")
 
 importMethodsFrom(flowCore,
                   "plot")
 
-importFrom(lattice,
-           "densityplot",
-           "levelplot",
-           "parallel",
-           "qqmath",
-           "splom",
-           "xyplot")
-
-
-importFrom(grid,
-           "get.gpar",
-           "grid.points",
-           "grid.polygon",
-           "grid.rect",
-           "current.viewport")
-
-
-importFrom(latticeExtra,
-           "ecdfplot")
-
-
-importFrom(geneplotter,
-           "densCols",
-           "panel.smoothScatter",
-           "smoothScatter")
-
+importFrom(KernSmooth,
+           bkde2D)
 
 importFrom(MASS,
-           "kde2d")
+           kde2d)
+
+importFrom(RColorBrewer,
+           brewer.pal)
+
+importFrom(geneplotter,
+	   densCols,
+           panel.smoothScatter,
+           smoothScatter)
+
+importFrom(grDevices,
+           col2rgb,
+           colorRampPalette,
+           contourLines,
+           rainbow,
+           rgb)
+
+importFrom(graphics,
+           abline,
+           axis,
+           barplot,
+           contour,
+           hist,
+           layout,
+           lines,
+           pairs,
+           par,
+           plot,
+           points,
+           polygon,
+           rect)
+
+importFrom(grid,
+           get.gpar,
+           grid.points,
+           grid.polygon,
+           grid.rect,
+           current.viewport)
+
+importFrom(lattice,
+           densityplot,
+           levelplot,
+           make.groups,
+           panel.abline,
+           panel.grid,
+           panel.lines,
+           panel.parallel,
+           panel.points,
+           panel.polygon,
+           panel.rect,
+           panel.segments,
+           panel.text,
+           panel.xyplot,
+           parallel,
+           prepanel.default.parallel,
+           qqmath,
+           splom,
+           trellis.par.get,
+           trellis.par.set,
+           which.packet,
+           xyplot)
+
+importFrom(latticeExtra,
+           ecdfplot)
+
+importFrom(methods,
+           "@<-",
+           as,
+           is)
+
+importFrom(stats,
+           approxfun,
+           cor,
+           density,
+           median,
+           ppoints,
+           qnorm,
+           quantile,
+           qunif,
+           var)
+
+importFrom(utils,
+           modifyList)
+
+#importFrom(geneplotter,
+#           "densCols",
+#           "panel.smoothScatter",
+#           "smoothScatter")
 
 
-importFrom(KernSmooth,
-           "bkde2D")
+#importFrom(MASS,
+#           "kde2d")
+
+
+#importFrom(KernSmooth,
+#           "bkde2D")
 
 exportMethods("addName",
               "contour",
