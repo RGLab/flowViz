@@ -222,12 +222,19 @@ panel.xyplot.flowframe <- function(x,
             selyL <- y > r[2,channel.y.name]-inc[2]
             selyS <- y < r[1,channel.y.name]+inc[2]
             allsel <- !(selxL | selxS | selyL | selyS)
-            panel.smoothScatter(x[allsel], y[allsel], range.x=list(r[,1], r[,2]),
-                                ...)
-            addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
-            addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
-            addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
-            addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+            if(sum(allsel)>0)
+            {
+                panel.smoothScatter(x[allsel], y[allsel], range.x=list(r[,1], r[,2]),
+                                    ...)
+                addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+                addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+                addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+                addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+            }
+            else
+            {
+                panel.smoothScatter(x, y, ...)
+            }
         }else{
             panel.smoothScatter(x, y, ...)
         }
