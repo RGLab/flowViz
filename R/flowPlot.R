@@ -10,7 +10,6 @@ setMethod("flowPlot",
           	parent,colParent="Grey",colChild="Blue",
           	showFilter=TRUE,gate.fill="transparent",gate.border="black",
           	xlab,ylab,xlim,ylim,...){
-          	require(geneplotter)
             data <- exprs(x)
             ncells <- nrow(data)
             if(missing(xlab)){
