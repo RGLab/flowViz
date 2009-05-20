@@ -11,7 +11,7 @@
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 ## helper function to do the actual plotting
-fplot <- function(x, smooth, pch, xlim, ylim, ...)
+fplot <- function(x, smooth, pch, xlim, ylim = NULL, ...)
 {
     values <- exprs(x)
     sel <- tolower(colnames(values)) != "time"
@@ -20,27 +20,30 @@ fplot <- function(x, smooth, pch, xlim, ylim, ...)
         pch <- "."
     l <- ncol(values)
     if(l==1){
-        hist(values, xlab=colnames(x), ...)
-        flowViz.state[["type"]] <- "hist"
-    }else if (l==2){
-        if(missing(xlim))
+        if (missing(xlim))
             xlim <- unlist(range(x[,1]))
-        if(missing(ylim))
+        hist(values, xlab=colnames(x), xlim = xlim, ylim = ylim, ...)
+        flowViz.state[["type"]] <- "hist"
+    }
+    else if (l==2) {
+        if (missing(xlim))
+            xlim <- unlist(range(x[,1]))
+        if (is.null(ylim))
             ylim <- unlist(range(x[,2]))
-        if(smooth){
+        if (smooth) {
             smoothScatter(values, pch=pch, xlim=xlim, ylim=ylim, ...)
             flowViz.state[["type"]] <- "smooth"
         }else{
             plot(values, pch=pch, xlim=xlim, ylim=ylim, ...)
             flowViz.state[["type"]] <- "dot"
         }
-    }else{
-        if(smooth){
+    } else {
+        if(smooth) {
             x <- x[,sel]
             print(splom(x, pch=pch, ...))
             flowViz.state[["type"]] <- "splom"
         }
-        else{
+        else {
             pairs(values[,sel], pch=pch, ...)
             flowViz.state[["type"]] <- "pairs"
         }
