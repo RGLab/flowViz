@@ -129,15 +129,6 @@ truncNames <- function(names){
     return(names)
 }
 
-## Lighten up colors
-desat <- function(col, by=50)
-{
-    rgbcol <- col2rgb(col)
-    rgbcol <- rgbcol + by
-    rgbcol[rgbcol>255] <- 255
-    return(rgb(rgbcol[1,], rgbcol[2,], rgbcol[3,], max=255))
-}
-
 
 
 ## Align all values around 0 and plot

@@ -3,6 +3,7 @@
 \docType{methods}
 \alias{densityplot}
 \alias{densityplot,formula,flowSet-method}
+\alias{densityplot,formula,flowFrame-method}
 \alias{densityplot,formula,view-method}
 \alias{densityplot,view,missing-method}
 \alias{panel.densityplot.flowset}
@@ -14,8 +15,7 @@
 
 \description{
   
-  So far, density plots are only implemented for
-  \code{\link[flowCore:flowSet-class]{flowSet}}. The idea is to
+  For \code{\link[flowCore:flowSet-class]{flowSets}} the idea is to
   horizontally stack plots of density estimates for all frames in the
   \code{flowSet} for one or several flow parameters. In the latter case,
   each parameter will be plotted in a separate panel, i.e., we
@@ -37,6 +37,12 @@
     filter=NULL,
     scales=list(y=list(draw=F)),
     channels,
+    \dots)
+
+## method for 'flowFrame' objects
+\S4method{densityplot}{formula,flowFrame}(
+    x,
+    data, 
     \dots)
 
 prepanel.densityplot.flowset(
@@ -65,6 +71,7 @@ panel.densityplot.flowset(
     col=superpose.polygon$border,
     groups=NULL,
     refline=NULL,
+    margin=0.005,
     gpar,
     \dots)
 
@@ -101,7 +108,7 @@ panel.densityplot.flowset(
     the workflow methods, \code{x} can also be one of the several
     workflow objects. }
   
-  \item{data}{ A \code{flowSet} object that serves as a source of data,
+  \item{data}{ A flow data object that serves as a source of data,
     either a \code{\link[flowCore]{flowFrame}} or
     \code{\link[flowCore]{flowSet}}, or one of the several workflow
     objects. }
@@ -115,7 +122,8 @@ panel.densityplot.flowset(
     original methods for details. \code{darg} gets passed on to
     \code{\link[stats]{density}}. }
   
-  \item{overlap}{ The amount of overlap between stacked density plots }
+  \item{overlap}{ The amount of overlap between stacked density
+    plots. This argument is ignored for the \code{flowFrame} method. }
   
   \item{prepanel}{ The prepanel function.  See
     \code{\link[lattice:xyplot]{xyplot}} }
@@ -156,9 +164,19 @@ panel.densityplot.flowset(
     argument is expected to be a phenotypic variable in the
     \code{flowSet}. }
 
-  \item{refline}{ Add one ore more vertical reference lines to the plot.
-    This argument is directly passed to
+  \item{refline}{ Logical. Add one ore more vertical reference lines to
+    the plot.  This argument is directly passed to
     \code{\link[lattice]{panel.abline}}. }
+
+  \item{margin}{ Numeric in \code{[0,1]}. Indicate margin events by
+    horizontal bars. The value of \code{margin} is interpreted as the
+    proportion of events on the margin over which the bars are
+    added. E.g., a value of \code{0,5} means to indicate margin events
+    if there are more than \code{0.5} times the total number of
+    events. \code{1} means to ignore margin events completetly. For
+    \code{0} bars are added even if there is only a single margin event.
+  
+}
 
   \item{gpar}{ A list of graphical parameters that are passed down to
     the low level panel functions. This is for internal use only. The
@@ -217,6 +235,9 @@ densityplot(~ ., GvHD[1:3])
 
 ## include a filter
 densityplot(~ `FSC-H`, GvHD, filter=curv1Filter("FSC-H"))
+
+## plot a single flowFrame
+densityplot(~ `SSC-H`, GvHD[[1]], margin=FALSE)
 
 }
 

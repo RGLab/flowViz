@@ -68,3 +68,17 @@ manipulate.call <- function(ocall, ccall)
     ccall
 }
 
+
+
+## Lighten up or darken colors
+desat <- function(col, by=50)
+{
+    rgbcol <- col2rgb(col)
+    up <- max(rgbcol-255)
+    down <- min(rgbcol)
+    if(by>0)
+        rgbcol <- rgbcol + min(by, up)
+    if(by<0)
+        rgbcol <- rgbcol - min(abs(by), down)
+    return(rgb(rgbcol[1,], rgbcol[2,], rgbcol[3,], max=255))
+}

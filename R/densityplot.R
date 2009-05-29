@@ -16,7 +16,30 @@ prepanel.densityplot.flowset <-
 }
 
 
-##FIXME: enable groups 
+## add a barchart indicating the margin events
+mbar <- function(dat, p, r, i, col, m)
+{
+    rl <- r + c(-1,1)*min(100, 0.06*diff(r))
+    off <- min(5, 0.005*diff(r))
+    lx <- length(dat)
+    des <- -20
+    fac <- 0.7
+    for(j in seq_along(p)){
+        sp <- sum(p[[j]], na.rm=TRUE)
+        if(sp > lx*m)
+        {
+            panel.segments(rl[j], i, rl[j], i+fac, col="gray")
+            panel.lines(rep(rl[j],2), c(i, i+(sp/lx*fac)),
+                        col=desat(col, des), lwd=4)
+            panel.segments(rl[j]-off, i, rl[j]+off, i, col="gray")
+            panel.segments(rl[j]-off, i+fac, rl[j]+off, i+fac, col="gray")
+
+        }
+    }
+}
+
+
+    
 ## Dedicated panel function to do the plotting and add gate boundaries
 panel.densityplot.flowset <-
     function(x, y, darg=list(n=50, na.rm=TRUE), frames, channel,
@@ -27,8 +50,10 @@ panel.densityplot.flowset <-
              alpha=superpose.polygon$alpha,
              col=superpose.polygon$border,
              groups=NULL, refline=NULL,
+             margin=0.005,
              gpar, ...)
 {
+    margin <- min(1, max(0, margin))
     which.channel <- tail(which.packet(), 1)
     lc <- length(channel)
     channel <- channel[[which.channel]]
@@ -86,16 +111,10 @@ panel.densityplot.flowset <-
             pl <- xx<=r[1]
             pr <- xx>=r[2]
             xxt <- xx[!(pl | pr)]
-            ## we indicate piled up data by vertical lines (if > 1%)
-            lx <- length(xx)
-            spl <- sum(pl, na.rm=TRUE)
-            if(spl > lx/100)
-                panel.lines(rep(rl[1],2), c(i, i+spl/lx*height),
-                            col=desat(col[i]), lwd=3)
-            spr <- sum(pr, na.rm=TRUE)
-            if(spr > lx/100)
-                panel.lines(rep(rl[2],2), c(i, i+spr/lx*height),
-                            col=desat(col[i]), lwd=3)
+            ## we indicate piled up data by vertical lines (if > 1%) unless
+            ## margin=FALSE
+            if(margin<1)
+                mbar(xx, list(pl, pr), r, i, col[i], margin)
             ## we need a smaller bandwidth than the default and keep it constant
             if(length(xxt)){
                 if(!("bw" %in% names(darg)))
@@ -286,6 +305,7 @@ setMethod("densityplot",
           ## from the formula???
           ccall$channel.name <- gsub("^.*\\(`|`\\).*$", "", channel.name)
           ccall$as.table <- as.table
+          overlap <- max(-0.5, overlap)
           ccall$overlap <- overlap
           ccall$xlab <- xlab
           ccall$horizontal <- TRUE
@@ -293,9 +313,9 @@ setMethod("densityplot",
           ccall$default.scales <- list(x = list(relation = "free"))
           ccall$which.channel <-
               gsub("^.*\\(`|`\\).*$", "", as.character(pd$which))
+          ypad <- lattice.getOption("axis.padding")$numeric * (length(data) + overlap)
           ccall$lattice.options <-
-              list(axis.padding =
-                   list(factor = c(0.6, 1 + 2 * overlap)))
+              list(axis.padding = list(factor = c(ypad, ypad + 1 + overlap)))
           ccall[[1]] <- quote(lattice::bwplot)
           ans <- eval.parent(ccall)
           ans$call <- ocall
@@ -303,6 +323,24 @@ setMethod("densityplot",
       })
 
 
+
+## ==========================================================================
+## For the flowFrame method, we simply coerce to a flowSet and remove the
+## axis annotation
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+setMethod("densityplot",
+          signature(x="formula", data="flowFrame"),
+          function(x, data, ...){
+              ocall <- sys.call(sys.parent())
+              ccall <- match.call(expand.dots = TRUE)
+              ccall$overlap <- 0
+              ccall$scales <- list(y=list(draw=FALSE))
+              ccall$data <- as(data, "flowSet")
+              ans <- eval.parent(ccall)
+              ans$call <- ocall
+              ans
+          })
+                 
 
 
 
