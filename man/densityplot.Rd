@@ -28,7 +28,8 @@
 ## method for 'flowSet' objects
 \S4method{densityplot}{formula,flowSet}(
     x,
-    data, 
+    data,
+    channels, 
     xlab,
     as.table=TRUE,
     overlap=0.3,
@@ -36,7 +37,7 @@
     panel = panel.densityplot.flowset,
     filter=NULL,
     scales=list(y=list(draw=F)),
-    channels,
+    groups,
     \dots)
 
 ## method for 'flowFrame' objects
@@ -162,7 +163,7 @@ panel.densityplot.flowset(
   
   \item{groups}{Use identical colors for grouping. The value of the
     argument is expected to be a phenotypic variable in the
-    \code{flowSet}. }
+    \code{flowSet}, or a factor.}
 
   \item{refline}{ Logical. Add one ore more vertical reference lines to
     the plot.  This argument is directly passed to

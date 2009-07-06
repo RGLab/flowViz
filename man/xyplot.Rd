@@ -108,14 +108,13 @@ panel.xyplot.flowframe(
 \S4method{xyplot}{formula,flowSet}(
     x,
     data,
-    xlab,
-    ylab,
+    smooth=TRUE,
+    filter = NULL,
     as.table=TRUE,
     prepanel=prepanel.xyplot.flowset,
     panel=panel.xyplot.flowset,
-    pch = ".",
-    smooth = TRUE,
-    filter = NULL,
+    xlab=channel.x.name,
+    ylab=channel.y.name,
     par.settings=NULL,
     \dots)
 
