@@ -236,12 +236,16 @@ rgate <- rectangleGate("FSC-H"=c(0, 400),"SSC-H"=c(-50, 300))
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate)
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure1.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
-
+%
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure1.jpg}
+\end{figure}
 
 As default for smoothed scatter plots, the gate boundaries are
 drawn. Orientation of the gate will be handled by the plotting
@@ -270,11 +274,17 @@ different colors for the different subpopulations.
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate, smooth=FALSE)
 @
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure2.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+%
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure2.jpg}
+\end{figure}
+
 
 
 Additionally, We can add the \Rclass{filter} boundaries to the plot
@@ -286,11 +296,17 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate,
 smooth=FALSE, outline=TRUE)
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure3.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+%
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure3.jpg}
+\end{figure}
+
 
 
 The constraint for a valid two-dimensional representation doesn't
@@ -312,11 +328,15 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate2,
 smooth=FALSE, outline=TRUE)
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure4.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure4.jpg}
+\end{figure}
 
 
 Overplotting is a potential problem for this representation. As a
@@ -358,11 +378,15 @@ n2Filter.results <- filter(GvHD, n2Filter)
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=n2Filter.results)
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure5.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure5.jpg}
+\end{figure}
 
 
 There are data-driven filter types that may result in more than just
@@ -378,11 +402,16 @@ c2f.results <- filter(GvHD, c2f)
 xyplot(`FL4-H` ~ `FSC-H` | Visit, data=GvHD, filter=c2f.results)
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure6.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure6.jpg}
+\end{figure}
+
 
 
 This is a good example for a case where passing the
@@ -429,12 +458,15 @@ overplotting of neighbouring density areas.
 densityplot(~ `FSC-H`, GvHD, filter=curv1Filter("FSC-H"))
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure7.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
-
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure7.jpg}
+\end{figure}
 
 The situation gets slightly more complex when we are conditioning on
 multiple FCM channels. In this case, filter has to be a list of equal
@@ -452,11 +484,15 @@ densityplot(~ ., GvHD, channels=c("FSC-H", "SSC-H", "FL1-H"),
 filter=list(curv1Filter("FSC-H"), NULL, rgate2))
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure8.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure8.jpg}
+\end{figure}
 
 
 Note that by default the scale of the x axis has been adjusted for
@@ -511,11 +547,16 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate,
        par.settings=list(gate=list(fill="black", alpha=0.2)))
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+  
+<<echo=FALSE>>=
+jpeg(file="figure9.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure9.jpg}
+\end{figure}
 
 
 We could have achieved the same customization by changing the session defaults:
@@ -544,11 +585,15 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate,
                                                         cex=0.7)))
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure10.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure10.jpg}
+\end{figure}
 
 
 
@@ -562,11 +607,16 @@ xyplot(`FL4-H` ~ `FSC-H` | Visit, data=GvHD, filter=c2f.results,
 par.settings=list(gate=list(fill=rainbow(10), alpha=0.5, col="transparent")))
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure11.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure11.jpg}
+\end{figure}
+
 
 
 
@@ -588,11 +638,16 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=n2Filter.results,
                                      gate.text=list(col="darkred", alpha=0.7, cex=0.6)))
 @ 
 %
-\begin{center}
-<<fig=TRUE,width=9,height=5,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure12.jpg", width=650, height=360)
 plot(trellis.last.object())
+dev.off()
 @
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure12.jpg}
+\end{figure}
+
 
 
 
@@ -638,13 +693,16 @@ this syntax.
 parallel(~ . | Visit, GvHD, filter=n2Filter.results, alpha = 0.01)
 @ 
 
-\begin{center}
   
-<<fig=TRUE,width=9,height=8,echo=FALSE>>=
+<<echo=FALSE>>=
+jpeg(file="figure13.jpg", width=650, height=560)
 plot(trellis.last.object())
+dev.off()
 @
-
-\end{center}
+\begin{figure}[htb]
+\centering 
+\includegraphics{figure13.jpg}
+\end{figure}
 
 
 

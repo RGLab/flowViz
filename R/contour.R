@@ -1,7 +1,7 @@
 setMethod("contour",
           signature("flowFrame"),
           function(x, y=1:2, nlevels=10, bw, grid.size=c(65,65), add=FALSE,
-                   xlab, ylab,  lwd=1, lty=1, col=par("fg"),
+                   xlab, ylab, xlim, ylim, lwd=1, lty=1, col=par("fg"),
                    fill="transparent", ...)
       {
           if(length(y) != 2)
@@ -11,10 +11,13 @@ setMethod("contour",
           if (missing(bw))
               bw <- diff(apply(exprs(x[,y]), 2, quantile, probs=c(0.05, 0.95),
                                na.rm=TRUE)) / 25
+          cnx <- colnames(x)[y[1]]
           if(missing(xlab))
-              xlab <- colnames(x)[y[1]]
+              xlab <- cnx
+          cny <- colnames(x)[y[2]]
           if(missing(ylab))
-              ylab <- colnames(x)[y[2]]
+              ylab <- cny
+          plotType("contour", c(cnx, cny))
           exp <- exprs(x[,y])
           ## compute the bivariate density and the contour lines
           xr <- range(exp[,1], na.rm=TRUE)
@@ -23,10 +26,13 @@ setMethod("contour",
           z <- bkde2D(exp, bw, grid.size, range.x=range)
           ll <- contourLines(z$x1, z$x2, z$fhat, nlevels=nlevels)
           ## plot everything as polygons
+          if(missing(xlim))
+              xlim <- unlist(range(x[,y[1]]))
+           if(missing(ylim))
+              ylim <- unlist(range(x[,y[2]]))
           if(!add) 
               plot(z$x1, z$x2, type="n", xlab=xlab, ylab=ylab,
-                   xlim=range(exp[,1], na.rm=TRUE),
-                   ylim=range(exp[,2], na.rm=TRUE), ...)
+                   xlim=xlim, ylim=ylim, ...)
           for(ct in ll) {
               polygon(ct$x, ct$y, border=col, col=fill, lwd=lwd, lty=lty)
           }

@@ -26,6 +26,8 @@
     add=FALSE,
     xlab,
     ylab,
+    xlim,
+    ylim,
     lwd=1,
     lty=1,
     col=par("fg"),
@@ -70,6 +72,8 @@
     superimposed on an existing plot.}
 
   \item{xlab, ylab}{The axis annotation.}
+  
+  \item{xlim, ylim}{The plotting ranges.}
 
   \item{lwd, lty, col, fill}{The usual plotting parameters, i.e. the
     line width, line type, line color and fill color. When using a fill
