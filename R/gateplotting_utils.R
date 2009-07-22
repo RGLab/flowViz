@@ -194,7 +194,7 @@ fixInf <- function(x, replacement)
 }
 
 ## convert a norm2Filter into a polygonGate
-norm2Polygon <- function(fd, parms)
+norm2Polygon <- function(fd, parms=fd$parameters)
 {
     ## get the ellipse lines
     norm.center <- fd$center[parms]
@@ -211,6 +211,13 @@ norm2Polygon <- function(fd, parms)
     polygonGate(.gate=ans)
 }
 
+## convert a norm2Gate into an ellipsoidGate
+norm2Ell <- function(fd, parms=fd$parameters)
+{
+    ellipsoidGate(mean=fd$center[parms],
+                  cov=fd$cov[parms, parms],
+                  distance=fd$radius)
+}
 
 ## convert an ellipseoidalFilter into a polygonGate
 ell2Polygon <- function(fd, parms=parameters(fd))
