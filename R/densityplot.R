@@ -336,6 +336,7 @@ setMethod("densityplot",
               ccall$overlap <- 0
               ccall$scales <- list(y=list(draw=FALSE))
               ccall$data <- as(data, "flowSet")
+              sampleNames(ccall$data) <- identifier(data)
               ans <- eval.parent(ccall)
               ans$call <- ocall
               ans
