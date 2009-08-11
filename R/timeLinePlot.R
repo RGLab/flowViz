@@ -58,7 +58,7 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
     lm <- length(med)
     gvars <- sapply(timeData, function(x) mean(x$variance))
     stand <-  mapply(function(z,m,v) abs(z$smooth[,2]-m)/(v*varCut), timeData,
-                 med, gvars)
+                 med, gvars, SIMPLIFY=FALSE)
     tvals <- lapply(timeData, function(x) x$smooth[,1])
     
     ## Create the plot, either one of the 4 possible types. For flowFrames
