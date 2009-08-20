@@ -250,7 +250,7 @@ freqPlot <- function(y, p, main="time line frequencies",
                   x$frequencies[,2] / mean(x$frequencies[,2])-1) 
     actualRange <- max(diff(range(stY)), var*varCut*2)*1.01
     stacks <- ((length(y):1)-1) * actualRange
-    stYY <- mapply(function(x,s) x+s, stY, stacks)
+    stYY <- mapply(function(x,s) x+s, stY, stacks, SIMPLIFY=FALSE)
     if(!is.list(stYY))
         stYY <- list(stYY)
     xlim <- c(0, max(unlist(stX)))
