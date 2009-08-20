@@ -66,7 +66,7 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
     if(lm==1 && type != "frequency"){
         nativePlot(timeData, p=channel, range=mr, col="darkblue",
                    varCut=varCut, ...)
-        return((sum(stand[stand>0])/length(stand))/varCut)
+        return((sum(unlist(stand)[unlist(stand)>0])/length(stand))/varCut)
     }else if(lm>1)
         layout(matrix(1:2), heights=c(0.8, 0.2))
     switch(type,
@@ -152,7 +152,7 @@ scaledPlot <- function(y, p, main=paste("time line for", p),
         xl <- par("usr")[1:2]
         xl <- xl + c(1,-1)*(diff(xl)*0.01)
         rect(xl[1], max(var)*varCut, xl[2], -max(var)*varCut,
-             col=desat("gray", by=30), border=NA)
+             col=desat("lightgray", by=30), border=NA)
     }
     abline(h=0, col="darkgray")
     for(j in 1:length(y))
@@ -190,7 +190,7 @@ stackedPlot <- function(y, p, main=paste("time line for", p),
     for(j in 1:length(y))
         rect(xl[1], mean(yy[[j]]$y)-var[[j]]*varCut, xl[2],
              mean(yy[[j]]$y)+var[[j]]*varCut,
-             col=desat("gray", by=30), border=NA)
+             col=desat("lightgray", by=30), border=NA)
     for(j in 1:length(y))
         lines(yy[[j]], col=col[j], lwd=lwd)   
 }
@@ -232,7 +232,7 @@ nativePlot <- function(y, p, main=paste("time line for", p),
         xl <- xl + c(1,-1)*(diff(xl)*0.01)
         
         rect(xl[1], m-var*varCut, xl[2], m+var*varCut,
-             col=desat("gray", by=30), border=NA)
+             col=desat("lightgray", by=30), border=NA)
     }
     for(j in 1:length(y))
         lines(y[[j]]$smooth, col=col[j], lwd=lwd, ...)
@@ -269,7 +269,7 @@ freqPlot <- function(y, p, main="time line frequencies",
     for(j in 1:length(y))
         rect(xl[1], stacks[j]-var*varCut, xl[2],
              stacks[j]+var*varCut,
-             col=desat("gray", by=30), border=NA)
+             col=desat("lightgray", by=30), border=NA)
     for(j in 1:length(y))
         lines(stX[[j]], stYY[[j]], col=col[j], lwd=lwd)
 }
