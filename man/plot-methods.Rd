@@ -8,16 +8,18 @@
 
 \title{ Very basic plotting of flowFrames}
 
-\description{ A basic method to plot \code{\link[flowCore:flowFrame-class]{flowFrame}}
-  objects. Depending on the number of dimensions, different types of
-  plots are generates. See below for details.  }
+\description{ A basic method to plot
+  \code{\link[flowCore:flowFrame-class]{flowFrame}} objects. Depending
+  on the number of dimensions, different types of plots are
+  generates. See below for details.  } 
 
 \section{Methods}{
   
   \describe{
 
     \item{x = "flowFrame", y = "ANY"}{ We decide on the number of parameters
-      in the  \code{\link[flowCore:flowFrame-class]{flowFrame}}which plot type to use.}
+      in the  \code{\link[flowCore:flowFrame-class]{flowFrame}} which
+      plot type to use.} 
       
     \item{x = "flowFrame", y = "missing"}{ see above }
     
@@ -33,14 +35,14 @@
   single parameter this produces a
   \code{\link[graphics:hist]{histogram}}. For exactly two parameters we
   plot a bivariate density map (see
-  \code{\link[graphics:smoothScatter]{smoothScatter}}) and for more
+  \code{\link[graphics:smoothscatter]{smoothScatter}}) and for more
   than two parameters we produce a simple \code{\link[lattice]{splom}}
   plot. To select specific parameters from a \code{flowFrame} for
   plotting, either subset the object or specify the parameters as a
   character vector in the second argument to \code{plot}. The
   \code{smooth} parameters lets you toggle between density-type
-  \code{\link[graphics:smoothScatter]{smoothScatter}} plots and
-  regular scatter- or pairs plots.  For far more sophisticated plotting
+  \code{\link[graphics:smoothscatter]{smoothScatter}} plots and
+  regular scatter or pairs plots.  For far more sophisticated plotting
   of flow cytometry data, see the lattice-style plot methods provided by
   this package.  }
 
@@ -48,8 +50,9 @@
 
 \seealso{
   
-  \code{\link{xyplot}},
-  \code{\link[flowCore:flowFrame-class]{flowFrame}}, \code{\link{densityplot}}
+  \code{\link[flowViz]{xyplot}},
+  \code{\link[flowCore:flowFrame-class]{flowFrame}},
+  \code{\link[flowViz]{densityplot}}
   
 }
 

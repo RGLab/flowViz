@@ -12,11 +12,11 @@
   parameters.
 
   \code{flowViz.par.set} is the equivalent to
-  \code{\link[lattice]{trellis.par.set}}. It sets the same set of
-  graphical parameters, either in the \code{flowViz} package or directly
-  in \code{lattice}.
-
+  \code{\link[lattice:trellis.par.get]{trellis.par.set}}. It sets the
+  same set of graphical parameters, either in the \code{flowViz} package
+  or directly in \code{lattice}.
 }
+
 \usage{
 
 flowViz.par.get(name = NULL)
@@ -35,7 +35,7 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
   \item{\dots}{Further arguments that get passed on. }
 
   \item{theme}{ The theme to set. See
-    \code{\link[lattice]{trellis.par.set}} for details. }
+    \code{\link[lattice:trellis.par.get]{trellis.par.set}} for details. }
 
   \item{warn}{ This gets passed on directly to \code{trellis.par.set}. }
 
@@ -49,8 +49,8 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
   and intentions, \code{flowViz.par.get} and \code{flowViz.par.get} can
   be viewed as wrappers around their \code{lattice} counterparts
   \code{\link[lattice]{trellis.par.get}} and
-  \code{\link[lattice]{trellis.par.set}} and you should consult their
-  documentation for further details.
+  \code{\link[lattice:trellis.par.get]{trellis.par.set}} and you should
+  consult their documentation for further details.
 
   We introduce four new categories of graphical parameters that are
   relevant for \code{flowViz} plots:
@@ -98,11 +98,9 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
 }
 
 \references{
-  Lattice, Multivariate Data Visualization with R.
-
-  Deepayan Sarkar
-
-  Springer, New York, 2008}
+  Deepayan Sarker, \emph{Lattice, Multivariate Data Visualization with R},
+  Springer, New York, 2008
+}
 
 \author{ F. Hahne}
 
@@ -110,7 +108,7 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
 \seealso{
 
   \code{\link[lattice]{trellis.par.get}} and
-  \code{\link[lattice]{trellis.par.set}}
+  \code{\link[lattice:trellis.par.get]{trellis.par.set}}
 
 }
 

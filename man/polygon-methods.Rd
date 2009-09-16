@@ -77,7 +77,7 @@
     \item{x = "curv2Filter", data = "ANY"}{ We either need a
       \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
       data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-      \code{\link[flowCore:curv2Filter-class]{curv2Filter}}s.}
+      \code{\link[flowCore:curv2Filter-class]{curv2Filter}}.}
 
     \item{x = "curv2Filter", data = "flowFrame"}{ see above }
 
@@ -85,13 +85,13 @@
 
     \item{x = "kmeansFilter", data = "ANY"}{ We don't know how to plot
       regions of a
-      \code{\link[flowCore:kmeansFilter-class]{kmeansFilter}}, hence we
+      \code{\link[flowCore]{kmeansFilter}}, hence we
       warn. }
 
     \item{x = "norm2Filter", data = "ANY"}{ We either need a
       \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
       data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-      \code{\link[flowCore:norm2Filter-class]{norm2Filter}}s.}
+      \code{\link[flowCore:norm2Filter-class]{norm2Filter}}.}
 
     \item{x = "norm2Filter", data = "flowFrame"}{ see above }
 

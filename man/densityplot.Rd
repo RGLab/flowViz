@@ -110,9 +110,9 @@ panel.densityplot.flowset(
     workflow objects. }
   
   \item{data}{ A flow data object that serves as a source of data,
-    either a \code{\link[flowCore]{flowFrame}} or
-    \code{\link[flowCore]{flowSet}}, or one of the several workflow
-    objects. }
+    either a \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+    \code{\link[flowCore:flowSet-class]{flowSet}}, or one of the several
+    workflow objects. }
   
   \item{xlab}{ Label for data x axis, with suitable defaults taken from
     the formula }
@@ -127,10 +127,10 @@ panel.densityplot.flowset(
     plots. This argument is ignored for the \code{flowFrame} method. }
   
   \item{prepanel}{ The prepanel function.  See
-    \code{\link[lattice:xyplot]{xyplot}} }
+    \code{\link[lattice]{xyplot}} }
   
   \item{panel}{ the panel function.  See
-    \code{\link[lattice:xyplot]{xyplot}} }
+    \code{\link[lattice]{xyplot}} }
   
   \item{filter}{ A \code{\link[flowCore:filter-class]{filter}},
     \code{\link[flowCore:filterResult-class]{filterResult}} or
@@ -158,8 +158,9 @@ panel.densityplot.flowset(
     throught the \code{lattice}-like \code{par.setting} and
     \code{flowViz.par.set} customization. The relevant parameter
     category for density plots is \code{gate.density} with available
-    parameters \code{col, \code{fill}, \code{lwd} \code{alpha} and
-      \code{lty}}. See \code{\link{flowViz.par.set}} for details.}
+    parameters \code{col}, \code{fill}, \code{lwd}, \code{alpha} and
+    \code{lty}. See
+    \code{\link[flowViz:flowViz.par.get]{flowViz.par.set}} for details.} 
   
   \item{groups}{Use identical colors for grouping. The value of the
     argument is expected to be a phenotypic variable in the
@@ -167,7 +168,7 @@ panel.densityplot.flowset(
 
   \item{refline}{ Logical. Add one ore more vertical reference lines to
     the plot.  This argument is directly passed to
-    \code{\link[lattice]{panel.abline}}. }
+    \code{\link[lattice:panel.functions]{panel.abline}}. }
 
   \item{margin}{ Numeric in \code{[0,1]}. Indicate margin events by
     horizontal bars. The value of \code{margin} is interpreted as the
@@ -175,9 +176,7 @@ panel.densityplot.flowset(
     added. E.g., a value of \code{0,5} means to indicate margin events
     if there are more than \code{0.5} times the total number of
     events. \code{1} means to ignore margin events completetly. For
-    \code{0} bars are added even if there is only a single margin event.
-  
-}
+    \code{0} bars are added even if there is only a single margin event.}
 
   \item{gpar}{ A list of graphical parameters that are passed down to
     the low level panel functions. This is for internal use only. The
@@ -203,8 +202,8 @@ panel.densityplot.flowset(
 
     \item{densityplot}{\code{signature(x = "formula", data = "view")}: A
       method to create density plots for workspace
-      \code{\link[flowCore]{view}} objects. This still allows for some
-      level of customization, but most defaults will be set depending
+      \code{\link[flowCore:view-class]{view}} objects. This still allows
+      for some level of customization, but most defaults will be set depending
       on the input object. }
 
     \item{densityplot}{\code{signature(x = "view", data = "missing")}:

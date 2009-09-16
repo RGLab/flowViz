@@ -65,7 +65,7 @@
     \item{x = "curv1Filter", data = "ANY"}{ We either need a
       \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
       data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-      \code{\link[flowCore:curv1Filter-class]{curv1Filter}}s. }
+      \code{\link[flowCore:curv1Filter-class]{curv1Filter}}. }
 
     \item{x = "curv1Filter", data = "flowFrame"}{ see above }
     
@@ -76,7 +76,7 @@
     \item{x = "curv2Filter", data = "ANY"}{ We either need a
       \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
       data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-      \code{\link[flowCore:curv2Filter-class]{curv2Filter}}s.}
+      \code{\link[flowCore:curv2Filter-class]{curv2Filter}}.}
 
     \item{x = "curv2Filter", data = "flowFrame"}{ see above }
 
@@ -84,13 +84,13 @@
 
     \item{x = "kmeansFilter", data = "ANY"}{ We don't know how to plot
       outlines of a
-      \code{\link[flowCore:kmeansFilter-class]{kmeansFilter}}, hence we
+      \code{\link[flowCore]{kmeansFilter}}, hence we
       warn. }
 
     \item{x = "norm2Filter", data = "ANY"}{ We either need a
       \code{\link[flowCore:filterResult-class]{filterResult}} or the raw
       data as a \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-      \code{\link[flowCore:norm2Filter-class]{norm2Filter}}s.}
+      \code{\link[flowCore:norm2Filter-class]{norm2Filter}}.}
 
     \item{x = "norm2Filter", data = "flowFrame"}{ see above }
 
@@ -133,10 +133,10 @@
 }
 
 \details{ When plotting
-  \code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
-  \code{plot} or \code{xyplot }methods provided by \code{flowViz}, the
+  \code{\link[flowCore:flowFrame-class]{flowFrames}} using the
+  \code{plot} or \code{xyplot} methods provided by \code{flowViz}, the
   plotted parameters are recorded, which makes it possible to correctly
-  overlay the outlines of \code{\link[flowCore:filter-class]{filter}}s
+  overlay the outlines of \code{\link[flowCore:filter-class]{filter}}
   assuming that they are defined for the repective parameters. Warnings
   and error will be cast for the cases where the parameters are
   non-distinct or ambigious.
@@ -156,7 +156,7 @@
   
   \code{\link[flowCore:filter-class]{filter}},
   \code{\link[flowCore:flowFrame-class]{flowFrame}},
-  \code{\link{glines}}, \code{\link{gpoints}}
+  \code{\link[flowViz:points-methods]{gpoints}}
   
 }
 

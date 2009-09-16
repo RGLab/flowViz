@@ -172,8 +172,8 @@ panel.xyplot.flowset(
   \item{data, y, frame}{ a \code{flowSet} or
     \code{\link[flowCore:flowFrame-class]{flowFrame}} object that serves
     as the source of data. For the workflow methods, this can also be
-    various \code{\link[flowCore]{view}} or
-    \code{\link[flowCore]{actionItem}} objects.}
+    various \code{\link[flowCore:view-class]{view}} or
+    \code{\link[flowCore:actionItem-class]{actionItem}} objects.}
 
   
   \item{time}{ A character string giving the name of the data column
@@ -474,7 +474,7 @@ xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD,
 
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
        data=transform("SSC-H"=asinh,"FSC-H"=asinh) \%on\% GvHD,
-       smooth=FALSE, filter=n2gate, subset=Patient==5)
+       smooth=FALSE, filter=n2gate, subset=Patient == 5)
 
 
 n2gate.results <- filter(GvHD, n2gate)

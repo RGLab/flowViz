@@ -91,7 +91,7 @@ panel.splom.flowframe(
   The function draws a scatter plot matrix of the data for each flow
   parameter in a \code{flowFrame}. For the most, one can think about
   this as a rectangular arrangement of separate
-  \code{\link[xyplot]{xyplots}}, and most of that functionality is also
+  \code{\link[flowViz:xyplot]{xyplots}}, and most of that functionality is also
   available here. To be more precise, the function repeatedly calls
   \code{panel.xyplot.flowframe} to do the actual plotting. Please see
   its documentation for details.
