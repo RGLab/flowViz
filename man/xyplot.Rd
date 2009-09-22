@@ -312,7 +312,7 @@ panel.xyplot.flowset(
       limitations on the use of expressions as part of the
       formulae. Unless you are sure about what you are doing, you should
       transform the raw data in a separate step using one of the tools
-      in the \code{\link[flowCore-package]{flowCore}} package rather
+      in the \code{\link[flowCore:flowCore-package]{flowCore}} package rather
       than inline using the formula interface. The method allows to
       superimpose gating results though the \code{filter} argument. If
       \code{smooth=TRUE}, we try to add spherical 2D representations of
