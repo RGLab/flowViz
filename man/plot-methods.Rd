@@ -35,13 +35,13 @@
   single parameter this produces a
   \code{\link[graphics:hist]{histogram}}. For exactly two parameters we
   plot a bivariate density map (see
-  \code{\link[graphics:smoothscatter]{smoothScatter}}) and for more
+  \code{\link[graphics]{smoothScatter}}) and for more
   than two parameters we produce a simple \code{\link[lattice]{splom}}
   plot. To select specific parameters from a \code{flowFrame} for
   plotting, either subset the object or specify the parameters as a
   character vector in the second argument to \code{plot}. The
   \code{smooth} parameters lets you toggle between density-type
-  \code{\link[graphics:smoothscatter]{smoothScatter}} plots and
+  \code{\link[graphics]{smoothScatter}} plots and
   regular scatter or pairs plots.  For far more sophisticated plotting
   of flow cytometry data, see the lattice-style plot methods provided by
   this package.  }
