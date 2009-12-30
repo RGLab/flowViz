@@ -71,6 +71,7 @@ panel.xyplot.flowframe.time(
     x,
     data,
     smooth=TRUE,
+    colramp=NULL,
     prepanel=prepanel.xyplot.flowframe,
     panel=panel.xyplot.flowframe,
     \dots)
@@ -91,6 +92,7 @@ panel.xyplot.flowframe(
     frame,
     filter=NULL,
     smooth=TRUE,
+    colramp=NULL,
     margin=TRUE,
     outline=FALSE,
     channel.x.name,
@@ -109,6 +111,7 @@ panel.xyplot.flowframe(
     x,
     data,
     smooth=TRUE,
+    colramp=NULL,
     filter = NULL,
     as.table=TRUE,
     prepanel=prepanel.xyplot.flowset,
@@ -217,6 +220,11 @@ panel.xyplot.flowset(
     used to display a partially smoothed version of the data.
     Otherwise, events are plotted individually, as in a standard scatter
     plot. }
+  
+  \item{colramp}{Function accepting an integer \code{n} as an argument
+  and returning \code{n} colors. If \code{smooth=FALSE} and \code{colramp}
+  is given (not \code{NULL}), the software will encode the local
+  densities at each point and produce a vector of colors accordingly.}
 
   
   \item{filter}{ A \code{\link[flowCore:filter-class]{filter}},
@@ -405,6 +413,11 @@ main="A single flowFrame")
 ## A non-smooth version of the same data
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
 main="A single flowFrame", smooth=FALSE)
+
+## A colorful non-smooth version of the same data
+cols <- colorRampPalette(topo.colors(16))
+xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
+main="A single flowFrame", smooth=FALSE, colramp=cols, pch=20, cex=0.1)
 
 ## Visual artifacts created by the pileup of margin events
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,

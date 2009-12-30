@@ -127,6 +127,7 @@ setMethod("xyplot",
           definition=function(x,
                               data,
                               smooth=TRUE,
+                              colramp=NULL,
                               prepanel=prepanel.xyplot.flowframe,
                               panel=panel.xyplot.flowframe,
                               ...)
@@ -145,7 +146,7 @@ setMethod("xyplot",
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
           ## call data.frame xyplot method with our panel function
-          xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, 
+          xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, colramp=colramp,
                  prepanel=prepanel, panel=panel, frame=data,
                  channel.x.name=channel.x.name,
                  channel.y.name=channel.y.name,
@@ -183,6 +184,7 @@ panel.xyplot.flowframe <- function(x,
                                    frame,
                                    filter=NULL,
                                    smooth=TRUE,
+                                   colramp=NULL,
                                    margin=TRUE,
                                    outline=FALSE,
                                    channel.x.name,
@@ -245,6 +247,9 @@ panel.xyplot.flowframe <- function(x,
                       verbose=FALSE, gpar=gpar, strict=FALSE, ...)
         }
     }else{
+        if (!is.null(colramp)) {
+            col <- densCols(x, y, nbin=128, colramp=colramp)
+        }
         if(!is.null(filter) && validName){
             if(!is(filter, "filterResult"))
                 filter <- filter(frame, filter)
@@ -281,6 +286,7 @@ setMethod("xyplot",
           definition=function(x,
                               data,
                               smooth=TRUE,
+                              colramp=NULL,
                               filter=NULL,
                               as.table=TRUE,
                               prepanel=prepanel.xyplot.flowset,
@@ -332,7 +338,7 @@ setMethod("xyplot",
                       frames=data@frames, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
-                      smooth=smooth, gp=gp, as.table=as.table, filter=filter,
+                      smooth=smooth, colramp=colramp, gp=gp, as.table=as.table, filter=filter,
                       par.settings=par.settings, ...)
       })
 
