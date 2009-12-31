@@ -71,7 +71,6 @@ panel.xyplot.flowframe.time(
     x,
     data,
     smooth=TRUE,
-    colramp=NULL,
     prepanel=prepanel.xyplot.flowframe,
     panel=panel.xyplot.flowframe,
     \dots)
@@ -92,7 +91,6 @@ panel.xyplot.flowframe(
     frame,
     filter=NULL,
     smooth=TRUE,
-    colramp=NULL,
     margin=TRUE,
     outline=FALSE,
     channel.x.name,
@@ -111,7 +109,6 @@ panel.xyplot.flowframe(
     x,
     data,
     smooth=TRUE,
-    colramp=NULL,
     filter = NULL,
     as.table=TRUE,
     prepanel=prepanel.xyplot.flowset,
@@ -219,13 +216,9 @@ panel.xyplot.flowset(
   \item{smooth}{ Logical. If \code{TRUE}, \code{panel.smoothScatter} is
     used to display a partially smoothed version of the data.
     Otherwise, events are plotted individually, as in a standard scatter
-    plot. }
-  
-  \item{colramp}{Function accepting an integer \code{n} as an argument
-  and returning \code{n} colors. If \code{smooth=FALSE} and \code{colramp}
-  is given (not \code{NULL}), the software will encode the local
-  densities at each point and produce a vector of colors accordingly.}
-
+    plot. If \code{FALSE}, a graphical parameter \code{colramp} can be
+    used to obtain a coloring of points that is indicative of their
+    local density. } 
   
   \item{filter}{ A \code{\link[flowCore:filter-class]{filter}},
     \code{\link[flowCore:filterResult-class]{filterResult}} or
@@ -233,8 +226,8 @@ panel.xyplot.flowset(
     or a list of such objects of the same length as the
     \code{flowSet}. The appropriate spherical 2D representation of this
     filter will be superimposed on the plot if \code{smooth=TRUE}, or
-    the resukt of the filtering operation will be indicated by grouping
-    if \code{smooth=FALSE} . The software will figure out whether the
+    the result of the filtering operation will be indicated by grouping
+    if \code{smooth=FALSE}. The software will figure out whether the
     \code{filter} needs to be evaluated in order to be plotted (in which
     case providing a \code{filterResult} can speed things up
     considerably). }
@@ -415,9 +408,11 @@ xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
 main="A single flowFrame", smooth=FALSE)
 
 ## A colorful non-smooth version of the same data
-cols <- colorRampPalette(topo.colors(16))
+require(RColorBrewer)
+cols <- colorRampPalette(brewer.pal(9, "YlOrBr"))
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
-main="A single flowFrame", smooth=FALSE, colramp=cols, pch=20, cex=0.1)
+       main="A single flowFrame", smooth=FALSE,
+       colramp=cols, pch=20, cex=0.1)
 
 ## Visual artifacts created by the pileup of margin events
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
@@ -429,6 +424,9 @@ main="A single flowFrame", margin=FALSE)
 ## Visit
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD)
 
+## Same bivariate scatter plot with replacing default color
+cols <- colorRampPalette(brewer.pal(9, "BuGn"))
+xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD, colramp=cols)
 
 ## several examples with time on the X axis
 ## first for a flowFrame

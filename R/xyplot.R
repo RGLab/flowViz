@@ -127,7 +127,6 @@ setMethod("xyplot",
           definition=function(x,
                               data,
                               smooth=TRUE,
-                              colramp=NULL,
                               prepanel=prepanel.xyplot.flowframe,
                               panel=panel.xyplot.flowframe,
                               ...)
@@ -146,7 +145,7 @@ setMethod("xyplot",
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
           ## call data.frame xyplot method with our panel function
-          xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth, colramp=colramp,
+          xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth,
                  prepanel=prepanel, panel=panel, frame=data,
                  channel.x.name=channel.x.name,
                  channel.y.name=channel.y.name,
@@ -184,7 +183,6 @@ panel.xyplot.flowframe <- function(x,
                                    frame,
                                    filter=NULL,
                                    smooth=TRUE,
-                                   colramp=NULL,
                                    margin=TRUE,
                                    outline=FALSE,
                                    channel.x.name,
@@ -197,7 +195,9 @@ panel.xyplot.flowframe <- function(x,
                                    ...)
 {
     ## graphical parameter defaults
+    argcolramp <- list(...)$colramp
     gpar <- flowViz.par.get()
+    
     if(!is.null(gp))
         gpar <- lattice:::updateList(gpar, gp)
     if(is.null(gpar$gate$cex))
@@ -226,8 +226,8 @@ panel.xyplot.flowframe <- function(x,
             allsel <- !(selxL | selxS | selyL | selyS)
             if(sum(allsel)>0)
             {
-                panel.smoothScatter(x[allsel], y[allsel], range.x=list(r[,1], r[,2]),
-                                    ...)
+                panel.smoothScatter(x[allsel], y[allsel],
+                                    range.x=list(r[,1], r[,2]), ...)
                 addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
                 addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
                 addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
@@ -247,8 +247,8 @@ panel.xyplot.flowframe <- function(x,
                       verbose=FALSE, gpar=gpar, strict=FALSE, ...)
         }
     }else{
-        if (!is.null(colramp)) {
-            col <- densCols(x, y, nbin=128, colramp=colramp)
+        if (!is.null(argcolramp)) {
+            col <- densCols(x, y, colramp=argcolramp)
         }
         if(!is.null(filter) && validName){
             if(!is(filter, "filterResult"))
@@ -286,7 +286,6 @@ setMethod("xyplot",
           definition=function(x,
                               data,
                               smooth=TRUE,
-                              colramp=NULL,
                               filter=NULL,
                               as.table=TRUE,
                               prepanel=prepanel.xyplot.flowset,
@@ -338,7 +337,7 @@ setMethod("xyplot",
                       frames=data@frames, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
-                      smooth=smooth, colramp=colramp, gp=gp, as.table=as.table, filter=filter,
+                      smooth=smooth, gp=gp, as.table=as.table, filter=filter,
                       par.settings=par.settings, ...)
       })
 

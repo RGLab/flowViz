@@ -12,8 +12,8 @@ importFrom(graphics, abline, axis, barplot, contour, hist, layout,
            lines, pairs, par, plot, points, polygon, rect,
            smoothScatter)
 
-importFrom(grDevices, col2rgb, colorRampPalette, contourLines, rainbow, topo.colors,
-           densCols, blues9, rgb)
+importFrom(grDevices, col2rgb, colorRampPalette, contourLines, rainbow,
+           topo.colors, densCols, blues9, rgb)
 
 importFrom(grid, get.gpar, grid.points, grid.polygon, grid.rect,
            current.viewport)
