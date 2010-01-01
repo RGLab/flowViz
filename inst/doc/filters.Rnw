@@ -229,23 +229,20 @@ forward and doesn't require the computation of
 recangular gate) are unambigously defined in the \Rclass{filter}
 object. We will start with a simple \Rclass{rectangleGate} in the
 \Robject{FSC-H} and \Robject{SSC-H} dimensions.
-
-
-<<simpleRG>>=
+%
+<<simpleRG, fig=TRUE, include=FALSE, echo=TRUE, prefix=FALSE, height=4.5, width=8>>= 
 rgate <- rectangleGate("FSC-H"=c(0, 400),"SSC-H"=c(-50, 300))
-xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate)
-@ 
-%
-<<echo=FALSE>>=
-jpeg(file="figure1.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
+print(xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate))
 @
-%
+
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure1.jpg}
+  \centering
+  \includegraphics{./simpleRG}
+  \label{fig:simpleRG}
+  \caption{A simple \Rclass{rectangleGate} visualization in the
+    \Robject{FSC-H}-\Robject{SSC-H} xyplo.}
 \end{figure}
+
 
 As default for smoothed scatter plots, the gate boundaries are
 drawn. Orientation of the gate will be handled by the plotting
@@ -257,7 +254,7 @@ complex filters. E.g., we can add a third dimension to the
 \Robject{FSC-H} and \Robject{SSC-H} dimensions.
 <<threeDRG>>=
 rgate2 <- rgate * rectangleGate("FL1-H"=c(2, 4))
-xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate)
+xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate2)
 @ 
 %
 Most of the customization options defined in the \Rpackage{lattice}
@@ -267,47 +264,44 @@ sections.
 
 For the non-smoothed rendering (i.e., all events are plotted as
 individual points), the default filter visualization uses
-different colors for the different subpopulations.
-
-
+different colors for the different subpopulations, as shown in
+Figure~\ref{fig:.nonSmoothScatter}.
+%
+%
 <<nonSmoothScatter>>=
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate, smooth=FALSE)
 @
 %
-<<echo=FALSE>>=
-jpeg(file="figure2.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
-%
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure2.jpg}
+  \centering
+<<plotnonSmoothScatter, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotnonSmoothScatter}
+  \label{fig:nonSmoothScatter}
+  \caption{Filter visualization in a non-smooth xyplot.}
 \end{figure}
-
-
-
+%
 Additionally, We can add the \Rclass{filter} boundaries to the plot
 using the \Robject{outline} argument.
-
-
+%
 <<nonSmoothScatterOutline>>=
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate,
 smooth=FALSE, outline=TRUE)
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure3.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 %
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure3.jpg}
+  \centering
+<<plotnonSmoothScatterOutline, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotnonSmoothScatterOutline}
+  \label{fig:nonSmoothScatterOutline}
+  \caption{Rectangle gate with outline in the  the
+    \Rclass{FSC-H}-\Rclass{FL4-H} non-smooth xyplot.}
 \end{figure}
-
-
+%
 
 The constraint for a valid two-dimensional representation doesn't
 apply any more for this type of rendering. Since each event is
@@ -320,23 +314,25 @@ a minute how we can optimize these operations. Going back to our
 three-dimensional rectangle, we notice that not all points within the
 rectangle are also color red, because the additional third dimension
 further reduced the selection of positive events in the
-\Robject{FSC-H} and \Robject{SSC-H} dimensions.
+\Robject{FSC-H} and \Robject{SSC-H} dimensions. The result is shown in 
+Figure~\ref{fig:nonSmoothScatter2}
 
-
-<<nonSmoothScatterOutline>>=
+<<nonSmoothScatterOutline2>>=
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate2,
-smooth=FALSE, outline=TRUE)
+       smooth=FALSE, outline=TRUE)
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure4.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure4.jpg}
+  \centering
+<<plotnonSmoothScatter2, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+\includegraphics{./plotnonSmoothScatter2}
+  \label{fig:nonSmoothScatter2}
+  \caption{Three-dimensional rectange gate with outline in the
+    \Rclass{FSC-H}-\Rclass{FL4-H} non-smooth xyplot.} 
 \end{figure}
+
 
 
 Overplotting is a potential problem for this representation. As a
@@ -378,14 +374,15 @@ n2Filter.results <- filter(GvHD, n2Filter)
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=n2Filter.results)
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure5.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure5.jpg}
+  \centering
+<<plotnorm2Filter, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotnorm2Filter}
+  \label{fig:norm2Filter}
+  \caption{Gate defined by \Robject{norm2Filter} in the \Rclass{FSC-H} and
+    \Rclass{FL4-H} channels.}
 \end{figure}
 
 
@@ -402,14 +399,15 @@ c2f.results <- filter(GvHD, c2f)
 xyplot(`FL4-H` ~ `FSC-H` | Visit, data=GvHD, filter=c2f.results)
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure6.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure6.jpg}
+  \centering
+<<plotcurv2Filter, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotcurv2Filter}
+  \label{fig:norm2Filter}
+  \caption{High density areas identified by \Robject{curv2Filter} in the
+    \Rclass{FSC-H} and \Rclass{FL4-H} dimensions.}
 \end{figure}
 
 
@@ -453,19 +451,18 @@ density regions rather than simply adding vertical lines. These tend
 to be distracting in the stacked layout or are often partly masked by
 overplotting of neighbouring density areas.
 
-
 <<densityplots>>=
 densityplot(~ `FSC-H`, GvHD, filter=curv1Filter("FSC-H"))
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure7.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure7.jpg}
+  \centering
+<<plotdensityplots, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{plotdensityplots}
+  \label{fig:densityplots}
+  \caption{High density areas identified by \Rclass{curv1Filter}.}
 \end{figure}
 
 The situation gets slightly more complex when we are conditioning on
@@ -484,14 +481,16 @@ densityplot(~ ., GvHD, channels=c("FSC-H", "SSC-H", "FL1-H"),
 filter=list(curv1Filter("FSC-H"), NULL, rgate2))
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure8.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
+
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure8.jpg}
+  \centering
+<<plotmultDensityplots, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4, width=8>>=
+print(plot(trellis.last.object()))
+@
+    \includegraphics{plotmultDensityplots}
+  \label{fig:multDensityplots}
+  \caption{Multiple densityplots with combination of \Rclass{rectangleGate} and
+    \Rclass{curv2Filter}.}
 \end{figure}
 
 
@@ -540,22 +539,21 @@ software. The facts to mention are:
   
 \end{itemize}
 
-
-
-<<plotPars1>>=
+<<Pars1>>=
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate,
        par.settings=list(gate=list(fill="black", alpha=0.2)))
 @ 
 %
-  
-<<echo=FALSE>>=
-jpeg(file="figure9.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure9.jpg}
+  \centering
+<<plotPars1, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotPars1}
+  \label{fig:Pars1}
+  \caption{Transparent rectangate gate (\Rclass{rectangleGate}) in the 
+     \Robject{FSC-H}-\Robject{FL4-H} xyplot as using the \Robject{per.ettings}
+     argument.} 
 \end{figure}
 
 
@@ -577,23 +575,26 @@ be hidden and we strongly emphasize the advantages of smoothed scatter
 plots for vizualization of FCM data.
 
 
-<<plotPars3>>=
+<<Pars3>>=
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate,
-       smooth=FALSE, par.settings=list(gate=list(col="orange", alpha=0.04,
-                                                 pch=20, cex=0.7),
-                                       flow.symbol=list(alpha=0.04, pch=20,
-                                                        cex=0.7)))
+       smooth=FALSE, 
+       par.settings=list(gate=list(col="orange", alpha=0.04,
+                                   pch=20, cex=0.7),
+                         flow.symbol=list(alpha=0.04, pch=20, cex=0.7)))
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure10.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure10.jpg}
+  \centering
+<<plotPars3, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.2, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotPars3}
+  \label{fig:Pars3}
+  \caption{Rectangate gate
+    (\Rclass{rectangleGate}) in the  \Robject{FSC-H}-\Robject{FL4-H}
+    non-smooth xyplot as using the \Robject{per.ettings} argument. }
 \end{figure}
+
 
 
 
@@ -602,20 +603,22 @@ we can spice up out plot of the \Rclass{curv2Filter} results by using
 a different color for each sub-population.
 
 
-<<plotPars4>>=
+<<Pars4>>=
 xyplot(`FL4-H` ~ `FSC-H` | Visit, data=GvHD, filter=c2f.results,
 par.settings=list(gate=list(fill=rainbow(10), alpha=0.5, col="transparent")))
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure11.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure11.jpg}
+  \centering
+<<plotPars4, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotPars4}
+  \label{fig:Pars4}
+  \caption{High density areas in the \Robject{FSC-H}-\Robject{FL4-H}
+    xyplot using lists of graphical paremeters.} 
 \end{figure}
+
 
 
 
@@ -629,24 +632,24 @@ if \Robject{TRUE}) or a character vector. Again, recycing rules apply
 when there are multiple sub-populations (unless default names are uses
 in which case the software provides a reasonable choice).
 
-
-
 <<norm2FilterNames>>=
-xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=n2Filter.results,
-       names=TRUE, par.settings=list(gate=list(fill="black", alpha=0.2, 
-                                               col="transparent"),
-                                     gate.text=list(col="darkred", alpha=0.7, cex=0.6)))
+xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=n2Filter.results, 
+       names=TRUE, 
+       par.settings=list(gate=list(fill="black", alpha=0.2, 
+                                   col="transparent"),
+                         gate.text=list(col="darkred", alpha=0.7, cex=0.6)))
 @ 
 %
-<<echo=FALSE>>=
-jpeg(file="figure12.jpg", width=650, height=360)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure12.jpg}
+  \centering
+<<plotnorm2FilterNames, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=4.5, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{plotnorm2FilterNames}
+  \label{fig:norm2FilterNames}
+  \caption{Displaying population names.}
 \end{figure}
+
 
 
 
@@ -693,16 +696,16 @@ this syntax.
 parallel(~ . | Visit, GvHD, filter=n2Filter.results, alpha = 0.01)
 @ 
 
-  
-<<echo=FALSE>>=
-jpeg(file="figure13.jpg", width=650, height=560)
-plot(trellis.last.object())
-dev.off()
-@
 \begin{figure}[htb]
-\centering 
-\includegraphics{figure13.jpg}
+  \centering
+<<plotparCoord, fig=TRUE, include=FALSE, echo=FALSE, results=hide, prefix=FALSE, height=6, width=8>>=
+print(plot(trellis.last.object()))
+@
+  \includegraphics{./plotparCoord}
+  \label{fig:parCoord}
+  \caption{Parallel coordinates plot all channels excluding time.}
 \end{figure}
+
 
 
 
