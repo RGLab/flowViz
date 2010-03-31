@@ -4,11 +4,13 @@
 \docType{methods}
 \title{Standard Plots for Flow Cytometry Data
 }
+
 \description{
   A method that makes standard plots from a \code{flowFrame}. The user may also
   provide various \code{filter} or \code{filterResult} arguments to customize
   the plot.
 }
+
 \usage{
 
 flowPlot(x, ...)
@@ -23,24 +25,36 @@ flowPlot(x, ...)
 }
 
 \arguments{
-	\item{x}{An object of class \code{flowFrame} that contains the data to be plotted.}
-	\item{child}{An optional argument of class \code{filterResult} that specifies
-	a subset of the data that are included in the \code{filterResult}}
-	\item{filter}{}
-	\item{plotParameters}{}
-	\item{logx}{}
-	\item{logy}{}
-	\item{parent}{}
-	\item{colParent}{}
-	\item{colChild}{}
-	\item{showFilter}{}
-	\item{gate.fill}{}
-	\item{gate.border}{}
-	\item{xlab}{}
-	\item{ylab}{}
-	\item{xlim}{}
-	\item{ylim}{}
-	\item{\dots}{}
+	\item{x}{An object of class \code{flowFrame} that contains the
+	  data to be plotted.}
+	\item{child}{An optional argument of class \code{filterResult}
+	  that specifies a subset of the data that are included in the
+	  \code{filterResult}} 
+	\item{filter}{A \code{filter}, \code{filterResult} or
+	  \code{filterResultList} object.}
+	\item{plotParameters}{A vector of charactors defining the x and
+	y variables in terms of columns in the data.}
+	\item{logx, logy}{Logical controlling wheterh the corresponding
+	variables will be log transfromed before passing to the panel
+	function. Default to \code{FALSE}.} 
+	\item{parent}{An optional argument of class \code{filterResult}
+  	  that specifies a subset of the data that are inclueed in the
+	  \code{filterResult}.}
+	\item{colParent}{Specifying the color for \code{parent}. See
+ 	  \code{parent} above.}
+	\item{colChild}{Specifies the color for \code{child}. See
+	\code{chile} above.}
+	\item{showFilter}{Logical, specifying whether to show the
+  	  \code{filter}. }
+	\item{gate.fill}{Specifies the fill color of the gate. Default
+	  to \code{transparent}.}
+	\item{gate.border}{Character or specifying the color of the gate
+	  border. Default to \code{black}.}
+	\item{xlab, ylab}{Labels for data axes.}
+	\item{xlim, ylim}{Numeric vectors of length 2 specifying axis limits.}
+	\item{\dots}{More arguments, usually passed on to the underlying
+	  lattice methods.}
+	
 }
 \details{
   The plot that is most commonly used in flow cytometry data analysis is usuall called
