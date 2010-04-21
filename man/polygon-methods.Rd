@@ -136,7 +136,7 @@
   \code{plot} method provided by \code{flowViz}, the plotted parameters
   are recorded, which makes it possible to correctly overlay the
   outlines of \code{\link[flowCore:filter-class]{filter}}s assuming that
-  they are defined for the repective parameters. Warnings and error will
+  they are defined for the respective parameters. Warnings and error will
   be cast for the cases where the parameters are non-distinct or
   ambigious.
 

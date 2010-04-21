@@ -143,7 +143,7 @@
   plotted parameters are recorded, which makes it possible to correctly
   overlay the outlines of \code{\link[flowCore:filter-class]{filter}}
   assuming that 
-  they are defined for the repective parameters. Warnings and error will
+  they are defined for the respective parameters. Warnings and error will
   be cast for the cases where the parameters are non-distinct or
   ambigious. These methods are meant to be used within lattice panel
   functions and are probably not of much use outside of those. }

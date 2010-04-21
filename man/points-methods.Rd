@@ -99,14 +99,15 @@
   using the \code{plot} method provided by \code{flowViz}, the plotted
   parameters are recorded, which makes it possible to correctly overlay the
   points within \code{\link[flowCore:filter-class]{filter}}s assuming that
-  they are defined for the repective parameters. Warnings and error will be
+  they are defined for the respective parameters. Warnings and error will be
   cast for the cases where the parameters are non-distinct or ambigious. }
 
 \author{ F. Hahne }
 
 \seealso{
   
-  \code{\link[flowCore:filter-class]{filter}}, \code{\link[flowCore:flowFrame-class]{flowFrame}},
+  \code{\link[flowCore:filter-class]{filter}},
+  \code{\link[flowCore:flowFrame-class]{flowFrame}}, 
   \code{\link{glines}}, \code{\link{gpolygon}}
   
   
