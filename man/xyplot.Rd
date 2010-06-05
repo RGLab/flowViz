@@ -408,15 +408,15 @@ xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
 main="A single flowFrame", smooth=FALSE)
 
 ## A colorful non-smooth version of the same data
-require(RColorBrewer)
-cols <- colorRampPalette(brewer.pal(9, "YlOrBr"))
+require(IDPmisc)
+colramp <- colorRampPalette(IDPcolorRamp(21))
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
        main="A single flowFrame", smooth=FALSE,
-       colramp=cols, pch=20, cex=0.1)
+       colramp=colramp, pch=20, cex=0.1)
 
 ## Visual artifacts created by the pileup of margin events
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
-main="A single flowFrame", margin=FALSE)
+       main="A single flowFrame", margin=FALSE)
 
 
 ## simple bivariate scatter plot (a.k.a. dot plot)
@@ -425,7 +425,8 @@ main="A single flowFrame", margin=FALSE)
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD)
 
 ## Same bivariate scatter plot with replacing default color
-cols <- colorRampPalette(brewer.pal(9, "BuGn"))
+require(IDPmisc)
+cols <- colorRampPalette(IDPcolorRamp(21))
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD, colramp=cols)
 
 ## several examples with time on the X axis
