@@ -11,7 +11,7 @@ Imports: Biobase, flowCore, graphics, grDevices, grid, KernSmooth,
          utils
 Suggests: RColorBrewer, IDPmisc
 License: Artistic-2.0
-Collate: AllGeneric.R
+Collate: AllGenerics.R
 	 utilities.R
 	 addNames-methods.R  
 	 flowPlot.R            
