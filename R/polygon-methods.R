@@ -170,7 +170,7 @@ setMethod("gpolygon",
           if(missing(col)){
                col <-  col2rgb(colorRampPalette(brewer.pal(9, "Set1"))(4),
                               alpha=TRUE)
-              col <- rgb(col[1,], col[2,], col[3,], 75, max=255)
+              col <- rgb(col[1,], col[2,], col[3,], 75, maxColorValue=255)
           }
           else
               col <- rep(col,4)
@@ -296,7 +296,7 @@ setMethod("gpolygon",
           if(missing(col)){
               col <-  col2rgb(colorRampPalette(brewer.pal(9, "Set1"))(lf),
                               alpha=TRUE)
-              col <- rgb(col[1,], col[2,], col[3,], 75, max=255)
+              col <- rgb(col[1,], col[2,], col[3,], 75, maxColorValue=255)
           }
           else
               col <- rep(col, lf)[1:lf]
@@ -345,7 +345,7 @@ setMethod("gpolygon",
           if(missing(col)){
               col <-  col2rgb(colorRampPalette(brewer.pal(9, "Set1"))(lb),
                               alpha=TRUE)
-              col <- rgb(col[1,], col[2,], col[3,], 75, max=255)
+              col <- rgb(col[1,], col[2,], col[3,], 75, maxColorValue=255)
           }
           else
               col <- rep(col, lb)[1:lb]

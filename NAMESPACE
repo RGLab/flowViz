@@ -8,8 +8,10 @@ importClassesFrom(methods, ANY, character, formula, logical, matrix,
 importMethodsFrom(Biobase, exprs, pData, "pData<-", phenoData,
                   sampleNames, "sampleNames<-")
 
+importFrom(BiocGenerics, plot)
+
 importFrom(graphics, abline, axis, barplot, contour, hist, layout,
-           lines, pairs, par, plot, points, polygon, rect,
+           lines, pairs, par, points, polygon, rect,
            smoothScatter)
 
 importFrom(grDevices, col2rgb, colorRampPalette, contourLines, rainbow,

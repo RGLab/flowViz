@@ -80,5 +80,5 @@ desat <- function(col, by=50)
         rgbcol <- rgbcol + min(by, up)
     if(by<0)
         rgbcol <- rgbcol - min(abs(by), down)
-    return(rgb(rgbcol[1,], rgbcol[2,], rgbcol[3,], max=255))
+    return(rgb(rgbcol[1,], rgbcol[2,], rgbcol[3,], maxColorValue=255))
 }
