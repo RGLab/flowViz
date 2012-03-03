@@ -8,7 +8,7 @@ importClassesFrom(methods, ANY, character, formula, logical, matrix,
 importMethodsFrom(Biobase, exprs, pData, "pData<-", phenoData,
                   sampleNames, "sampleNames<-")
 
-importFrom(BiocGenerics, plot)
+importFrom(stats4, plot)
 
 importFrom(graphics, abline, axis, barplot, contour, hist, layout,
            lines, pairs, par, points, polygon, rect,
