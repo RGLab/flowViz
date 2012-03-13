@@ -20,7 +20,7 @@ setMethod("parallel",
               column.order <- rev(order(apply(expr[, column.names], 2, reorder.by)))
               column.names <- column.names[column.order]
           }
-          parallel(expr[, column.names],
+          parallelplot(expr[, column.names],
                    ...)
       })
 
