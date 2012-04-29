@@ -34,4 +34,4 @@ Collate: AllGenerics.R
 	 plot-methods.R    
    	 zzz.R
 
-biocViews:  Infrastructure, Flowcytometry, CellBasedAssays, Visualization
+biocViews:  Infrastructure, FlowCytometry, CellBasedAssays, Visualization
