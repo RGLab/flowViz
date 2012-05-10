@@ -1,0 +1,83 @@
+useDynLib("flowViz")
+
+import(flowCore)
+
+importClassesFrom(methods, ANY, character, formula, logical, matrix,
+                  missing)
+
+importMethodsFrom(Biobase, exprs, pData, "pData<-", phenoData,
+                  sampleNames, "sampleNames<-")
+
+importFrom(stats4, plot)
+
+importFrom(graphics, abline, axis, barplot, contour, hist, layout,
+           lines, pairs, par, points, polygon, rect,
+           smoothScatter)
+
+importFrom(grDevices, col2rgb, colorRampPalette, contourLines, rainbow,
+           topo.colors, densCols, blues9, rgb)
+
+importFrom(grid, get.gpar, grid.points, grid.polygon, grid.rect,
+           current.viewport)
+
+importFrom(KernSmooth, bkde2D)
+
+importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
+           panel.grid, panel.lines, panel.parallel, panel.points,
+           panel.polygon, panel.rect, panel.segments,
+           panel.smoothScatter, panel.text, panel.xyplot, parallel,
+           prepanel.default.parallel, qqmath, splom, trellis.par.get,
+           trellis.par.set, which.packet, xyplot)
+
+importFrom(latticeExtra, ecdfplot)
+
+importFrom(MASS, kde2d)
+
+importFrom(methods, "@<-", as, is)
+
+importFrom(RColorBrewer, brewer.pal)
+
+importFrom(stats, approxfun, cor, density, median, ppoints, qnorm,
+           quantile, qunif, var)
+
+importFrom(utils, modifyList)
+
+exportMethods("addName",
+              "contour",
+              "densityplot",
+              "ecdfplot",
+              "flowPlot",
+              "glines",
+              "gpoints",
+              "gpolygon",
+              "glpoints",
+              "glpolygon",
+              "levelplot",
+              "parallel",
+              "plot",
+              "qqmath",
+              "splom",
+              "timeLinePlot",
+              "xyplot")
+
+
+export("addName",
+       "flowViz.par.set",
+       "flowViz.par.get",
+       "glines",
+       "gpoints",
+       "glpoints",
+       "glpolygon",
+       "gpolygon",
+       "hexbin",
+       "panel.densityplot.flowset",
+       "panel.ecdfplot.flowset",
+       "panel.xyplot.flowframe",
+       "panel.xyplot.flowframe.time",
+       "panel.xyplot.flowset",
+       "prepanel.ecdfplot.flowset",
+       "prepanel.densityplot.flowset", 
+       "prepanel.xyplot.flowframe",
+       "prepanel.xyplot.flowframe.time",
+       "prepanel.xyplot.flowset",
+       "timeLinePlot")

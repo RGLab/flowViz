@@ -1,0 +1,12 @@
+Some suggested graphics
+
+ 1) RG thinks it would be of some use to have a plot function that
+  takes a flowFrame as input and produces a lattice view where Time
+  is on the x-axis in all, and the other fields are on the y-axis.
+  Each plot should have a smooth of some sort - and potentially
+  some other visualization tool to help find anomalies wrt time.
+
+
+ 2) unified treatment of filters and gates -DS
+
+ 3) parallel coord plots for flowSets -DS
