@@ -40,7 +40,7 @@ importFrom(RColorBrewer, brewer.pal)
 importFrom(stats, approxfun, cor, density, median, ppoints, qnorm,
            quantile, qunif, var)
 
-importFrom(utils, modifyList)
+importFrom(hexbin, hexbin,grid.hexagons)
 
 exportMethods("addName",
               "contour",
@@ -69,7 +69,6 @@ export("addName",
        "glpoints",
        "glpolygon",
        "gpolygon",
-       "hexbin",
        "panel.densityplot.flowset",
        "panel.ecdfplot.flowset",
        "panel.xyplot.flowframe",

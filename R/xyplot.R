@@ -178,6 +178,7 @@ prepanel.xyplot.flowframe <-
 ## Panel function that allows us to add filters on the plot. The actual plotting
 ## is done by either the panel.smoothScatter or the default lattice panel.xyplot
 ## function
+##when xbins>0, we do the hexagon plot provided by hexbin package to improve the speed
 panel.xyplot.flowframe <- function(x,
                                    y,
                                    frame,
@@ -191,8 +192,9 @@ panel.xyplot.flowframe <- function(x,
                                    alpha=gpar$flow.symbol$alpha,
                                    cex=gpar$flow.symbol$cex,
                                    col=gpar$flow.symbol$col,
-                                   gp,
-                                   ...)
+                                   gp
+								   ,xbins
+						   			,...)
 {
     ## graphical parameter defaults
     argcolramp <- list(...)$colramp
@@ -247,28 +249,38 @@ panel.xyplot.flowframe <- function(x,
                       verbose=FALSE, gpar=gpar, strict=FALSE, ...)
         }
     }else{
-        if (!is.null(argcolramp)) {
-            col <- densCols(x, y, colramp=argcolramp)
-        }
-        if(!is.null(filter) && validName){
-            if(!is(filter, "filterResult"))
-                filter <- filter(frame, filter)
-            rest <- Subset(frame, !filter)
-            x <- exprs(rest[,channel.x.name])
-            y <- exprs(rest[,channel.y.name])
-            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-            
-            glpoints(filter, frame,
-                     channels=c(channel.x.name, channel.y.name),
-                     verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-            if(outline)
-                glpolygon(filter, frame,
-                          channels=c(channel.x.name, channel.y.name),
-                          verbose=FALSE, gpar=gpar, names=FALSE,
-                          strict=FALSE)
-        }else{
-            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-        }
+		
+		if(xbins>0)
+		{
+			#using hexbin package to do the hexagon plot	
+			bin<-hexbin(x,y,xbins=xbins)
+			grid.hexagons(bin,colramp = argcolramp)						
+			
+		}else
+		{
+	        if (!is.null(argcolramp)) {
+	            col <- densCols(x, y, colramp=argcolramp)
+	        }
+	        if(!is.null(filter) && validName){
+	            if(!is(filter, "filterResult"))
+	                filter <- filter(frame, filter)
+	            rest <- Subset(frame, !filter)
+	            x <- exprs(rest[,channel.x.name])
+	            y <- exprs(rest[,channel.y.name])
+	            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+	            
+	            glpoints(filter, frame,
+	                     channels=c(channel.x.name, channel.y.name),
+	                     verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+	            if(outline)
+	                glpolygon(filter, frame,
+	                          channels=c(channel.x.name, channel.y.name),
+	                          verbose=FALSE, gpar=gpar, names=FALSE,
+	                          strict=FALSE)
+	        }else{
+	            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+	        }
+		}
         plotType("gpoints", c(channel.x.name, channel.y.name))
     }
 }
@@ -387,8 +399,9 @@ panel.xyplot.flowset <- function(x,
                                  frames,
                                  filter=NULL,
                                  channel.x,
-                                 channel.y,
-                                 ...)
+                                 channel.y
+								 ,xbins=0 #passed to hexbin routine
+                                 ,...)
 {
     nm <- as.character(x)
     if (length(nm) < 1) return()
@@ -411,7 +424,7 @@ panel.xyplot.flowset <- function(x,
     }
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
-    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], ...)
+    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]],xbins=xbins, ...)
 }
 
 
