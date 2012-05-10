@@ -267,7 +267,7 @@ plotGates(c1f, verbose=FALSE)
 fun <- gpoints
 plotPoints(c1f)
 plotPoints(c1f, verbose=FALSE)
-
+GvHD[1
 
 ############################################################################
 ##                               kmeansFilter                             ##
@@ -289,5 +289,5 @@ plotPoints(kf, verbose=FALSE)
 ############################################################################
 ##                               hexbin
 ############################################################################
-xyplot(`FSC-H` ~ `SSC-H`, GvHD[1], smooth=F,xbin=128)
+xyplot(`FSC-H` ~ `SSC-H`, GvHD[1:3], smooth=F,xbin=128)
 

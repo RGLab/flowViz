@@ -198,6 +198,7 @@ panel.xyplot.flowframe <- function(x,
 {
     ## graphical parameter defaults
     argcolramp <- list(...)$colramp
+	gate.plotType<-list(...)$gate.plotType
     gpar <- flowViz.par.get()
     
     if(!is.null(gp))
@@ -257,35 +258,54 @@ panel.xyplot.flowframe <- function(x,
 			if (is.null(argcolramp))
 				argcolramp <- colorRampPalette(IDPcolorRamp(21,
 								t(col2hsv(c("blue","green","yellow","red"))),
-								fr=c(0.7,0)))
+								fr=c(0.7,0)),bias=4)
 			grid.hexagons(bin,colramp = argcolramp)						
 			
 		}else
 		{
-	        if (!is.null(argcolramp)) {
-	            col <- densCols(x, y, colramp=argcolramp)
-	        }
-	        if(!is.null(filter) && validName){
-	            if(!is(filter, "filterResult"))
-	                filter <- filter(frame, filter)
-	            rest <- Subset(frame, !filter)
-	            x <- exprs(rest[,channel.x.name])
-	            y <- exprs(rest[,channel.y.name])
-	            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-	            
-	            glpoints(filter, frame,
-	                     channels=c(channel.x.name, channel.y.name),
-	                     verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-	            if(outline)
-	                glpolygon(filter, frame,
-	                          channels=c(channel.x.name, channel.y.name),
-	                          verbose=FALSE, gpar=gpar, names=FALSE,
-	                          strict=FALSE)
-	        }else{
-	            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-	        }
+			if (is.null(argcolramp))
+				argcolramp <- colorRampPalette(IDPcolorRamp(21,
+								t(col2hsv(c("blue","green","yellow","red"))),
+								fr=c(0.7,0)),bias=1)
+			col <- densCols(x, y, colramp=argcolramp)
+			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+			plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
-        plotType("gpoints", c(channel.x.name, channel.y.name))
+	        
+        if(!is.null(filter) && validName){
+			if(is.null(gate.plotType))
+				gate.plotType="l"
+#			browser()
+			if(gate.plotType=="p")##highlight the dots within gate,by default it is now disabled 
+			{
+				if(!is(filter, "filterResult"))
+					filter <- filter(frame, filter)
+				rest <- Subset(frame, !filter)
+				x <- exprs(rest[,channel.x.name])
+				y <- exprs(rest[,channel.y.name])
+				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+				
+				glpoints(filter, frame,
+						channels=c(channel.x.name, channel.y.name),
+						verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+				if(outline)
+					glpolygon(filter, frame,
+							channels=c(channel.x.name, channel.y.name),
+							verbose=FALSE, gpar=gpar, names=FALSE,
+							strict=FALSE)
+			}else
+			{
+				
+				glpolygon(filter, frame,
+						channels=c(channel.x.name, channel.y.name),
+						verbose=FALSE, gpar=gpar, names=FALSE,
+						strict=FALSE)
+			}
+			
+            
+        }
+		
+        
     }
 }
 
