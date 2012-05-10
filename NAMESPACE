@@ -1,5 +1,3 @@
-useDynLib("flowViz")
-
 import(flowCore)
 
 importClassesFrom(methods, ANY, character, formula, logical, matrix,
@@ -41,6 +39,7 @@ importFrom(stats, approxfun, cor, density, median, ppoints, qnorm,
            quantile, qunif, var)
 
 importFrom(hexbin, hexbin,grid.hexagons)
+importFrom(IDPmisc,IDPcolorRamp,col2hsv)
 
 exportMethods("addName",
               "contour",

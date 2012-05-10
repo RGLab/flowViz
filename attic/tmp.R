@@ -285,3 +285,9 @@ plotGates(kf)
 fun <- gpoints
 plotPoints(kf)
 plotPoints(kf, verbose=FALSE)
+
+############################################################################
+##                               hexbin
+############################################################################
+xyplot(`FSC-H` ~ `SSC-H`, GvHD[1], smooth=F,xbin=128)
+

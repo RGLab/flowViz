@@ -254,6 +254,10 @@ panel.xyplot.flowframe <- function(x,
 		{
 			#using hexbin package to do the hexagon plot	
 			bin<-hexbin(x,y,xbins=xbins)
+			if (is.null(argcolramp))
+				argcolramp <- colorRampPalette(IDPcolorRamp(21,
+								t(col2hsv(c("blue","green","yellow","red"))),
+								fr=c(0.7,0)))
 			grid.hexagons(bin,colramp = argcolramp)						
 			
 		}else
