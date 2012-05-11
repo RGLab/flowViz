@@ -198,7 +198,7 @@ panel.xyplot.flowframe <- function(x,
 {
     ## graphical parameter defaults
     argcolramp <- list(...)$colramp
-	gate.plotType<-list(...)$gate.plotType
+	
     gpar <- flowViz.par.get()
     
     if(!is.null(gp))
@@ -207,6 +207,9 @@ panel.xyplot.flowframe <- function(x,
         gpar$gate$cex <- cex
     if(is.null(gpar$gate$pch))
         gpar$gate$pch <- pch
+#	browser()
+	if(is.null(gpar$gate$plotType))
+		gpar$gate$plotType<-"l"
     ## Whenever we have a function call in the formula we might no longer be the
     ## original scale in which the gate was defined, and we have no clue how to
     # plot it
@@ -267,23 +270,22 @@ panel.xyplot.flowframe <- function(x,
 				argcolramp <- colorRampPalette(IDPcolorRamp(21,
 								t(col2hsv(c("blue","green","yellow","red"))),
 								fr=c(0.7,0)),bias=1)
-			col <- densCols(x, y, colramp=argcolramp)
+			if(gpar$gate$plotType=="l")
+				col <- densCols(x, y, colramp=argcolramp)
 			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
 			plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
-	        
+#	browser()	        
         if(!is.null(filter) && validName){
-			if(is.null(gate.plotType))
-				gate.plotType="l"
 #			browser()
-			if(gate.plotType=="p")##highlight the dots within gate,by default it is now disabled 
+			if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
 			{
 				if(!is(filter, "filterResult"))
 					filter <- filter(frame, filter)
 				rest <- Subset(frame, !filter)
 				x <- exprs(rest[,channel.x.name])
 				y <- exprs(rest[,channel.y.name])
-				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+#				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
 				
 				glpoints(filter, frame,
 						channels=c(channel.x.name, channel.y.name),
@@ -448,6 +450,7 @@ panel.xyplot.flowset <- function(x,
     }
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
+#	browser()
     panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]],xbins=xbins, ...)
 }
 
