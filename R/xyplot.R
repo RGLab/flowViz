@@ -193,7 +193,7 @@ panel.xyplot.flowframe <- function(x,
                                    cex=gpar$flow.symbol$cex,
                                    col=gpar$flow.symbol$col,
                                    gp
-								   ,xbins
+								   ,xbins=0
 						   			,...)
 {
     ## graphical parameter defaults
@@ -210,26 +210,30 @@ panel.xyplot.flowframe <- function(x,
 #	browser()
 	if(is.null(gpar$gate$plotType))
 		gpar$gate$plotType<-"l"
+	if(is.null(gpar$density))
+		gpar$density<-TRUE
     ## Whenever we have a function call in the formula we might no longer be the
     ## original scale in which the gate was defined, and we have no clue how to
     # plot it
     validName <- !(length(grep("\\(", channel.x.name)) ||
                    length(grep("\\(", channel.y.name)))
+#browser()
+    ## We remove margin events before passing on the data to panel.smoothScatter
+    ## and after plotting indicate those events by grayscale lines on the plot
+    ## margins
     if (smooth){
-        ## We remove margin events before passing on the data to panel.smoothScatter
-        ## and after plotting indicate those events by grayscale lines on the plot
-        ## margins
-        if(margin){
-            r <- range(frame, c(channel.x.name, channel.y.name))
-            l <- length(x)
-            inc <- apply(r, 2, diff)/1e5
-            dots <- list(...)
-            nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
-            selxL <- x > r[2,channel.x.name]-inc[1]
-            selxS <- x < r[1,channel.x.name]+inc[1]
-            selyL <- y > r[2,channel.y.name]-inc[2]
-            selyS <- y < r[1,channel.y.name]+inc[2]
-            allsel <- !(selxL | selxS | selyL | selyS)
+		if(margin){
+			r <- range(frame, c(channel.x.name, channel.y.name))
+			l <- length(x)
+			inc <- apply(r, 2, diff)/1e5
+			dots <- list(...)
+			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+			selxL <- x > r[2,channel.x.name]-inc[1]
+			selxS <- x < r[1,channel.x.name]+inc[1]
+			selyL <- y > r[2,channel.y.name]-inc[2]
+			selyS <- y < r[1,channel.y.name]+inc[2]
+			allsel <- !(selxL | selxS | selyL | selyS)
+			
             if(sum(allsel)>0)
             {
                 panel.smoothScatter(x[allsel], y[allsel],
@@ -253,24 +257,52 @@ panel.xyplot.flowframe <- function(x,
                       verbose=FALSE, gpar=gpar, strict=FALSE, ...)
         }
     }else{
-		
+		#for non-smoothed plot:
+		#1:always remove boundary events for hexbin version 
+		#since they are going to affect the color encoding for density
+		#2.for non-hexbin version,when gpar$density=FALSE,which means one-color non-densityscatter plot
+		#we then keep the boundary events 
+		if(margin){
+			
+			r <- range(frame, c(channel.x.name, channel.y.name))
+			l <- length(x)
+			inc <- apply(r, 2, diff)/1e5
+			dots <- list(...)
+			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+			selxL <- x > r[2,channel.x.name]-inc[1]
+			selxS <- x < r[1,channel.x.name]+inc[1]
+			selyL <- y > r[2,channel.y.name]-inc[2]
+			selyS <- y < r[1,channel.y.name]+inc[2]
+			allsel <- !(selxL | selxS | selyL | selyS)
+			
+			if(sum(allsel)>0)
+			{
+				panel.smoothScatter(x[allsel], y[allsel],
+						range.x=list(r[,1], r[,2]), ...)
+				addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+				addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+				addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+				addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+			}
+				
+			x<-x[allsel]
+			y<-y[allsel]
+			
+		}
 		if(xbins>0)
 		{
 			#using hexbin package to do the hexagon plot	
 			bin<-hexbin(x,y,xbins=xbins)
 			if (is.null(argcolramp))
-				argcolramp <- colorRampPalette(IDPcolorRamp(21,
-								t(col2hsv(c("blue","green","yellow","red"))),
-								fr=c(0.7,0)),bias=4)
+				argcolramp<-flowViz.getOption("argcolramp1")
 			grid.hexagons(bin,colramp = argcolramp)						
 			
 		}else
 		{
 			if (is.null(argcolramp))
-				argcolramp <- colorRampPalette(IDPcolorRamp(21,
-								t(col2hsv(c("blue","green","yellow","red"))),
-								fr=c(0.7,0)),bias=1)
-			if(gpar$gate$plotType=="l")
+				argcolramp<-flowViz.getOption("argcolramp2")
+#			browser()
+			if(gpar$density)
 				col <- densCols(x, y, colramp=argcolramp)
 			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
 			plotType("gpoints", c(channel.x.name, channel.y.name))
