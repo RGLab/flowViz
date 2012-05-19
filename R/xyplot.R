@@ -287,25 +287,31 @@ panel.xyplot.flowframe <- function(x,
 			y<-y[allsel]
 			
 		}
+#		browser()
 		if(xbins>0)
 		{
 			#using hexbin package to do the hexagon plot	
 			bin<-hexbin(x,y,xbins=xbins)
 			if (is.null(argcolramp))
 				argcolramp<-flowViz.getOption("argcolramp1")
-			grid.hexagons(bin,colramp = argcolramp)						
+			if (is.null(argcolramp))
+				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=4)
+			grid.hexagons(bin,colramp = argcolramp)		
+			plotType("gpoints", c(channel.x.name, channel.y.name))
 			
 		}else
 		{
 			if (is.null(argcolramp))
 				argcolramp<-flowViz.getOption("argcolramp2")
+			if (is.null(argcolramp))
+				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
 #			browser()
 			if(gpar$density)
 				col <- densCols(x, y, colramp=argcolramp)
 			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
 			plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
-#	browser()	        
+	   
         if(!is.null(filter) && validName){
 #			browser()
 			if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
@@ -315,7 +321,7 @@ panel.xyplot.flowframe <- function(x,
 				rest <- Subset(frame, !filter)
 				x <- exprs(rest[,channel.x.name])
 				y <- exprs(rest[,channel.y.name])
-#				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+
 				
 				glpoints(filter, frame,
 						channels=c(channel.x.name, channel.y.name),
@@ -327,9 +333,9 @@ panel.xyplot.flowframe <- function(x,
 							strict=FALSE)
 			}else
 			{
-				
+#				browser()	     
 				glpolygon(filter, frame,
-						channels=c(channel.x.name, channel.y.name),
+#						channels=c(channel.x.name, channel.y.name),
 						verbose=FALSE, gpar=gpar, names=FALSE,
 						strict=FALSE)
 			}
