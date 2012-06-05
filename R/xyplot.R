@@ -407,6 +407,7 @@ setMethod("xyplot",
           channel.y <- as.expression(channel.y)
           ## use densityplot method with dedicated panel and prepanel
           ## functions to do the actual plotting
+#		  browser()
           densityplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data@frames, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
@@ -439,7 +440,8 @@ prepanel.xyplot.flowset <-
         }else NULL
         plotLims(xlim, ylim)
         return(list(xlim=xlim, ylim=ylim))
-    }
+    }else
+		return(list())
 }
 
 

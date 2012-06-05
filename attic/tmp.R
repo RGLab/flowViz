@@ -267,7 +267,7 @@ plotGates(c1f, verbose=FALSE)
 fun <- gpoints
 plotPoints(c1f)
 plotPoints(c1f, verbose=FALSE)
-GvHD[1
+
 
 ############################################################################
 ##                               kmeansFilter                             ##
@@ -290,4 +290,20 @@ plotPoints(kf, verbose=FALSE)
 ##                               hexbin
 ############################################################################
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[1:3], smooth=F,xbin=128)
+
+############################################################################
+##                               conditioning lattice
+############################################################################
+
+library(flowViz)
+data(GvHD)
+#lapply(list.files("/home/wjiang2/rglab/workspace/flowViz/R",full=T),source)
+fs<-GvHD[c(1,2,9,10)]
+
+xyplot(`SSC-H` ~ `FSC-H`|Patient+Visit ,data =fs)
+
+
+xyplot(Grade~factor(name)|Patient+Visit,data=pData(fs))
+
+
 
