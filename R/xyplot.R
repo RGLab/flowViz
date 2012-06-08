@@ -194,6 +194,7 @@ panel.xyplot.flowframe <- function(x,
                                    col=gpar$flow.symbol$col,
                                    gp
 								   ,xbins=0
+						   		   ,binTrans=sqrt
 						   			,...)
 {
     ## graphical parameter defaults
@@ -295,8 +296,9 @@ panel.xyplot.flowframe <- function(x,
 			if (is.null(argcolramp))
 				argcolramp<-flowViz.getOption("argcolramp1")
 			if (is.null(argcolramp))
-				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=4)
-			grid.hexagons(bin,colramp = argcolramp)		
+				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
+#			browser()
+			grid.hexagons(bin,colramp = argcolramp,trans=binTrans)		
 			plotType("gpoints", c(channel.x.name, channel.y.name))
 			
 		}else
@@ -465,7 +467,8 @@ panel.xyplot.flowset <- function(x,
                                  channel.x,
                                  channel.y
 								 ,xbins=0 #passed to hexbin routine
-                                 ,...)
+								 ,binTrans=sqrt	       
+						 ,...)
 {
     nm <- as.character(x)
     if (length(nm) < 1) return()
@@ -489,7 +492,7 @@ panel.xyplot.flowset <- function(x,
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
 #	browser()
-    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]],xbins=xbins, ...)
+    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]],xbins=xbins,binTrans=binTrans, ...)
 }
 
 

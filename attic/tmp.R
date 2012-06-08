@@ -300,8 +300,8 @@ data(GvHD)
 #lapply(list.files("/home/wjiang2/rglab/workspace/flowViz/R",full=T),source)
 fs<-GvHD[c(1,2,9,10)]
 
-xyplot(`SSC-H` ~ `FSC-H`|Patient+Visit ,data =fs)
-
+xyplot(`SSC-H` ~ `FSC-H`|Patient:Visit:name ,data =fs)
+xyplot(`SSC-H` ~ `FSC-H`|Patient:name ,data =fs)
 
 xyplot(Grade~factor(name)|Patient+Visit,data=pData(fs))
 
