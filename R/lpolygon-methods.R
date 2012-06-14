@@ -204,15 +204,19 @@ setMethod("glpolygon",
           col <- col[c(2,1,3,4)]
           fill <- fill[c(2,1,3,4)]
           res <- vector(4, mode="list")
+		  #quadrant iteration in this loop goes by :x-y+,x+y+,x-y-,x+y-
+		  #	yet populations generated from quadGate is:++,-+,+-,--
+		  #so we need to re-order the names character	
+		  names<-names[c(2,1,4,3)]
           for(i in 1:4){
               gpar$gate$col <- col[i]
               gpar$gate$fill <- fill[i]
               rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
                                   dimnames=list(c("min", "max"),
                                   data)))
-		  browser()
+#		  browser()
               res[[i]] <- glpolygon(x=rg, data=data, verbose=FALSE,
-                                    gpar=gpar, channels=data,names[i], ...)[[1]]
+                                    gpar=gpar, channels=data,names=names[i], ...)[[1]]
           }
           return(invisible(res))
       })
