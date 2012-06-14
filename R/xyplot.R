@@ -144,6 +144,7 @@ setMethod("xyplot",
               channel.x <- channel.x[[2]]
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
+#		  browser()
           ## call data.frame xyplot method with our panel function
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth,
                  prepanel=prepanel, panel=panel, frame=data,
@@ -195,6 +196,7 @@ panel.xyplot.flowframe <- function(x,
                                    gp
 								   ,xbins=0
 						   		   ,binTrans=sqrt
+						   			,stat=F
 						   			,...)
 {
     ## graphical parameter defaults
@@ -335,11 +337,33 @@ panel.xyplot.flowframe <- function(x,
 							strict=FALSE)
 			}else
 			{
-#				browser()	     
+#				browser()	
+				if(stat)
+				{
+					if (!is(filter, "filterResult")) 
+						filter <- filter(frame, filter)
+					curFres<-filter
+					p.stats<-summary(curFres)@p
+					#remove stats for "rest" pop(usually the first one) from mulitfilterResults 
+					#produced by filters such as curv2Filter
+					if(length(p.stats)>1)
+						p.stats<-p.stats[-1]
+					p.stats<-sprintf("%.2f%%",p.stats*100)
+					
+					names<-p.stats
+				}else
+				{
+					names<-list(...)$names
+					if(is.null(names))
+						names<-FALSE
+				}
+#				browser()
 				glpolygon(filter, frame,
 #						channels=c(channel.x.name, channel.y.name),
-						verbose=FALSE, gpar=gpar, names=FALSE,
-						strict=FALSE)
+						verbose=FALSE, gpar=gpar
+						, names=names
+						,strict=FALSE
+						)
 			}
 			
             
@@ -347,6 +371,96 @@ panel.xyplot.flowframe <- function(x,
 		
         
     }
+	#plot proportion of population
+#	if(!is.null(filter) && validName &&stat)
+	if(FALSE)
+	{
+		
+
+		
+		bounds<-QUALIFIER:::gateBoundary(filterDetails(curFres)[[1]]$filter,curFres)
+		
+		for(i in 1:length(bounds))
+		{
+			
+			
+			xcolname<-channel.x.name
+			ycolname<-channel.y.name
+			xlim<-range(x)
+			ylim<-range(y)
+			
+			##fix the vertices outside of the x,y range
+			outInd<-bounds[[i]][,1]>max(x)
+			if(any(outInd))
+				bounds[[i]][outInd,1]<-max(x)
+			
+			
+			
+			outInd<-bounds[[i]][,1]<min(x)
+			if(any(outInd))
+				bounds[[i]][outInd,1]<-min(x)
+			
+			
+			
+			
+#				browser()
+			if(ncol(bounds[[i]])>1)
+			{
+				outInd<-bounds[[i]][,2]>max(y)
+				if(any(outInd))
+					bounds[[i]][outInd,2]<-max(y)
+				
+				outInd<-bounds[[i]][,2]<min(y)
+				if(any(outInd))
+					bounds[[i]][outInd,2]<-min(y)
+				
+				xCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",xcolname,"'])",sep="")))
+				yCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",ycolname,"'])",sep="")))
+#					yCenterPos<-eval(parse(text=paste("max(bounds[[i]][,'",ycolname,"'])",sep="")))
+				
+#					xleft<-xCenterPos-diff(xlim)/6
+#					xright=xCenterPos+diff(xlim)/6
+#					ybottom=yCenterPos#-diff(ylim)/6
+#					ytop=max(ylim)
+			}else
+			{
+				xCenterPos<-mean(bounds[[i]])
+				yCenterPos<-mean(y)
+				
+				xleft<-xCenterPos-diff(xlim)/6
+				xright=xCenterPos+diff(xlim)/6
+				
+				ybottom=yCenterPos-diff(ylim)/30
+				ytop=yCenterPos+diff(ylim)/30
+			}
+			
+			
+			grid.rect(x=unit(xCenterPos,"native")
+					,y=unit(yCenterPos,"native")
+					,width=unit(1,'strwidth',p.stats[i])
+					,height=unit(1,'strheight',p.stats[i])
+					,draw=T, gp=gpar(font=gpar$gate.text$font
+							,fill="white"
+							,col="transparent"
+							,alpha=0.7
+					)
+			)
+			panel.text(
+					x=xCenterPos
+					,y=yCenterPos
+					,labels=p.stats[i]
+					,col=gpar$gate.text$col
+					,alpha=gpar$gate.text$alpha
+#						,lineheight=gpar$gate.text$lineheight
+#						,font=gpar$gate.text$font
+#						,cex=gpar$gate.text$cex
+#						,adj=c(0.5,0.5)
+					,...
+			)
+		}
+			
+		
+	}
 }
 
 
@@ -466,8 +580,8 @@ panel.xyplot.flowset <- function(x,
                                  filter=NULL,
                                  channel.x,
                                  channel.y
-								 ,xbins=0 #passed to hexbin routine
-								 ,binTrans=sqrt	       
+#								 ,xbins=0 #passed to hexbin routine
+#								 ,binTrans=sqrt
 						 ,...)
 {
     nm <- as.character(x)
@@ -492,7 +606,9 @@ panel.xyplot.flowset <- function(x,
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
 #	browser()
-    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]],xbins=xbins,binTrans=binTrans, ...)
+    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]]
+#							,xbins=xbins,binTrans=binTrans
+							, ...)
 }
 
 

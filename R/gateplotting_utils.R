@@ -183,6 +183,7 @@ nnWarn <- function(type, verbose=TRUE)
 ## replace infinite values by something useful
 fixInf <- function(x, replacement)
 {
+#	browser()
     for(i in seq_along(x)){
         y <- x[i]
         if(is.infinite(y) && y<0)
@@ -191,6 +192,20 @@ fixInf <- function(x, replacement)
             x[i] <- replacement[2]+diff(replacement)*10
     }
     return(x)
+}
+##fixInf returned the exagerated bounaries which does not give good esitmation of label position for gates
+##so we add another version here specifically for addName methods
+fixBound_addName <- function(x, range)
+{
+#	browser()
+	for(i in seq_along(x)){
+		y <- x[i]
+		if(y<range[1])
+			x[i] <- range[1]
+		else if(y>range[2])
+			x[i] <- range[2]
+	}
+	return(x)
 }
 
 ## convert a norm2Filter into a polygonGate
