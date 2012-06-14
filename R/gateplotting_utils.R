@@ -265,6 +265,15 @@ glrect <- function (xleft, ybottom, xright, ytop, ..., gp)
 
 gltext <- function (x, y, labels, ..., gp) 
 {
+	grid.rect(x=unit(x,"native")
+			,y=unit(y,"native")
+			,width=unit(1.3,'strwidth',labels)
+			,height=unit(1.1,'strheight',labels)
+			, gp=gpar(fill="white"
+					,col="transparent"
+					,alpha=0.7
+					)
+	)
     panel.text(x, y, labels=labels, col=gp$col, cex=gp$cex,
                linheight=gp$lineheigt, alpha=gp$alpha, font=gp$font)
 }

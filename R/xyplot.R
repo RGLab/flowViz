@@ -337,12 +337,13 @@ panel.xyplot.flowframe <- function(x,
 							strict=FALSE)
 			}else
 			{
-#				browser()	
+
 				if(stat)
 				{
 					if (!is(filter, "filterResult")) 
 						filter <- filter(frame, filter)
 					curFres<-filter
+#					browser()	
 					p.stats<-summary(curFres)@p
 					popNames<-names(p.stats)
 					p.stats<-sprintf("%.2f%%",p.stats*100)
