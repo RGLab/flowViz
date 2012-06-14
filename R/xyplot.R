@@ -344,13 +344,10 @@ panel.xyplot.flowframe <- function(x,
 						filter <- filter(frame, filter)
 					curFres<-filter
 					p.stats<-summary(curFres)@p
-					#remove stats for "rest" pop(usually the first one) from mulitfilterResults 
-					#produced by filters such as curv2Filter
-					if(length(p.stats)>1)
-						p.stats<-p.stats[-1]
+					popNames<-names(p.stats)
 					p.stats<-sprintf("%.2f%%",p.stats*100)
-					
 					names<-p.stats
+					names(names)<-popNames
 				}else
 				{
 					names<-list(...)$names

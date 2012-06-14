@@ -210,8 +210,9 @@ setMethod("glpolygon",
               rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
                                   dimnames=list(c("min", "max"),
                                   data)))
+		  browser()
               res[[i]] <- glpolygon(x=rg, data=data, verbose=FALSE,
-                                    gpar=gpar, channels=data, ...)[[1]]
+                                    gpar=gpar, channels=data,names[i], ...)[[1]]
           }
           return(invisible(res))
       })
@@ -222,9 +223,13 @@ setMethod("glpolygon",
           function(x, data, verbose=TRUE, gpar=flowViz.par.get(),
                    names=FALSE, ...)
       {
+#		  browser()
           dropWarn("filterResult", "quadGates", verbose=verbose)
-          glpolygon(x=x, verbose=verbose, gpar=gpar,
-                    names=ifelse(names, names(x), FALSE), ...)  
+#          glpolygon(x=x, verbose=verbose, gpar=gpar,
+#                    names=ifelse(names, names(x), FALSE), ...)  
+
+			glpolygon(x=x, verbose=verbose, gpar=gpar,
+                    names=names, ...)
       })
 
 ## We can drop the dataFrame, don't need it for rectangleGates.
