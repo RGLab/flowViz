@@ -7,19 +7,21 @@ setMethod("addName",
           signature(x="rectangleGate", name="character"), 
           function(x, name, data, gp)
       {
+#		  browser()
           parms <- parameters(x)
           xlim <- state("xlim")
           ylim <- state("ylim")
           ## 1D rectangular gate (region gate).
           if(length(parms)==1){
-              mt <- match(parms, data)
-              if(mt==1){
+#              mt <- match(parms, data)
+#              if(mt==1){
                   xx <- c(fixBound_addName(x@min, xlim), fixBound_addName(x@max, xlim))
-                  gltext(mean(xx), ylim[2], labels=name, pos=1, gp=gp)
-              }else if(mt==2){
+#                  gltext(mean(xx), ylim[2], labels=name, pos=1, gp=gp)
+#              }else if(mt==2){
                   yy <- c(fixBound_addName(x@min, ylim), fixBound_addName(x@max, ylim))
-                  gltext(xlim[1], mean(yy), labels=name, pos=4, gp=gp)
-              }else stop("How did you end up here????")
+#                  gltext(xlim[1], mean(yy), labels=name, pos=4, gp=gp)
+#              }else stop("How did you end up here????")
+				gltext(mean(xx), mean(yy), labels=name, pos=4, gp=gp)
           }else{## 2D rectangular gate   
               bl <- x@min[data]
               tr <- x@max[data]
