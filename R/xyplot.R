@@ -254,11 +254,11 @@ panel.xyplot.flowframe <- function(x,
             panel.smoothScatter(x, y, ...)
         }
         plotType("gsmooth", c(channel.x.name, channel.y.name))
-        if(!is.null(filter) & validName){
-            glpolygon(filter, frame,
-                      channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-        }
+#        if(!is.null(filter) & validName){
+#            glpolygon(filter, frame,
+#                      channels=c(channel.x.name, channel.y.name),
+#                      verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+#        }
     }else{
 		#for non-smoothed plot:
 		#1:always remove boundary events for hexbin version 
@@ -316,149 +316,63 @@ panel.xyplot.flowframe <- function(x,
 			plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
 	   
-        if(!is.null(filter) && validName){
-#			browser()
-			if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
-			{
-				if(!is(filter, "filterResult"))
-					filter <- filter(frame, filter)
-				rest <- Subset(frame, !filter)
-				x <- exprs(rest[,channel.x.name])
-				y <- exprs(rest[,channel.y.name])
-
-				
-				glpoints(filter, frame,
-						channels=c(channel.x.name, channel.y.name),
-						verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-				if(outline)
-					glpolygon(filter, frame,
-							channels=c(channel.x.name, channel.y.name),
-							verbose=FALSE, gpar=gpar, names=FALSE,
-							strict=FALSE)
-			}else
-			{
-
-				if(stat)
-				{
-					if (!is(filter, "filterResult")) 
-						filter <- filter(frame, filter)
-					curFres<-filter
-#					browser()	
-					p.stats<-summary(curFres)@p
-					popNames<-names(p.stats)
-					p.stats<-sprintf("%.2f%%",p.stats*100)
-					names<-p.stats
-					names(names)<-popNames
-				}else
-				{
-					names<-list(...)$names
-					if(is.null(names))
-						names<-FALSE
-				}
-#				browser()
-				glpolygon(filter, frame,
-#						channels=c(channel.x.name, channel.y.name),
-						verbose=FALSE, gpar=gpar
-						, names=names
-						,strict=FALSE
-						)
-			}
+       
+	}
+    
+	#plot gate
+	if(!is.null(filter) && validName){
+		
+		if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+		{
+			if(!is(filter, "filterResult"))
+				filter <- filter(frame, filter)
+			rest <- Subset(frame, !filter)
+			x <- exprs(rest[,channel.x.name])
+			y <- exprs(rest[,channel.y.name])
 			
-            
-        }
-		
-        
-    }
-	#plot proportion of population
-#	if(!is.null(filter) && validName &&stat)
-	if(FALSE)
-	{
-		
-
-		
-		bounds<-QUALIFIER:::gateBoundary(filterDetails(curFres)[[1]]$filter,curFres)
-		
-		for(i in 1:length(bounds))
+			
+			glpoints(filter, frame,
+					channels=c(channel.x.name, channel.y.name),
+					verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+			if(outline)
+				glpolygon(filter, frame,
+						channels=c(channel.x.name, channel.y.name),
+						verbose=FALSE, gpar=gpar, names=FALSE,
+						strict=FALSE)
+			
+		}else
 		{
 			
-			
-			xcolname<-channel.x.name
-			ycolname<-channel.y.name
-			xlim<-range(x)
-			ylim<-range(y)
-			
-			##fix the vertices outside of the x,y range
-			outInd<-bounds[[i]][,1]>max(x)
-			if(any(outInd))
-				bounds[[i]][outInd,1]<-max(x)
-			
-			
-			
-			outInd<-bounds[[i]][,1]<min(x)
-			if(any(outInd))
-				bounds[[i]][outInd,1]<-min(x)
-			
-			
-			
-			
-#				browser()
-			if(ncol(bounds[[i]])>1)
+			if(stat)
 			{
-				outInd<-bounds[[i]][,2]>max(y)
-				if(any(outInd))
-					bounds[[i]][outInd,2]<-max(y)
-				
-				outInd<-bounds[[i]][,2]<min(y)
-				if(any(outInd))
-					bounds[[i]][outInd,2]<-min(y)
-				
-				xCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",xcolname,"'])",sep="")))
-				yCenterPos<-eval(parse(text=paste("mean(bounds[[i]][,'",ycolname,"'])",sep="")))
-#					yCenterPos<-eval(parse(text=paste("max(bounds[[i]][,'",ycolname,"'])",sep="")))
-				
-#					xleft<-xCenterPos-diff(xlim)/6
-#					xright=xCenterPos+diff(xlim)/6
-#					ybottom=yCenterPos#-diff(ylim)/6
-#					ytop=max(ylim)
+				if (!is(filter, "filterResult")) 
+					filter <- filter(frame, filter)
+				curFres<-filter
+#					browser()	
+				p.stats<-summary(curFres)@p
+				popNames<-names(p.stats)
+				p.stats<-sprintf("%.2f%%",p.stats*100)
+				names<-p.stats
+				names(names)<-popNames
 			}else
 			{
-				xCenterPos<-mean(bounds[[i]])
-				yCenterPos<-mean(y)
-				
-				xleft<-xCenterPos-diff(xlim)/6
-				xright=xCenterPos+diff(xlim)/6
-				
-				ybottom=yCenterPos-diff(ylim)/30
-				ytop=yCenterPos+diff(ylim)/30
+				names<-list(...)$names
+				if(is.null(names))
+					names<-FALSE
 			}
-			
-			
-			grid.rect(x=unit(xCenterPos,"native")
-					,y=unit(yCenterPos,"native")
-					,width=unit(1,'strwidth',p.stats[i])
-					,height=unit(1,'strheight',p.stats[i])
-					,draw=T, gp=gpar(font=gpar$gate.text$font
-							,fill="white"
-							,col="transparent"
-							,alpha=0.7
-					)
-			)
-			panel.text(
-					x=xCenterPos
-					,y=yCenterPos
-					,labels=p.stats[i]
-					,col=gpar$gate.text$col
-					,alpha=gpar$gate.text$alpha
-#						,lineheight=gpar$gate.text$lineheight
-#						,font=gpar$gate.text$font
-#						,cex=gpar$gate.text$cex
-#						,adj=c(0.5,0.5)
-					,...
+#				browser()
+			glpolygon(filter, frame,
+#						channels=c(channel.x.name, channel.y.name),
+					verbose=FALSE, gpar=gpar
+					, names=names
+					,strict=FALSE
 			)
 		}
-			
+		
 		
 	}
+	
+	
 }
 
 
