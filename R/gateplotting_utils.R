@@ -20,9 +20,9 @@ flowViz.state[["lattice.theme"]] <-
                                  lty="solid"),
                        gate.text=list(font=1,
                                       col="#000000",
-                                      alpha=0.4,
-                                      cex=1.2,
-                                      lineheight=1.2),
+                                      alpha=1,#0.4,
+                                      cex=0.8,#1.2,
+                                      lineheight=0.8),#1.2),
                        flow.symbol=list(alpha=1,
                                         cex=0.8,
                                         pch=".",
@@ -265,9 +265,10 @@ glrect <- function (xleft, ybottom, xright, ytop, ..., gp)
 
 gltext <- function (x, y, labels, ..., gp) 
 {
+	#add rectange as white background for the better visual effect when label is plotted against color 
 	grid.rect(x=unit(x,"native")
 			,y=unit(y,"native")
-			,width=unit(1.3,'strwidth',labels)
+			,width=unit(1,'strwidth',labels)
 			,height=unit(1.1,'strheight',labels)
 			, gp=gpar(fill="white"
 					,col="transparent"

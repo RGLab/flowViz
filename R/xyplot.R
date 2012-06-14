@@ -492,8 +492,6 @@ panel.xyplot.flowset <- function(x,
                                  filter=NULL,
                                  channel.x,
                                  channel.y
-#								 ,xbins=0 #passed to hexbin routine
-#								 ,binTrans=sqrt
 						 ,...)
 {
     nm <- as.character(x)
@@ -518,9 +516,7 @@ panel.xyplot.flowset <- function(x,
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
 #	browser()
-    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]]
-#							,xbins=xbins,binTrans=binTrans
-							, ...)
+    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], ...)
 }
 
 
