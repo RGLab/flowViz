@@ -197,6 +197,8 @@ panel.xyplot.flowframe <- function(x,
 								   ,xbins=0
 						   		   ,binTrans=sqrt
 						   			,stat=F
+									,pos=0.5
+									,abs=F
 						   			,...)
 {
     ## graphical parameter defaults
@@ -366,7 +368,9 @@ panel.xyplot.flowframe <- function(x,
 					verbose=FALSE, gpar=gpar
 					, names=names
 					,strict=FALSE
-			)
+					,pos=pos
+					,abs=abs
+					)
 		}
 		
 		

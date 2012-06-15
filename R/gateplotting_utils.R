@@ -22,7 +22,12 @@ flowViz.state[["lattice.theme"]] <-
                                       col="#000000",
                                       alpha=1,#0.4,
                                       cex=0.8,#1.2,
-                                      lineheight=0.8),#1.2),
+                                      lineheight=0.8#1.2
+	  								  ,background=list(fill="white"
+											  				,col="transparent"
+											  				,alpha=0.7
+											  				)
+	  									),
                        flow.symbol=list(alpha=1,
                                         cex=0.8,
                                         pch=".",
@@ -269,10 +274,10 @@ gltext <- function (x, y, labels, ..., gp)
 	grid.rect(x=unit(x,"native")
 			,y=unit(y,"native")
 			,width=unit(1,'strwidth',labels)
-			,height=unit(1.1,'strheight',labels)
-			, gp=gpar(fill="white"
-					,col="transparent"
-					,alpha=0.7
+			,height=unit(1,'strheight',labels)
+			, gp=gpar(fill=gp$background$fill
+					,col=gp$background$col
+					,alpha=gp$background$alpha
 					)
 	)
     panel.text(x, y, labels=labels, col=gp$col, cex=gp$cex,

@@ -137,15 +137,29 @@ setMethod("addName",
 ## or can be a character provided by the user.
 setMethod("addName",
           signature(x="polygonGate", name="character"), 
-          function(x, name, data, gp,range)
+          function(x, name, data, gp,pos=0.5,abs=FALSE)
       {
 		  xlim <- state("xlim")
 		  ylim <- state("ylim")
-          xp <- x@boundaries[,data[1]]
-          yp <- x@boundaries[,data[2]]
-		  xp<-fixBound_addName(xp,xlim)
-		  yp<-fixBound_addName(yp,ylim)
-          gltext(mean(xp), mean(yp), labels=name, adj=0.5, gp=gp)
+		  
+		  if(abs)#plot label whithin the boundary by default 
+		  {
+			  xp<-xlim
+			  yp<-ylim
+		  }else #specify location by absolute position of the current window
+		  {
+			  xp <- range(x@boundaries[,data[1]])
+			  yp <- range(x@boundaries[,data[2]])
+			  xp<-fixBound_addName(xp,xlim)
+			  yp<-fixBound_addName(yp,ylim)
+		  }
+		  pos <- rep(pos, length=2)[1:2]
+		  
+  		  xp<-xp[1]+diff(xp)*pos[1]
+		  yp<-yp[1]+diff(yp)*pos[2]
+	  		 
+          
+          gltext(xp, yp, labels=name, adj=0.5, gp=gp)
           return(invisible())
       })
 

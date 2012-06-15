@@ -302,7 +302,7 @@ setMethod("glpolygon",
                   glpoly(xp, yp, gp=gpar$gate)
               }
           }
-          addName(x, names, data, gpar$gate.text)
+          addName(x, names, data, gpar$gate.text,...)
           res <- cbind(xp,yp)
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
           return(invisible(list(res)))
