@@ -8,7 +8,7 @@ assign("flowViz.options", list(), envir = .flowVizEnv)
 
 .onLoad <- function(libname, pkgname) 
 {
-    ## library.dynam("lattice", pkgname, libname )
+   
 	flowViz.options(.defaultFlowVizOptions())
     
 }
@@ -50,9 +50,11 @@ flowViz.options <- function(...)
 
 .defaultFlowVizOptions <- function()
 {
-	cR<-IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0))
-	list(argcolramp1 = colorRampPalette(cR,bias=4)
-		,argcolramp2 = colorRampPalette(cR,bias=1)
+	cR1<-rev(brewer.pal(21, "RdBu"))
+	cR2<-IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0))
+	list(argcolramp = colorRampPalette(cR1,bias=1)
+		,argcolramp_bin = colorRampPalette(cR2,bias=1)
+		,argcolramp_flowJo = colorRampPalette(cR2,bias=1)
 		)
 }
 	

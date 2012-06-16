@@ -298,9 +298,9 @@ panel.xyplot.flowframe <- function(x,
 			#using hexbin package to do the hexagon plot	
 			bin<-hexbin(x,y,xbins=xbins)
 			if (is.null(argcolramp))
-				argcolramp<-flowViz.getOption("argcolramp1")
-			if (is.null(argcolramp))
-				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
+				argcolramp<-flowViz.getOption("argcolramp")
+#			if (is.null(argcolramp))
+#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
 #			browser()
 			grid.hexagons(bin,colramp = argcolramp,trans=binTrans)		
 			plotType("gpoints", c(channel.x.name, channel.y.name))
@@ -308,9 +308,9 @@ panel.xyplot.flowframe <- function(x,
 		}else
 		{
 			if (is.null(argcolramp))
-				argcolramp<-flowViz.getOption("argcolramp2")
-			if (is.null(argcolramp))
-				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
+				argcolramp<-flowViz.getOption("argcolramp")
+#			if (is.null(argcolramp))
+#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
 #			browser()
 			if(gpar$density)
 				col <- densCols(x, y, colramp=argcolramp)
