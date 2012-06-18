@@ -14,8 +14,8 @@ flowViz.state[["lattice.theme"]] <-
     list(X11cairo=list(gate=list(alpha=1,
                                  cex=NULL,
                                  pch=NULL,
-                                 col="red",
-                                 fill="transparent",
+                                 col="#9E0142"#"red",
+                                 ,fill="transparent",
                                  lwd=1,
                                  lty="solid"),
                        gate.text=list(font=1,
@@ -25,7 +25,7 @@ flowViz.state[["lattice.theme"]] <-
                                       lineheight=0.8#1.2
 	  								  ,background=list(fill="white"
 											  				,col="transparent"
-											  				,alpha=0.7
+											  				,alpha=1
 											  				)
 	  									),
                        flow.symbol=list(alpha=1,
@@ -37,7 +37,10 @@ flowViz.state[["lattice.theme"]] <-
                                          fill="#FFFFFFB3",
                                          col="black",
                                          lwd=1,
-                                         lty="dotted")))
+                                         lty="dotted")
+		 			
+		 			)
+		 )
                                       
 
 

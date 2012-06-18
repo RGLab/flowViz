@@ -203,8 +203,7 @@ panel.xyplot.flowframe <- function(x,
 {
     ## graphical parameter defaults
     argcolramp <- list(...)$colramp
-	
-    gpar <- flowViz.par.get()
+	gpar <- flowViz.par.get()
     
     if(!is.null(gp))
         gpar <- lattice:::updateList(gpar, gp)
@@ -412,7 +411,14 @@ setMethod("xyplot",
           ## par.settings will not be passed on to the panel functions, so
           ## we have to fetch it from ... and stick the gate relevant stuff
           ## back it in there manually
-          gp <- par.settings
+           
+		  gp<-par.settings
+		  par.settings<-flowViz.getOption("flowVizTheme")#default theme for lattice
+		  
+		  if(!is.null(gp))#update the default theme if necessary
+		  {
+			  par.settings<-lattice:::updateList(par.settings,gp)  
+		  }
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
