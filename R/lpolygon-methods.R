@@ -212,9 +212,9 @@ setMethod("glpolygon",
 			
 		  
 		  poslist<-vector(mode="list",4)
-		  poslist[[1]]<-c(0.1,0.9)
+		  poslist[[1]]<-c(0.15,0.9)
 		  poslist[[2]]<-c(0.9,0.9)
-		  poslist[[3]]<-c(0.1,0.1)
+		  poslist[[3]]<-c(0.15,0.1)
 		  poslist[[4]]<-c(0.9,0.1)
           for(i in 1:4){
               gpar$gate$col <- col[i]

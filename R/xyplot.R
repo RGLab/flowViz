@@ -202,6 +202,7 @@ panel.xyplot.flowframe <- function(x,
 						   			,...)
 {
     ## graphical parameter defaults
+	
     argcolramp <- list(...)$colramp
 	gpar <- flowViz.par.get()
     
@@ -319,58 +320,115 @@ panel.xyplot.flowframe <- function(x,
 	   
        
 	}
-    
+#    browser()
 	#plot gate
 	if(!is.null(filter) && validName){
-		
-		if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+		if(is(filter,"filters"))
 		{
-			if(!is(filter, "filterResult"))
-				filter <- filter(frame, filter)
-			rest <- Subset(frame, !filter)
-			x <- exprs(rest[,channel.x.name])
-			y <- exprs(rest[,channel.y.name])
-			
-			
-			glpoints(filter, frame,
-					channels=c(channel.x.name, channel.y.name),
-					verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-			if(outline)
-				glpolygon(filter, frame,
-						channels=c(channel.x.name, channel.y.name),
-						verbose=FALSE, gpar=gpar, names=FALSE,
-						strict=FALSE)
-			
+			lapply(filter,function(curFilter){
+						
+						
+						if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+						{
+							if(!is(curFilter, "filterResult"))
+								curFilter <- filter(frame, curFilter)
+							rest <- Subset(frame, !filter)
+							x <- exprs(rest[,channel.x.name])
+							y <- exprs(rest[,channel.y.name])
+							
+							
+							glpoints(curFilter, frame,
+									channels=c(channel.x.name, channel.y.name),
+									verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+							if(outline)
+								glpolygon(curFilter, frame,
+										channels=c(channel.x.name, channel.y.name),
+										verbose=FALSE, gpar=gpar, names=FALSE,
+										strict=FALSE)
+							
+						}else
+						{
+							
+							if(stat)
+							{
+								if (!is(curFilter, "filterResult")) 
+									curFilter <- filter(frame, curFilter)
+								curFres<-curFilter
+#					browser()	
+								p.stats<-summary(curFres)@p
+								popNames<-names(p.stats)
+								p.stats<-sprintf("%.2f%%",p.stats*100)
+								names<-p.stats
+								names(names)<-popNames
+							}else
+							{
+								names<-list(...)$names
+								if(is.null(names))
+									names<-FALSE
+							}
+#				browser()
+							glpolygon(curFilter, frame,
+#						channels=c(channel.x.name, channel.y.name),
+									verbose=FALSE, gpar=gpar
+									, names=names
+									,strict=FALSE
+									,pos=pos
+									,abs=abs
+							)
+						}
+					})
 		}else
 		{
-			
-			if(stat)
+			if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
 			{
-				if (!is(filter, "filterResult")) 
+				if(!is(filter, "filterResult"))
 					filter <- filter(frame, filter)
-				curFres<-filter
-#					browser()	
-				p.stats<-summary(curFres)@p
-				popNames<-names(p.stats)
-				p.stats<-sprintf("%.2f%%",p.stats*100)
-				names<-p.stats
-				names(names)<-popNames
+				rest <- Subset(frame, !filter)
+				x <- exprs(rest[,channel.x.name])
+				y <- exprs(rest[,channel.y.name])
+				
+				
+				glpoints(filter, frame,
+						channels=c(channel.x.name, channel.y.name),
+						verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+				if(outline)
+					glpolygon(filter, frame,
+							channels=c(channel.x.name, channel.y.name),
+							verbose=FALSE, gpar=gpar, names=FALSE,
+							strict=FALSE)
+				
 			}else
 			{
-				names<-list(...)$names
-				if(is.null(names))
-					names<-FALSE
-			}
+				
+				if(stat)
+				{
+					if (!is(filter, "filterResult")) 
+						filter <- filter(frame, filter)
+					curFres<-filter
+#					browser()	
+					p.stats<-summary(curFres)@p
+					popNames<-names(p.stats)
+					p.stats<-sprintf("%.2f%%",p.stats*100)
+					names<-p.stats
+					names(names)<-popNames
+				}else
+				{
+					names<-list(...)$names
+					if(is.null(names))
+						names<-FALSE
+				}
 #				browser()
-			glpolygon(filter, frame,
+				glpolygon(filter, frame,
 #						channels=c(channel.x.name, channel.y.name),
-					verbose=FALSE, gpar=gpar
-					, names=names
-					,strict=FALSE
-					,pos=pos
-					,abs=abs
-					)
+						verbose=FALSE, gpar=gpar
+						, names=names
+						,strict=FALSE
+						,pos=pos
+						,abs=abs
+				)
+			}
 		}
+		
 		
 		
 	}
@@ -508,16 +566,18 @@ panel.xyplot.flowset <- function(x,
     if (length(nm) < 1) return()
     ## 'filter' either has to be a single filter, or a list of filters matching
     ## the flowSet's sample names, or a filterResultList.
-    if(!is.null(filter)){
+  
+	if(!is.null(filter)){
         if(!is.list(filter)){
             if(is(filter, "filter")){
                 filter <- lapply(seq_along(nm), function(x) filter)
                 names(filter) <- nm
             }
-        }else if(!is(filter, "filterResultList"))
+        }else if(!is(filter, "filterResultList")&&!is(filter, "filtersList"))
             filter <- as(filter, "filterResultList")
-        if(!nm %in% names(filter) || !is(filter[[nm]] ,"filter")){
-            warning("'filter' must either be a filterResultList, a single\n",
+		
+        if(!nm %in% names(filter) || !(is(filter[[nm]] ,"filter")||is(filter[[nm]] ,"filters"))){
+            warning("'filter' must either be a filtersList,filterResultList, a single\n",
                     "filter object or a named list of filter objects.",
                     call.=FALSE)
             filter <- NULL
@@ -525,7 +585,7 @@ panel.xyplot.flowset <- function(x,
     }
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
-#	browser()
+	
     panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], ...)
 }
 
