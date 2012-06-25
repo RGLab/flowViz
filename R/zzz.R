@@ -54,6 +54,7 @@ flowViz.options <- function(...)
 
 	myTheme <- modifyList(standard.theme()
 							,list(strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
+								,background=list(col="white")
 								)
 							)
 #	show.settings(myTheme)	
