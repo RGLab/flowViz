@@ -51,11 +51,12 @@ flowViz.options <- function(...)
 .defaultFlowVizOptions <- function()
 {
 	#modified lattice theme
-	myTheme <- modifyList(trellis.par.get()
+
+	myTheme <- modifyList(standard.theme()
 							,list(strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
 								)
 							)
-	
+#	show.settings(myTheme)	
 	cR1<-rev(brewer.pal(11, "Spectral"))
 	cR2<-IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0))
 	list(argcolramp = colorRampPalette(cR1,bias=1)
