@@ -99,7 +99,12 @@ panel.xyplot.flowframe(
     alpha=gpar$flow.symbol$alpha,
     cex=gpar$flow.symbol$cex,
     col=gpar$flow.symbol$col,
-    gp,
+    gp
+    ,xbins=0
+    ,binTrans=sqrt
+    ,stat=FALSE
+    ,pos=0.5
+    ,abs=FALSE
     \dots)
 
 
@@ -224,7 +229,12 @@ panel.xyplot.flowset(
     \code{\link[flowCore:filterResult-class]{filterResult}} or
     \code{\link[flowCore:filterResult-class]{filterResultList}} object
     or a list of such objects of the same length as the
-    \code{flowSet}. The appropriate spherical 2D representation of this
+    \code{flowSet}.
+    Also a \code{\link[flowCore:filters-class]{filters}}
+    or A \code{\link[flowCore:filtersList-class]{filtersList}}
+    can be passed to xyplot in order to plot multiple filters/gates(with the same x,y parameters)
+    on one panel to represent multiple sub-populations. 
+    The appropriate spherical 2D representation of this
     filter will be superimposed on the plot if \code{smooth=TRUE}, or
     the result of the filtering operation will be indicated by grouping
     if \code{smooth=FALSE}. The software will figure out whether the
@@ -277,9 +287,28 @@ panel.xyplot.flowset(
 
   \item{frames}{An environment containing frame-specific data. }
 
-  
+    \item{xbins}{The argument passed to \code{\link[hexbin:hexbin]{hexbin}} 
+		    	 ,which is the number of bins partitioning the range of xbnds.
+		    	 It is set as 0 by default,which plots all the events without binning.
+		    	 When it is larger than 0,hexbin plot engine is used for the faster plotting.
+		    	 Note that it is only valid when \code{smooth} is set as FALSE .
+		    	 }
+	\item{binTrans}{The argument passed to \code{\link[hexbin:grid.hexagons]{grid.hexagons}}
+					,which is a transformation function (or NULL) for the count. 
+					It is \code{\link[base:sqrt]{sqrt}} by default.
+		    		}    			 		
+	
+ 	\item{stat,pos,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted
+ 	 					Currently only population proportion/percentage is supported.
+ 	 					\code{stat} is a logical scalar indicating whether to display statistics. Default is FALSE.
+						\code{pos} is the numeric scalar (range within c(0,1)) or vector(length of 2,first is for x-axis,second for y-axis)
+								  to control the position of the statistics label. It is set as 0.5,which is the center.
+						\code{abs} is a logical scalar indicating whether the \code{pos} is relative to the gate boundary or the entire xy-axis(absolute position).
+									By default it is set as FALSE,which indicates the position is relative to gate. 
+  						}
   \item{\dots}{ More arguments, usually passed on to the underlying
     lattice methods. }
+    
   
 }
 
@@ -407,12 +436,17 @@ main="A single flowFrame")
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
 main="A single flowFrame", smooth=FALSE)
 
-## A colorful non-smooth version of the same data
+## A non-smooth version of the same data with customerized color scheme
 require(IDPmisc)
 colramp <- colorRampPalette(IDPcolorRamp(21))
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
        main="A single flowFrame", smooth=FALSE,
        colramp=colramp, pch=20, cex=0.1)
+
+## A hexbin version of non-smooth scatter plot  
+xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], xbin = 128
+       ,main="A single flowFrame", smooth=FALSE)
+
 
 ## Visual artifacts created by the pileup of margin events
 xyplot(`FSC-H` ~ `SSC-H`, GvHD[["s5a05"]], nbin = 100,
@@ -489,11 +523,27 @@ xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
        smooth=FALSE, filter=n2gate, subset=Patient == 5)
 
 
+## displaying filters with stats
 n2gate.results <- filter(GvHD, n2gate)
 
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD,
        subset=Patient == "6",
-       filter=n2gate.results, smooth=FALSE)
+       filter=n2gate.results, smooth=FALSE
+       ,stat=TRUE
+       ,abs=TRUE
+       )
+       
+## displaying multiple filters in one panel with stats
+recGate1<-rectangleGate("FL3-H"=c(2.3,4.1),"FL2-H"=c(6.8,9))
+recGate2<-rectangleGate("FL3-H"=c(1,3),"FL2-H"=c(4,6))
+filters1<-filters(list(recGate1,recGate2))
+xyplot(`FL2-H` ~ `FL3-H`
+	   ,data=transform("FL2-H"=asinh,"FL3-H"=asinh) %on% GvHD[[1]]
+       ,filter=filters1
+       ,stat=TRUE
+       ,margin=FALSE
+       )
+
 
 }
 

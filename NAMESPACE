@@ -20,6 +20,8 @@ importFrom(grid, get.gpar, grid.points, grid.polygon, grid.rect,
 
 importFrom(KernSmooth, bkde2D)
 
+importFrom(utils, modifyList)
+
 importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
            panel.grid, panel.lines, panel.parallel, panel.points,
            panel.polygon, panel.rect, panel.segments,
