@@ -111,7 +111,7 @@ setMethod("glpolygon",
                          gp=gpar$gate, ...)
               }
               ## add names if necessary
-              addName(x, names, data, gpar$gate.text)
+              addName(x, names, data, gpar$gate.text,...)
           }
           res <- rbind(x@min[data], x@max[data])
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
@@ -190,7 +190,7 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="quadGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par.get(), names=NULL, ...)
+                   gpar=flowViz.par.get(), names=NULL,...)
       {
           if(!missing(channels))
               data <- channels
@@ -204,14 +204,28 @@ setMethod("glpolygon",
           col <- col[c(2,1,3,4)]
           fill <- fill[c(2,1,3,4)]
           res <- vector(4, mode="list")
+		  #quadrant iteration in this loop goes by :x-y+,x+y+,x-y-,x+y-
+		  #	yet populations generated from quadGate is:++,-+,+-,--
+		  #so we need to re-order the names character	
+		  names<-names[c(2,1,4,3)]
+		  # fix the location of gate labels at four corners for quadGate
+			
+		  
+		  poslist<-vector(mode="list",4)
+		  poslist[[1]]<-c(0.15,0.9)
+		  poslist[[2]]<-c(0.9,0.9)
+		  poslist[[3]]<-c(0.15,0.1)
+		  poslist[[4]]<-c(0.9,0.1)
           for(i in 1:4){
               gpar$gate$col <- col[i]
               gpar$gate$fill <- fill[i]
               rg <- rectangleGate(.gate=matrix(mat[i,], ncol=2,
                                   dimnames=list(c("min", "max"),
                                   data)))
+		  
               res[[i]] <- glpolygon(x=rg, data=data, verbose=FALSE,
-                                    gpar=gpar, channels=data, ...)[[1]]
+                                    gpar=gpar, channels=data,names=names[i],abs=F,pos=poslist[[i]])[[1]]
+										
           }
           return(invisible(res))
       })
@@ -222,9 +236,13 @@ setMethod("glpolygon",
           function(x, data, verbose=TRUE, gpar=flowViz.par.get(),
                    names=FALSE, ...)
       {
+#		  browser()
           dropWarn("filterResult", "quadGates", verbose=verbose)
-          glpolygon(x=x, verbose=verbose, gpar=gpar,
-                    names=ifelse(names, names(x), FALSE), ...)  
+#          glpolygon(x=x, verbose=verbose, gpar=gpar,
+#                    names=ifelse(names, names(x), FALSE), ...)  
+
+			glpolygon(x=x, verbose=verbose, gpar=gpar,
+                    names=names, ...)
       })
 
 ## We can drop the dataFrame, don't need it for rectangleGates.
@@ -236,7 +254,7 @@ setMethod("glpolygon",
           dropWarn("flowFrame", "quadGates", verbose=verbose)
           res <- glpolygon(x=x, verbose=verbose, gpar=gpar,
                     names=FALSE, ...)
-          addName(x, names, data=data, gp=gpar$gate.text)
+          addName(x, names, data=data, gp=gpar$gate.text,...)
           return(invisible(res))
       })
 
@@ -293,7 +311,7 @@ setMethod("glpolygon",
                   glpoly(xp, yp, gp=gpar$gate)
               }
           }
-          addName(x, names, data, gpar$gate.text)
+          addName(x, names, data, gpar$gate.text,...)
           res <- cbind(xp,yp)
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
           return(invisible(list(res)))

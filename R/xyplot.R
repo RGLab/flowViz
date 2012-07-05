@@ -144,6 +144,7 @@ setMethod("xyplot",
               channel.x <- channel.x[[2]]
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
+#		  browser()
           ## call data.frame xyplot method with our panel function
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth,
                  prepanel=prepanel, panel=panel, frame=data,
@@ -178,6 +179,7 @@ prepanel.xyplot.flowframe <-
 ## Panel function that allows us to add filters on the plot. The actual plotting
 ## is done by either the panel.smoothScatter or the default lattice panel.xyplot
 ## function
+##when xbins>0, we do the hexagon plot provided by hexbin package to improve the speed
 panel.xyplot.flowframe <- function(x,
                                    y,
                                    frame,
@@ -191,12 +193,18 @@ panel.xyplot.flowframe <- function(x,
                                    alpha=gpar$flow.symbol$alpha,
                                    cex=gpar$flow.symbol$cex,
                                    col=gpar$flow.symbol$col,
-                                   gp,
-                                   ...)
+                                   gp
+								   ,xbins=0
+						   		   ,binTrans=sqrt
+						   			,stat=F
+									,pos=0.5
+									,abs=F
+						   			,...)
 {
     ## graphical parameter defaults
+	
     argcolramp <- list(...)$colramp
-    gpar <- flowViz.par.get()
+	gpar <- flowViz.par.get()
     
     if(!is.null(gp))
         gpar <- lattice:::updateList(gpar, gp)
@@ -204,26 +212,33 @@ panel.xyplot.flowframe <- function(x,
         gpar$gate$cex <- cex
     if(is.null(gpar$gate$pch))
         gpar$gate$pch <- pch
+#	browser()
+	if(is.null(gpar$gate$plotType))
+		gpar$gate$plotType<-"l"
+	if(is.null(gpar$density))
+		gpar$density<-TRUE
     ## Whenever we have a function call in the formula we might no longer be the
     ## original scale in which the gate was defined, and we have no clue how to
     # plot it
     validName <- !(length(grep("\\(", channel.x.name)) ||
                    length(grep("\\(", channel.y.name)))
+#browser()
+    ## We remove margin events before passing on the data to panel.smoothScatter
+    ## and after plotting indicate those events by grayscale lines on the plot
+    ## margins
     if (smooth){
-        ## We remove margin events before passing on the data to panel.smoothScatter
-        ## and after plotting indicate those events by grayscale lines on the plot
-        ## margins
-        if(margin){
-            r <- range(frame, c(channel.x.name, channel.y.name))
-            l <- length(x)
-            inc <- apply(r, 2, diff)/1e5
-            dots <- list(...)
-            nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
-            selxL <- x > r[2,channel.x.name]-inc[1]
-            selxS <- x < r[1,channel.x.name]+inc[1]
-            selyL <- y > r[2,channel.y.name]-inc[2]
-            selyS <- y < r[1,channel.y.name]+inc[2]
-            allsel <- !(selxL | selxS | selyL | selyS)
+		if(margin){
+			r <- range(frame, c(channel.x.name, channel.y.name))
+			l <- length(x)
+			inc <- apply(r, 2, diff)/1e5
+			dots <- list(...)
+			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+			selxL <- x > r[2,channel.x.name]-inc[1]
+			selxS <- x < r[1,channel.x.name]+inc[1]
+			selyL <- y > r[2,channel.y.name]-inc[2]
+			selyS <- y < r[1,channel.y.name]+inc[2]
+			allsel <- !(selxL | selxS | selyL | selyS)
+			
             if(sum(allsel)>0)
             {
                 panel.smoothScatter(x[allsel], y[allsel],
@@ -241,36 +256,184 @@ panel.xyplot.flowframe <- function(x,
             panel.smoothScatter(x, y, ...)
         }
         plotType("gsmooth", c(channel.x.name, channel.y.name))
-        if(!is.null(filter) & validName){
-            glpolygon(filter, frame,
-                      channels=c(channel.x.name, channel.y.name),
-                      verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-        }
+#        if(!is.null(filter) & validName){
+#            glpolygon(filter, frame,
+#                      channels=c(channel.x.name, channel.y.name),
+#                      verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+#        }
     }else{
-        if (!is.null(argcolramp)) {
-            col <- densCols(x, y, colramp=argcolramp)
-        }
-        if(!is.null(filter) && validName){
-            if(!is(filter, "filterResult"))
-                filter <- filter(frame, filter)
-            rest <- Subset(frame, !filter)
-            x <- exprs(rest[,channel.x.name])
-            y <- exprs(rest[,channel.y.name])
-            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-            
-            glpoints(filter, frame,
-                     channels=c(channel.x.name, channel.y.name),
-                     verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-            if(outline)
-                glpolygon(filter, frame,
-                          channels=c(channel.x.name, channel.y.name),
-                          verbose=FALSE, gpar=gpar, names=FALSE,
-                          strict=FALSE)
-        }else{
-            panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-        }
-        plotType("gpoints", c(channel.x.name, channel.y.name))
-    }
+		#for non-smoothed plot:
+		#1:always remove boundary events for hexbin version 
+		#since they are going to affect the color encoding for density
+		#2.for non-hexbin version,when gpar$density=FALSE,which means one-color non-densityscatter plot
+		#we then keep the boundary events 
+		if(margin){
+			
+			r <- range(frame, c(channel.x.name, channel.y.name))
+			l <- length(x)
+			inc <- apply(r, 2, diff)/1e5
+			dots <- list(...)
+			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+			selxL <- x > r[2,channel.x.name]-inc[1]
+			selxS <- x < r[1,channel.x.name]+inc[1]
+			selyL <- y > r[2,channel.y.name]-inc[2]
+			selyS <- y < r[1,channel.y.name]+inc[2]
+			allsel <- !(selxL | selxS | selyL | selyS)
+			#we may want to skip marginal events in non-smoothed version to save time			
+			if(sum(allsel)>0)
+			{
+				addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+				addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+				addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+				addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+			}
+				
+			x<-x[allsel]
+			y<-y[allsel]
+			
+		}
+#		browser()
+		if(xbins>0)
+		{
+			#using hexbin package to do the hexagon plot	
+			bin<-hexbin(x,y,xbins=xbins)
+			if (is.null(argcolramp))
+				argcolramp<-flowViz.getOption("argcolramp")
+#			if (is.null(argcolramp))
+#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
+#			browser()
+			grid.hexagons(bin,colramp = argcolramp,trans=binTrans)		
+			plotType("gpoints", c(channel.x.name, channel.y.name))
+			
+		}else
+		{
+			if (is.null(argcolramp))
+				argcolramp<-flowViz.getOption("argcolramp")
+#			if (is.null(argcolramp))
+#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
+#			browser()
+			if(gpar$density)
+				col <- densCols(x, y, colramp=argcolramp)
+			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+			plotType("gpoints", c(channel.x.name, channel.y.name))
+		}
+	   
+       
+	}
+#    browser()
+	#plot gate
+	if(!is.null(filter) && validName){
+		if(is(filter,"filters"))
+		{
+			lapply(filter,function(curFilter){
+						
+						
+						if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+						{
+							if(!is(curFilter, "filterResult"))
+								curFilter <- filter(frame, curFilter)
+							rest <- Subset(frame, !filter)
+							x <- exprs(rest[,channel.x.name])
+							y <- exprs(rest[,channel.y.name])
+							
+							
+							glpoints(curFilter, frame,
+									channels=c(channel.x.name, channel.y.name),
+									verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+							if(outline)
+								glpolygon(curFilter, frame,
+										channels=c(channel.x.name, channel.y.name),
+										verbose=FALSE, gpar=gpar, names=FALSE,
+										strict=FALSE)
+							
+						}else
+						{
+							
+							if(stat)
+							{
+								if (!is(curFilter, "filterResult")) 
+									curFilter <- filter(frame, curFilter)
+								curFres<-curFilter
+#					browser()	
+								p.stats<-summary(curFres)@p
+								popNames<-names(p.stats)
+								p.stats<-sprintf("%.2f%%",p.stats*100)
+								names<-p.stats
+								names(names)<-popNames
+							}else
+							{
+								names<-list(...)$names
+								if(is.null(names))
+									names<-FALSE
+							}
+#				browser()
+							glpolygon(curFilter, frame,
+#						channels=c(channel.x.name, channel.y.name),
+									verbose=FALSE, gpar=gpar
+									, names=names
+									,strict=FALSE
+									,pos=pos
+									,abs=abs
+							)
+						}
+					})
+		}else
+		{
+			if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+			{
+				if(!is(filter, "filterResult"))
+					filter <- filter(frame, filter)
+				rest <- Subset(frame, !filter)
+				x <- exprs(rest[,channel.x.name])
+				y <- exprs(rest[,channel.y.name])
+				
+				
+				glpoints(filter, frame,
+						channels=c(channel.x.name, channel.y.name),
+						verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+				if(outline)
+					glpolygon(filter, frame,
+							channels=c(channel.x.name, channel.y.name),
+							verbose=FALSE, gpar=gpar, names=FALSE,
+							strict=FALSE)
+				
+			}else
+			{
+				
+				if(stat)
+				{
+					if (!is(filter, "filterResult")) 
+						filter <- filter(frame, filter)
+					curFres<-filter
+#					browser()	
+					p.stats<-summary(curFres)@p
+					popNames<-names(p.stats)
+					p.stats<-sprintf("%.2f%%",p.stats*100)
+					names<-p.stats
+					names(names)<-popNames
+				}else
+				{
+					names<-list(...)$names
+					if(is.null(names))
+						names<-FALSE
+				}
+#				browser()
+				glpolygon(filter, frame,
+#						channels=c(channel.x.name, channel.y.name),
+						verbose=FALSE, gpar=gpar
+						, names=names
+						,strict=FALSE
+						,pos=pos
+						,abs=abs
+				)
+			}
+		}
+		
+		
+		
+	}
+	
+	
 }
 
 
@@ -306,7 +469,14 @@ setMethod("xyplot",
           ## par.settings will not be passed on to the panel functions, so
           ## we have to fetch it from ... and stick the gate relevant stuff
           ## back it in there manually
-          gp <- par.settings
+           
+		  gp<-par.settings
+		  par.settings<-flowViz.getOption("flowVizTheme")#default theme for lattice
+		  
+		  if(!is.null(gp))#update the default theme if necessary
+		  {
+			  par.settings<-lattice:::updateList(par.settings,gp)  
+		  }
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
@@ -333,6 +503,7 @@ setMethod("xyplot",
           channel.y <- as.expression(channel.y)
           ## use densityplot method with dedicated panel and prepanel
           ## functions to do the actual plotting
+#		  browser()
           densityplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data@frames, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
@@ -365,7 +536,8 @@ prepanel.xyplot.flowset <-
         }else NULL
         plotLims(xlim, ylim)
         return(list(xlim=xlim, ylim=ylim))
-    }
+    }else
+		return(list())
 }
 
 
@@ -387,23 +559,25 @@ panel.xyplot.flowset <- function(x,
                                  frames,
                                  filter=NULL,
                                  channel.x,
-                                 channel.y,
-                                 ...)
+                                 channel.y
+						 ,...)
 {
     nm <- as.character(x)
     if (length(nm) < 1) return()
     ## 'filter' either has to be a single filter, or a list of filters matching
     ## the flowSet's sample names, or a filterResultList.
-    if(!is.null(filter)){
+  
+	if(!is.null(filter)){
         if(!is.list(filter)){
             if(is(filter, "filter")){
                 filter <- lapply(seq_along(nm), function(x) filter)
                 names(filter) <- nm
             }
-        }else if(!is(filter, "filterResultList"))
+        }else if(!is(filter, "filterResultList")&&!is(filter, "filtersList"))
             filter <- as(filter, "filterResultList")
-        if(!nm %in% names(filter) || !is(filter[[nm]] ,"filter")){
-            warning("'filter' must either be a filterResultList, a single\n",
+		
+        if(!nm %in% names(filter) || !(is(filter[[nm]] ,"filter")||is(filter[[nm]] ,"filters"))){
+            warning("'filter' must either be a filtersList,filterResultList, a single\n",
                     "filter object or a named list of filter objects.",
                     call.=FALSE)
             filter <- NULL
@@ -411,6 +585,7 @@ panel.xyplot.flowset <- function(x,
     }
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
+	
     panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], ...)
 }
 

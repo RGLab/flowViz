@@ -14,15 +14,20 @@ flowViz.state[["lattice.theme"]] <-
     list(X11cairo=list(gate=list(alpha=1,
                                  cex=NULL,
                                  pch=NULL,
-                                 col="red",
-                                 fill="transparent",
+                                 col="#9E0142"#"red",
+                                 ,fill="transparent",
                                  lwd=1,
                                  lty="solid"),
                        gate.text=list(font=1,
                                       col="#000000",
-                                      alpha=0.4,
-                                      cex=1.2,
-                                      lineheight=1.2),
+                                      alpha=1,#0.4,
+                                      cex=0.8,#1.2,
+                                      lineheight=0.8#1.2
+	  								  ,background=list(fill="white"
+											  				,col="transparent"
+											  				,alpha=1
+											  				)
+	  									),
                        flow.symbol=list(alpha=1,
                                         cex=0.8,
                                         pch=".",
@@ -32,7 +37,10 @@ flowViz.state[["lattice.theme"]] <-
                                          fill="#FFFFFFB3",
                                          col="black",
                                          lwd=1,
-                                         lty="dotted")))
+                                         lty="dotted")
+		 			
+		 			)
+		 )
                                       
 
 
@@ -183,6 +191,7 @@ nnWarn <- function(type, verbose=TRUE)
 ## replace infinite values by something useful
 fixInf <- function(x, replacement)
 {
+#	browser()
     for(i in seq_along(x)){
         y <- x[i]
         if(is.infinite(y) && y<0)
@@ -191,6 +200,20 @@ fixInf <- function(x, replacement)
             x[i] <- replacement[2]+diff(replacement)*10
     }
     return(x)
+}
+##fixInf returned the exagerated bounaries which does not give good esitmation of label position for gates
+##so we add another version here specifically for addName methods
+fixBound_addName <- function(x, range)
+{
+#	browser()
+	for(i in seq_along(x)){
+		y <- x[i]
+		if(y<range[1])
+			x[i] <- range[1]
+		else if(y>range[2])
+			x[i] <- range[2]
+	}
+	return(x)
 }
 
 ## convert a norm2Filter into a polygonGate
@@ -250,6 +273,16 @@ glrect <- function (xleft, ybottom, xright, ytop, ..., gp)
 
 gltext <- function (x, y, labels, ..., gp) 
 {
+	#add rectange as white background for the better visual effect when label is plotted against color 
+	grid.rect(x=unit(x,"native")
+			,y=unit(y,"native")
+			,width=unit(1,'strwidth',labels)
+			,height=unit(1,'strheight',labels)
+			, gp=gpar(fill=gp$background$fill
+					,col=gp$background$col
+					,alpha=gp$background$alpha
+					)
+	)
     panel.text(x, y, labels=labels, col=gp$col, cex=gp$cex,
                linheight=gp$lineheigt, alpha=gp$alpha, font=gp$font)
 }

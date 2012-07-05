@@ -5,28 +5,48 @@
 ## or can be a character provided by the user.
 setMethod("addName",
           signature(x="rectangleGate", name="character"), 
-          function(x, name, data, gp)
+          function(x, name, data, gp,pos=0.5,abs=FALSE)
       {
+#		  browser()
           parms <- parameters(x)
           xlim <- state("xlim")
           ylim <- state("ylim")
+		  
+#		  browser()
+		  
           ## 1D rectangular gate (region gate).
           if(length(parms)==1){
               mt <- match(parms, data)
               if(mt==1){
-                  xx <- c(fixInf(x@min, xlim), fixInf(x@max, xlim))
-                  gltext(mean(xx), ylim[2], labels=name, pos=1, gp=gp)
+				  xx<-c(x@min,x@max)
+				  yy <- ylim
               }else if(mt==2){
-                  yy <- c(fixInf(x@min, ylim), fixInf(x@max, ylim))
-                  gltext(xlim[1], mean(yy), labels=name, pos=4, gp=gp)
+				  yy<-c(x@min,x@max)
+				  xx <- xlim
               }else stop("How did you end up here????")
           }else{## 2D rectangular gate   
               bl <- x@min[data]
               tr <- x@max[data]
-              xx <- c(fixInf(bl[1], xlim), fixInf(tr[1], xlim))
-              yy <- c(fixInf(bl[2], ylim), fixInf(tr[2], ylim))
-              gltext(mean(xx), mean(yy), labels=name, adj=0.5, gp=gp)
+			  xx<-c(bl[1], tr[1])
+			  yy<-c(bl[2], tr[2])
+#              gltext(mean(xx), mean(yy), labels=name, adj=0.5, gp=gp)
           }
+		  
+		  if(abs)#plot label whithin the boundary by default 
+		  {
+			  xx<-xlim
+			  yy<-ylim
+		  }else #specify location by absolute position of the current window
+		  {
+			  
+			  xx<-fixBound_addName(xx,xlim)
+			  yy<-fixBound_addName(yy,ylim)
+		  }
+		  pos <- rep(pos, length=2)[1:2]
+		  xx<-xx[1]+diff(xx)*pos[1]
+		  yy<-yy[1]+diff(yy)*pos[2]
+		  
+		  gltext(xx, yy, labels=name, adj=0.5, gp=gp)
           return(invisible())
       })
 
@@ -134,11 +154,29 @@ setMethod("addName",
 ## or can be a character provided by the user.
 setMethod("addName",
           signature(x="polygonGate", name="character"), 
-          function(x, name, data, gp)
+          function(x, name, data, gp,pos=0.5,abs=FALSE)
       {
-          xp <- x@boundaries[,data[1]]
-          yp <- x@boundaries[,data[2]]
-          gltext(mean(xp), mean(yp), labels=name, adj=0.5, gp=gp)
+		  xlim <- state("xlim")
+		  ylim <- state("ylim")
+		  
+		  if(abs)#plot label whithin the boundary by default 
+		  {
+			  xp<-xlim
+			  yp<-ylim
+		  }else #specify location by absolute position of the current window
+		  {
+			  xp <- range(x@boundaries[,data[1]])
+			  yp <- range(x@boundaries[,data[2]])
+			  xp<-fixBound_addName(xp,xlim)
+			  yp<-fixBound_addName(yp,ylim)
+		  }
+		  pos <- rep(pos, length=2)[1:2]
+		  
+  		  xp<-xp[1]+diff(xp)*pos[1]
+		  yp<-yp[1]+diff(yp)*pos[2]
+	  		 
+          
+          gltext(xp, yp, labels=name, adj=0.5, gp=gp)
           return(invisible())
       })
 
