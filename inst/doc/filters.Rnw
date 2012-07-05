@@ -135,6 +135,7 @@ library(flowViz)
 data(GvHD)
 head(pData(GvHD))
 @ 
+
 %
 The set is quite large and reducing it to a reasonable subset will
 speed up things for our interactive demonstration purpose. Due to
@@ -171,7 +172,9 @@ patient 6 in the following examples, it makes sense to directly subset
 the \Rclass{flowSet}.
 <<subsetFlowCore>>=
 GvHD <- GvHD[pData(GvHD)$Patient==6]
-@ 
+@
+
+ 
 %
 We also want to transform some of the fluorescence channels to an
 adequate log-like scale. A good choice is the \Rfunction{asinh}
@@ -263,14 +266,21 @@ filter-specific graphical settings will follow in one of the later
 sections.
 
 For the non-smoothed rendering (i.e., all events are plotted as
-individual points), the default filter visualization uses
-different colors for the different subpopulations, as shown in
-Figure~\ref{fig:.nonSmoothScatter}.
+individual points), as shown in Figure~\ref{fig:.nonSmoothScatter}.
 %
 %
 <<nonSmoothScatter>>=
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate, smooth=FALSE)
 @
+
+Sometime non-smoothed plots can be slow for large number of events. We provide
+hexbin version of xyplot for faster rendering.
+
+<<hexbinScatter>>=
+xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate, smooth=FALSE,xbin=128)
+@
+
+
 %
 \begin{figure}[htb]
   \centering
@@ -282,13 +292,27 @@ print(plot(trellis.last.object()))
   \caption{Filter visualization in a non-smooth xyplot.}
 \end{figure}
 %
-Additionally, We can add the \Rclass{filter} boundaries to the plot
-using the \Robject{outline} argument.
+Additionally, We can add statistics of gated population along with the \Rclass{filter} to the plot
+using the \Robject{stat} argument.\Robject{pos} and \Robject{abs}(whether the position is absolute or relative to filter boundary ) are used to control the label position.
 %
 <<nonSmoothScatterOutline>>=
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD, filter=rgate,
-smooth=FALSE, outline=TRUE)
-@ 
+smooth=FALSE, stat=TRUE,pos=0.5,abs=TRUE)
+@
+
+Sometime it is necessary to display multipe filters/gates in one panel to represent multiple sub-populations gated from the same parent populatuion.
+<<multi-filters>>=
+recGate1<-rectangleGate("FL4-H"=c(3.3,5.3),"FL2-H"=c(2.5,5))
+recGate2<-rectangleGate("FL4-H"=c(4,6),"FL2-H"=c(6,8))
+filters1<-filters(list(recGate1,recGate2))
+xyplot(`FL2-H` ~ `FL4-H`
+	   ,data=GvHD[[1]]
+       ,filter=filters1
+       ,stat=TRUE
+       ,margin=FALSE
+       )	
+@
+ 
 %
 %
 \begin{figure}[htb]
