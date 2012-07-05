@@ -13,12 +13,14 @@ importFrom(graphics, abline, axis, barplot, contour, hist, layout,
            smoothScatter)
 
 importFrom(grDevices, col2rgb, colorRampPalette, contourLines, rainbow,
-           topo.colors, densCols, blues9, rgb)
+           topo.colors, densCols, blues9, rgb,gray)
 
 importFrom(grid, get.gpar, grid.points, grid.polygon, grid.rect,
            current.viewport)
 
 importFrom(KernSmooth, bkde2D)
+
+importFrom(utils, modifyList)
 
 importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
            panel.grid, panel.lines, panel.parallel, panel.points,
