@@ -1,26 +1,25 @@
+import(grDevices)
 import(flowCore)
 
-importClassesFrom(methods, ANY, character, formula, logical, matrix,
-                  missing)
 
-importMethodsFrom(Biobase, exprs, pData, "pData<-", phenoData,
-                  sampleNames, "sampleNames<-")
+
+importMethodsFrom(Biobase, exprs, pData, "pData<-", phenoData,sampleNames, "sampleNames<-")
 
 importFrom(stats4, plot)
 
-importFrom(graphics, abline, axis, barplot, contour, hist, layout,
-           lines, pairs, par, points, polygon, rect,
-           smoothScatter)
+#importClassesFrom(methods, ANY, character, formula, logical, matrix,missing)
+#importFrom(graphics, abline, axis, barplot, contour, hist, layout,lines, pairs, par, points, polygon, rect,smoothScatter)
+#importFrom(grDevices, col2rgb, colorRampPalette, contourLines, rainbow,topo.colors, densCols, blues9,gray,rgb)
+#importFrom(utils, modifyList)
 
-importFrom(grDevices, col2rgb, colorRampPalette, contourLines, rainbow,
-           topo.colors, densCols, blues9, rgb,gray)
+#importFrom(methods, "@<-", as, is)
+#importFrom(stats, approxfun, cor, density, median, ppoints, qnorm,quantile, qunif, var)
 
-importFrom(grid, get.gpar, grid.points, grid.polygon, grid.rect,
-           current.viewport)
+importFrom(grid, get.gpar, grid.points, grid.polygon, grid.rect,current.viewport)
 
 importFrom(KernSmooth, bkde2D)
 
-importFrom(utils, modifyList)
+
 
 importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
            panel.grid, panel.lines, panel.parallel, panel.points,
@@ -33,12 +32,10 @@ importFrom(latticeExtra, ecdfplot)
 
 importFrom(MASS, kde2d)
 
-importFrom(methods, "@<-", as, is)
 
-importFrom(RColorBrewer, brewer.pal)
+#importFrom(RColorBrewer, brewer.pal)
 
-importFrom(stats, approxfun, cor, density, median, ppoints, qnorm,
-           quantile, qunif, var)
+
 
 importFrom(hexbin, hexbin,grid.hexagons)
 importFrom(IDPmisc,IDPcolorRamp,col2hsv)
