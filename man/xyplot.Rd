@@ -105,7 +105,7 @@ panel.xyplot.flowframe(
     ,stat=FALSE
     ,pos=0.5
     ,abs=FALSE
-    \dots)
+    ,\dots)
 
 
 
@@ -538,7 +538,7 @@ recGate1<-rectangleGate("FL3-H"=c(2.3,4.1),"FL2-H"=c(6.8,9))
 recGate2<-rectangleGate("FL3-H"=c(1,3),"FL2-H"=c(4,6))
 filters1<-filters(list(recGate1,recGate2))
 xyplot(`FL2-H` ~ `FL3-H`
-	   ,data=transform("FL2-H"=asinh,"FL3-H"=asinh) %on% GvHD[[1]]
+	   ,data=transform("FL2-H"=asinh,"FL3-H"=asinh) \%on\% GvHD[[1]]
        ,filter=filters1
        ,stat=TRUE
        ,margin=FALSE
