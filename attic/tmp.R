@@ -296,8 +296,9 @@ xyplot(`FSC-H` ~ `SSC-H`, GvHD[1:3], smooth=F,xbin=128)
 ############################################################################
 
 library(flowViz)
+library(IDPmisc)
 data(GvHD)
-lapply(list.files("/home/wjiang2/rglab/workspace/flowViz/R",full=T),source)
+lapply(list.files("/~/rglab/workspace/flowViz/R",full=T),source)
 fs<-GvHD[c(1,2,9,10)]
 
 xyplot(`SSC-H` ~ `FSC-H`|Patient:Visit:name ,data =fs)
@@ -305,5 +306,12 @@ xyplot(`SSC-H` ~ `FSC-H`|Patient:name ,data =fs)
 
 xyplot(Grade~factor(name)|Patient+Visit,data=pData(fs))
 
+require(flowWorkspace)
+library(flowStats)
+library(flowClust)
+lapply(list.files("~/rglab/workspace/HIMCLyoplate/Gottardo/pipeline/R",full=T),source)
 
-
+load("~/rglab/workspace/HIMCLyoplate/Gottardo/flowCAP/wf.rda")
+png("~/rglab/workspace/HIMCLyoplate/Gottardo/pipeline/analysis/Tcell/flowVizFixed.png",width=800,height=600)
+plotGate(wf)
+dev.off()

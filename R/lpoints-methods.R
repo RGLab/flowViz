@@ -70,7 +70,7 @@ setMethod("glpoints",
           addLpoints(x=x, data=data, channels=channels, verbose=verbose,
                      filterResult=NULL, gpar=gpar$gate, ...)
           ## add names if necessary
-          addName(x, names, channels, gpar$gate.text)
+          addName(x, names, channels, gpar$gate.text,...)
       })
 
 
@@ -90,7 +90,7 @@ setMethod("glpoints",
               dropWarn("filterResult", "ellipsoidGates", verbose=verbose)
           addLpoints(x=xe, data=data, channels=channels, verbose=verbose,
                      filterResult=NULL, gpar=gpar$gate, ...)
-          addName(x, names, channels, gpar$gate.text)
+          addName(x, names, channels, gpar$gate.text,...)
       })
 
 
@@ -119,7 +119,7 @@ setMethod("glpoints",
                                                              channels)))
               glpoints(x=rg, data=data, channels=channels, verbose=FALSE,
                        gpar=gpar, ...)
-              addName(x, names, data, gp=gpar$gate.text)
+              addName(x, names, data, gp=gpar$gate.text,...)
           }
       })
 
@@ -141,7 +141,7 @@ setMethod("glpoints",
               dropWarn("filterResult", "polygonGates", verbose=verbose)
           addLpoints(x=x, data=data, channels=channels, verbose=verbose,
                      filterResult=NULL, gpar=gpar$gate, ...)
-          addName(x, names, channels, gp=gpar$gate.text)
+          addName(x, names, channels, gp=gpar$gate.text,...)
       })
 
 
@@ -185,7 +185,7 @@ setMethod("glpoints",
               filterResult <- filter(data, x)
           multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
                          filterResult=filterResult, gpar=gpar$gate, ...)
-          addName(x, name=names, data=filterResult, gp=gpar$gate.text)
+          addName(x, name=names, data=filterResult, gp=gpar$gate.text,...)
       })
 
 
@@ -206,7 +206,7 @@ setMethod("glpoints",
               filterResult <- filter(data, x)
           multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
                          filterResult=filterResult, gpar=gpar$gate, ...)
-          addName(x, name=names, data=filterResult, gp=gpar$gate.text)
+          addName(x, name=names, data=filterResult, gp=gpar$gate.text,...)
       })
 
 
@@ -228,7 +228,7 @@ setMethod("glpoints",
           multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
                             filterResult=filterResult, gpar=gpar$gate, ...)
           addName(x, names, split(data[,channels], filterResult),
-                  gp=gpar$gate.text)
+                  gp=gpar$gate.text,...)
       })
 
 

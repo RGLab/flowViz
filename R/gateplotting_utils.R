@@ -3,7 +3,6 @@
 
 ## Store state info in this internal environment
 flowViz.state <- new.env(hash = FALSE)
-flowViz.state[["plotted"]] <- FALSE
 flowViz.state[["par"]] <- get.gpar()
 
 ## FIXME: We hardcode a lattice theme for the X11xcairo device for now which will be
@@ -47,18 +46,12 @@ flowViz.state[["lattice.theme"]] <-
 ## return the state information from the internal environment
 state <- function(x) flowViz.state[[x]]
 
-## set the state information in the internal environment from a named
-## vector or list
-setState <- function(x)
-{
-    if(is.null(names(x)))
-        stop("'x' must be a named vector or list")
-    x <- as.list(x)
-    for(i in seq_along(x))
-        flowViz.state[[names(x)[i]]] <- x[[i]]
+plotType <- function(type, parms){
+	return (list(plotted= TRUE
+				,type=type
+				,parameters= parms)
+			)
 }
-
-
 ## set or return graphical parameters from the internal environment
 flowViz.par <- function(x){
     if(missing(x))
@@ -72,21 +65,6 @@ set.flowViz.par <- function(x)
    flowViz.state[["par"]] <- modifyList(flowViz.state[["par"]], x)
 
 
-## record the type of plot or the plotting dimensions in the internal
-## environment
-plotType <- function(type, parms){
-    flowViz.state[["plotted"]] <- TRUE
-    flowViz.state[["type"]] <- type
-    flowViz.state[["parameters"]] <- parms
-    return(invisible(NULL))
-}
-plotLims <- function(xlim, ylim){
-    if(!missing(xlim))
-       flowViz.state[["xlim"]] <- xlim
-    if(!missing(ylim))
-        flowViz.state[["ylim"]] <- ylim
-    return(invisible(NULL))
-}
 
 
 
@@ -101,11 +79,13 @@ fmatchWarn <- function(parms, verbose=TRUE)
                 "that they match the plotting parameters.", call.=FALSE)
 }
 
-checkParameterMatch <- function(parms, channels, verbose=TRUE, strict=TRUE, ...)
+checkParameterMatch <- function(parms,channels, verbose=TRUE, strict=TRUE,ptList, ...)
 {
+	parameters<-ptList$parameters
+	plotted<-ptList$plotted
     if(missing(channels)){
-        if(state("plotted") && length(state("parameters")==2)){
-            sparms <- state("parameters")
+        if(plotted && length(parameters==2)){
+            sparms <- parameters
             err <-   function(strict=TRUE){
                 if(strict)
                     stop("The flow parameters used in the last plot don't match ",

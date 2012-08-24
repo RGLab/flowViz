@@ -14,7 +14,7 @@ addPoints <- function(x, data, channels, verbose=TRUE,
                       filterResult=NULL, ...)
 {
     parms <- parameters(x)
-    channels <- checkParameterMatch(channels, verbose=verbose)
+    channels <- checkParameterMatch(channels, verbose=verbose,...)
     ## We check if the filterResult matches the filter and subset with that
     if(!is.null(filterResult)){
         fd <- filterDetails(filterResult, identifier(x))
@@ -48,7 +48,7 @@ setMethod("gpoints",
               fd <- filterDetails(x)
               x <- fd[[length(fd)]]$filter
           }
-          channels <- checkParameterMatch(parameters(x), verbose=verbose)
+          channels <- checkParameterMatch(parameters(x), verbose=verbose,...)
           gpoints(x=x, data=data, channels=channels, verbose=verbose,
                   filterResult=filterResult, ...)
       })
@@ -67,7 +67,7 @@ setMethod("gpoints",
           filterResult <- x
           fd <- filterDetails(x)
           x <- fd[[length(fd)]]$filter
-          channels <- checkParameterMatch(channels, verbose=verbose)
+          channels <- checkParameterMatch(channels, verbose=verbose,...)
           gpoints(x=x, data=data, channels=channels, verbose=verbose,
                    filterResult=filterResult, ...)
       })    
@@ -114,7 +114,7 @@ setMethod("gpoints",
           if(!is.null(filterResult))
               dropWarn("filterResult", "quadGates", verbose=verbose)
           parms <- parameters(x)
-          channels <- checkParameterMatch(channels, verbose=verbose)
+          channels <- checkParameterMatch(channels, verbose=verbose,...)
           if(missing(col))
               col <-  colorRampPalette(brewer.pal(9, "Set1"))(4)
           else
@@ -213,7 +213,7 @@ setMethod("gpoints",
                    filterResult=NULL, col, ...)
       {
           ## We check that the filterResult matches the filter and split by that
-          channels <- checkParameterMatch(channels, verbose=verbose)
+          channels <- checkParameterMatch(channels, verbose=verbose,...)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
                  class(x) != class(filterDetails(filterResult,
@@ -247,7 +247,7 @@ setMethod("gpoints",
                    filterResult=NULL, col, ...)
       {
           ## We check that the filterResult matches the filter and split by that
-          channels <- checkParameterMatch(channels, verbose=verbose)
+          channels <- checkParameterMatch(channels, verbose=verbose,...)
           if(!is.null(filterResult)){
               if(!identical(identifier(x), identifier(filterResult)) ||
                  class(x) != class(filterDetails(filterResult,

@@ -60,7 +60,7 @@ prepanel.xyplot.flowframe.time <-
     yy <- expr[, yc]
     xlim <- range(xx, finite=TRUE)
     ylim <- unlist(range(frame, yc))
-    plotLims(xlim, ylim)
+    
     return(list(xlim=xlim, ylim=ylim))
 }
 
@@ -73,7 +73,7 @@ panel.xyplot.flowframe.time <-
     xx <- expr[, time]
     yy <- expr[, y]
     ## We record in the state environment which type of plot we produce
-    plotType("gtime", c("Time",  as.character(y)))
+#	plotType("gtime", c("Time", as.character(y)))
     if (type == "smooth"){
         ## smoothScatter plot of time vs. parameter (not sure how useful
         ## that is...)
@@ -172,7 +172,7 @@ prepanel.xyplot.flowframe <-
         yd <- diff(tmp)/15
         tmp + c(-1,1)*yd
     }else NULL
-    plotLims(xlim, ylim)
+    
     return(list(xlim=xlim, ylim=ylim))
 }
 
@@ -201,11 +201,14 @@ panel.xyplot.flowframe <- function(x,
 									,abs=FALSE
 						   			,...)
 {
-    ## graphical parameter defaults
 	
+    ## graphical parameter defaults
+	limits<-prepanel.xyplot.flowframe(frame,channel.x.name,channel.y.name)
+	xlim<-limits$xlim
+	ylim<-limits$ylim
     argcolramp <- list(...)$colramp
 	gpar <- flowViz.par.get()
-    
+	parameters<-c(channel.x.name, channel.y.name)
     if(!is.null(gp))
         gpar <- lattice:::updateList(gpar, gp)
     if(is.null(gpar$gate$cex))
@@ -255,12 +258,7 @@ panel.xyplot.flowframe <- function(x,
         }else{
             panel.smoothScatter(x, y, ...)
         }
-        plotType("gsmooth", c(channel.x.name, channel.y.name))
-#        if(!is.null(filter) & validName){
-#            glpolygon(filter, frame,
-#                      channels=c(channel.x.name, channel.y.name),
-#                      verbose=FALSE, gpar=gpar, strict=FALSE, ...)
-#        }
+		ptList<-plotType("gsmooth", c(channel.x.name, channel.y.name))
     }else{
 		#for non-smoothed plot:
 		#1:always remove boundary events for hexbin version 
@@ -303,7 +301,7 @@ panel.xyplot.flowframe <- function(x,
 #				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
 #			browser()
 			grid.hexagons(bin,colramp = argcolramp,trans=binTrans)		
-			plotType("gpoints", c(channel.x.name, channel.y.name))
+			
 			
 		}else
 		{
@@ -315,10 +313,10 @@ panel.xyplot.flowframe <- function(x,
 			if(gpar$density)
 				col <- densCols(x, y, colramp=argcolramp)
 			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-			plotType("gpoints", c(channel.x.name, channel.y.name))
+
 		}
 	   
-       
+		ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
 	}
 #    browser()
 	#plot gate
@@ -339,12 +337,13 @@ panel.xyplot.flowframe <- function(x,
 							
 							glpoints(curFilter, frame,
 									channels=c(channel.x.name, channel.y.name),
-									verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+									verbose=FALSE, gpar=gpar, strict=FALSE,ptList=ptList, ...)
 							if(outline)
 								glpolygon(curFilter, frame,
 										channels=c(channel.x.name, channel.y.name),
 										verbose=FALSE, gpar=gpar, names=FALSE,
-										strict=FALSE)
+										strict=FALSE,ptList=ptList,xlim=xlim
+										,ylim=ylim)
 							
 						}else
 						{
@@ -374,6 +373,9 @@ panel.xyplot.flowframe <- function(x,
 									,strict=FALSE
 									,pos=pos
 									,abs=abs
+									,ptList=ptList
+									,xlim=xlim
+									,ylim=ylim
 							)
 						}
 					})
@@ -390,12 +392,13 @@ panel.xyplot.flowframe <- function(x,
 				
 				glpoints(filter, frame,
 						channels=c(channel.x.name, channel.y.name),
-						verbose=FALSE, gpar=gpar, strict=FALSE, ...)
+						verbose=FALSE, gpar=gpar, strict=FALSE,ptList=ptList, ...)
 				if(outline)
 					glpolygon(filter, frame,
 							channels=c(channel.x.name, channel.y.name),
 							verbose=FALSE, gpar=gpar, names=FALSE,
-							strict=FALSE)
+							strict=FALSE,ptList=ptList,xlim=xlim
+							,ylim=ylim)
 				
 			}else
 			{
@@ -425,6 +428,9 @@ panel.xyplot.flowframe <- function(x,
 						,strict=FALSE
 						,pos=pos
 						,abs=abs
+						,ptList=ptList
+						,xlim=xlim
+						,ylim=ylim
 				)
 			}
 		}
@@ -534,7 +540,7 @@ prepanel.xyplot.flowset <-
             yd <- diff(tmp)/15
             tmp + c(-1,1)*yd
         }else NULL
-        plotLims(xlim, ylim)
+        
         return(list(xlim=xlim, ylim=ylim))
     }else
 		return(list())

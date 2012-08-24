@@ -20,10 +20,11 @@ panel.splom.flowframe <- function(x,
         yd <- diff(tmp)/15
         tmp + c(-1,1)*yd
     }else NULL
-    plotLims(xlim, ylim)
+    
     panel.xyplot.flowframe(x=x, channel.x.name=channel.x.name,
-                           channel.y.name=channel.y.name, frame=frame,
-                           ...)
+                           channel.y.name=channel.y.name, frame=frame
+				   			,xlim=xlim,ylim=ylim
+                           ,...)
 }
 
 

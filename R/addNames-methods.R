@@ -5,12 +5,11 @@
 ## or can be a character provided by the user.
 setMethod("addName",
           signature(x="rectangleGate", name="character"), 
-          function(x, name, data, gp,pos=0.5,abs=FALSE)
+          function(x, name, data, gp,pos=0.5,abs=FALSE,xlim,ylim,...)
       {
 #		  browser()
           parms <- parameters(x)
-          xlim <- state("xlim")
-          ylim <- state("ylim")
+          
 		  
 #		  browser()
 		  
@@ -70,7 +69,7 @@ setMethod("addName",
 ## or can be a character provided by the user.
 setMethod("addName",
           signature(x="ellipsoidGate", name="character"), 
-          function(x, name, data, gp)
+          function(x, name, data, gp,...)
       {
           gltext(x@mean[data[1]], x@mean[data[2]], labels=name, adj=0.5, gp=gp)
           return(invisible())
@@ -95,12 +94,11 @@ setMethod("addName",
 ## or can be a character provided by the user.
 setMethod("addName",
           signature(x="quadGate", name="matrix"), 
-          function(x, name, data, gp)
+          function(x, name, data, gp,xlim,ylim,...)
       {
           v <- x@boundary[data[1]]
           h <- x@boundary[data[2]]
-          xlim <- state("xlim")
-          ylim <- state("ylim")
+          
           yoff <- diff(ylim)/50
           trans <- match(colnames(name)[1], data)-1
           if(trans)
@@ -127,7 +125,7 @@ setMethod("addName",
                                 sprintf("%s+%s-", desc[1], desc[2])),
                               ncol=2)
               colnames(names) <- names(desc)
-              data <- checkParameterMatch(parameters(x), verbose=FALSE)
+              data <- checkParameterMatch(parameters(x), verbose=FALSE,...)
               addName(x, names, data, ...)
           }else
           return(invisible())
@@ -138,7 +136,7 @@ setMethod("addName",
           function(x, name, data, ...)
       {
           desc <- flowCore:::popNames(data, x)
-          data <- checkParameterMatch(parameters(x), verbose=FALSE)
+          data <- checkParameterMatch(parameters(x), verbose=FALSE,...)
           names <- matrix(rep(name, 4)[4:1], ncol=2, dimnames=list(NULL, data))
           colnames(names) <- names(desc)
           addName(x, names, data, ...)
@@ -154,10 +152,9 @@ setMethod("addName",
 ## or can be a character provided by the user.
 setMethod("addName",
           signature(x="polygonGate", name="character"), 
-          function(x, name, data, gp,pos=0.5,abs=FALSE)
+          function(x, name, data, gp,pos=0.5,abs=FALSE,xlim,ylim,...)
       {
-		  xlim <- state("xlim")
-		  ylim <- state("ylim")
+		  
 		  
 		  if(abs)#plot label whithin the boundary by default 
 		  {
@@ -205,7 +202,7 @@ setMethod("addName",
           bounds <- fd$boundaries
           if(all(is.na(bounds[[1]])))
               return(invisible())
-          data <- checkParameterMatch(parameters(x), verbose=FALSE)
+          data <- checkParameterMatch(parameters(x), verbose=FALSE,...)
           lb <- length(bounds)
           name <- rep(name, lb)
           for(i in 1:lb){
@@ -240,7 +237,7 @@ setMethod("addName",
       {
           fd <- filterDetails(data, identifier(x))
           bounds <- fd$polygon
-          data <- checkParameterMatch(parameters(x), verbose=FALSE)
+          data <- checkParameterMatch(parameters(x), verbose=FALSE,...)
           lb <- length(bounds)
           name <- rep(name, lb)
           for(i in 1:lb){
@@ -273,7 +270,7 @@ setMethod("addName",
           signature(x="kmeansFilter", name="character"), 
           function(x, name, data, gp, ...)
       {
-          chan <- checkParameterMatch(parameters(x), verbose=FALSE)
+          chan <- checkParameterMatch(parameters(x), verbose=FALSE,...)
           loc <- sapply(data, function(x) colMeans(exprs(x)[,chan]))
           gltext(loc[1,], loc[,2], labels=name, adj=0.5, gp=gp)
           return(invisible())

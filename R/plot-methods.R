@@ -15,7 +15,7 @@ fplot <- function(x, smooth, pch, xlim, ylim = NULL, ...)
 {
     values <- exprs(x)
     sel <- tolower(colnames(values)) != "time"
-    flowViz.state[["plotted"]] <- TRUE
+#    flowViz.state[["plotted"]] <- TRUE
     if(missing(pch))
         pch <- "."
     l <- ncol(values)
@@ -23,7 +23,7 @@ fplot <- function(x, smooth, pch, xlim, ylim = NULL, ...)
         if (missing(xlim))
             xlim <- unlist(range(x[,1]))
         hist(values, xlab=colnames(x), xlim = xlim, ylim = ylim, ...)
-        flowViz.state[["type"]] <- "hist"
+#        flowViz.state[["type"]] <- "hist"
     }
     else if (l==2) {
         if (missing(xlim))
@@ -32,23 +32,23 @@ fplot <- function(x, smooth, pch, xlim, ylim = NULL, ...)
             ylim <- unlist(range(x[,2]))
         if (smooth) {
             smoothScatter(values, pch=pch, xlim=xlim, ylim=ylim, ...)
-            flowViz.state[["type"]] <- "smooth"
+#            flowViz.state[["type"]] <- "smooth"
         }else{
             plot(values, pch=pch, xlim=xlim, ylim=ylim, ...)
-            flowViz.state[["type"]] <- "dot"
+#            flowViz.state[["type"]] <- "dot"
         }
     } else {
         if(smooth) {
             x <- x[,sel]
             print(splom(x, pch=pch, ...))
-            flowViz.state[["type"]] <- "splom"
+#            flowViz.state[["type"]] <- "splom"
         }
         else {
             pairs(values[,sel], pch=pch, ...)
-            flowViz.state[["type"]] <- "pairs"
+#            flowViz.state[["type"]] <- "pairs"
         }
     }
-    flowViz.state[["parameters"]] <- colnames(values)
+#    flowViz.state[["parameters"]] <- colnames(values)
 }
 
 

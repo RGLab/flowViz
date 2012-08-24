@@ -33,7 +33,7 @@ setMethod("glpolygon",
                    strict=TRUE, ...)
       {
           parms <- checkParameterMatch(parameters(x), verbose=verbose,
-                                       strict=strict)
+                                       strict=strict,...)
           if(!all(is.na(parms)))
               glpolygon(x=x, data=parms, gpar=gpar, verbose=FALSE, ...)
       })
@@ -79,13 +79,12 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="rectangleGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par.get(), plot=TRUE, names=FALSE, ...)
+                   gpar=flowViz.par.get(), plot=TRUE, names=FALSE,xlim,ylim, ...)
       {
           if(!missing(channels))
               data <- channels
           parms <- parameters(x)
-          xlim <- state("xlim")
-          ylim <- state("ylim")
+          
           if(plot){
               ## 1D rectangular gate (region gate). We cheat those by drawing a
               ## rectangle that is slightly bigger than the drawing limits in the
@@ -111,7 +110,7 @@ setMethod("glpolygon",
                          gp=gpar$gate, ...)
               }
               ## add names if necessary
-              addName(x, names, data, gpar$gate.text,...)
+              addName(x, names, data, gpar$gate.text,xlim=xlim,ylim=ylim,...)
           }
           res <- rbind(x@min[data], x@max[data])
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
@@ -154,7 +153,7 @@ setMethod("glpolygon",
 	  ## We coerce to a polygon gate and plot that
           res <- ell2Polygon(x, parameters(x))
           glpolygon(res, verbose=verbose, gpar=gpar, plot=plot, ...)
-          addName(x, names, data, gpar$gate.text)
+          addName(x, names, data, gpar$gate.text,...)
           return(invisible(res@boundaries))
       })
 
@@ -190,8 +189,9 @@ setMethod("glpolygon",
 setMethod("glpolygon",
           signature(x="quadGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
-                   gpar=flowViz.par.get(), names=NULL,...)
+                   gpar=flowViz.par.get(), names=NULL,abs=FALSE,pos=NULL,...)
       {
+#		  browser()
           if(!missing(channels))
               data <- channels
           v <- x@boundary[data[1]]
@@ -224,7 +224,7 @@ setMethod("glpolygon",
                                   data)))
 		  
               res[[i]] <- glpolygon(x=rg, data=data, verbose=FALSE,
-                                    gpar=gpar, channels=data,names=names[i],abs=F,pos=poslist[[i]])[[1]]
+                                    gpar=gpar, channels=data,names=names[i],abs=abs,pos=poslist[[i]],...)[[1]]
 										
           }
           return(invisible(res))
@@ -270,8 +270,9 @@ setMethod("glpolygon",
           signature(x="polygonGate", data="character"), 
           function(x, data, channels, verbose=TRUE,
                    gpar=flowViz.par.get(), plot=TRUE, names=FALSE,
-                   inverse=FALSE, ...)
+                   inverse=FALSE,xlim,ylim, ...)
       {
+		  
           if(!missing(channels))
               data <- channels
           xp <- x@boundaries[,data[1]]
@@ -288,8 +289,7 @@ setMethod("glpolygon",
                       yp <- rev(yp)
                       mx <- which.min(yp)
                   }
-                  xlim <- state("xlim")
-                  ylim <- state("ylim")
+                  
                   xoff <- diff(xlim)
                   yoff <- diff(ylim)
                   boundingBox <- cbind(c(rep(xlim-xoff, 2),
@@ -311,7 +311,7 @@ setMethod("glpolygon",
                   glpoly(xp, yp, gp=gpar$gate)
               }
           }
-          addName(x, names, data, gpar$gate.text,...)
+          addName(x, names, data, gpar$gate.text,xlim=xlim,ylim=ylim,...)
           res <- cbind(xp,yp)
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
           return(invisible(list(res)))
