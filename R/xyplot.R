@@ -198,6 +198,7 @@ panel.xyplot.flowframe <- function(x,
 						   		   ,binTrans=sqrt
 						   			,stat=FALSE
 									,pos=0.5
+									,prec=2
 									,abs=FALSE
 						   			,...)
 {
@@ -356,7 +357,7 @@ panel.xyplot.flowframe <- function(x,
 #					browser()	
 								p.stats<-summary(curFres)@p
 								popNames<-names(p.stats)
-								p.stats<-sprintf("%.2f%%",p.stats*100)
+								p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
 								names<-p.stats
 								names(names)<-popNames
 							}else
@@ -411,7 +412,7 @@ panel.xyplot.flowframe <- function(x,
 #					browser()	
 					p.stats<-summary(curFres)@p
 					popNames<-names(p.stats)
-					p.stats<-sprintf("%.2f%%",p.stats*100)
+					p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
 					names<-p.stats
 					names(names)<-popNames
 				}else
