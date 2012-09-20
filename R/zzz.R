@@ -57,6 +57,11 @@ flowViz.options <- function(...)
 								)
 							)
 #	show.settings(myTheme)	
+
+    sillyName <- library
+    sillyName(RColorBrewer)
+    sillyName(grDevices)
+
 	cR1<-rev(brewer.pal(11, "Spectral"))
 	cR2<-IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0))
 	list(argcolramp = colorRampPalette(cR1,bias=1)
