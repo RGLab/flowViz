@@ -56,7 +56,7 @@ flowViz.options <- function(...)
 								,background=list(col="white")
 								)
 							)
-#	show.settings(myTheme)	
+	require(grDevices)  # RColorBrewer assumes 'rgb' on the search path
 	cR1<-rev(RColorBrewer::brewer.pal(11, "Spectral"))
 	cR2<-IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0))
 	list(argcolramp = colorRampPalette(cR1,bias=1)
