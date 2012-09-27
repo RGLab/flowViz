@@ -227,6 +227,8 @@ panel.xyplot.flowframe <- function(x,
     validName <- !(length(grep("\\(", channel.x.name)) ||
                    length(grep("\\(", channel.y.name)))
 #browser()
+	if(nrow(frame)==0)
+		return (NULL)
     ## We remove margin events before passing on the data to panel.smoothScatter
     ## and after plotting indicate those events by grayscale lines on the plot
     ## margins

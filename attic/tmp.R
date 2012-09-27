@@ -304,6 +304,10 @@ fs<-GvHD[c(1,2,9,10)]
 xyplot(`SSC-H` ~ `FSC-H`|Patient:Visit:name ,data =fs)
 xyplot(`SSC-H` ~ `FSC-H`|Patient:name ,data =fs)
 
+xyplot(`SSC-H` ~ `FSC-H` ,data =fs)
+exprs(fs[[3]])<-exprs(fs[[3]])[0,,drop=F]
+xyplot(`SSC-H` ~ `FSC-H` ,data =fs[[3]])
+
 xyplot(Grade~factor(name)|Patient+Visit,data=pData(fs))
 
 require(flowWorkspace)
