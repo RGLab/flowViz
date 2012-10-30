@@ -31,5 +31,4 @@ Collate: AllGenerics.R
 	 ecdfplot.R          
 	 lines-methods.R       
 	 plot-methods.R    
-   	 zzz.R
 biocViews:  Infrastructure, Flowcytometry, CellBasedAssays, Visualization
