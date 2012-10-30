@@ -35,7 +35,7 @@ setMethod("glpolygon",
           parms <- checkParameterMatch(parameters(x), verbose=verbose,
                                        strict=strict,...)
           if(!all(is.na(parms)))
-              glpolygon(x=x, data=parms, gpar=gpar, verbose=FALSE, ...)
+              glpolygon(x=x, data=parms, gpar=gpar, verbose=FALSE,strict=strict, ...)
       })
 
 
@@ -84,7 +84,7 @@ setMethod("glpolygon",
           if(!missing(channels))
               data <- channels
           parms <- parameters(x)
-          
+#          browser()
           if(plot){
               ## 1D rectangular gate (region gate). We cheat those by drawing a
               ## rectangle that is slightly bigger than the drawing limits in the
@@ -109,9 +109,10 @@ setMethod("glpolygon",
                          fixInf(tr[1], xlim),  fixInf(tr[2], ylim),
                          gp=gpar$gate, ...)
               }
-              ## add names if necessary
-              addName(x, names, data, gpar$gate.text,xlim=xlim,ylim=ylim,...)
+              
           }
+		  ## add names if necessary
+		  addName(x, names, data, gpar$gate.text,xlim=xlim,ylim=ylim,...)
           res <- rbind(x@min[data], x@max[data])
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
           return(invisible(list(res)))

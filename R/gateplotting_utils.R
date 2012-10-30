@@ -1,5 +1,6 @@
 ## Helper functions that will be needed for all of the gate plotting functions
 ## These are mostly functions that do some sanity checking.
+require(grDevices)  # RColorBrewer assumes 'rgb' on the search path
 
 ## Store state info in this internal environment
 flowViz.state <- new.env(hash = FALSE)
@@ -37,9 +38,25 @@ flowViz.state[["lattice.theme"]] <-
                                          col="black",
                                          lwd=1,
                                          lty="dotted")
+		 				,superpose.polygon=list(alpha=rep(1,7)
+												,col=RColorBrewer::brewer.pal(7, "Set2")
+												,border=rep("black",7)
+												,lty=rep(1,7)
+												,lwd=rep(1,7)
+												)	
+						
+						,strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
+						
+						,background=list(col="white")
+
+						
+						
+						,argcolramp = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
+						,argcolramp_bin = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
+						,argcolramp_flowJo = colorRampPalette(IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0)),bias=1)
 		 			
-		 			)
-		 )
+		 			
+		 ))
                                       
 
 
@@ -263,6 +280,8 @@ gltext <- function (x, y, labels, ..., gp)
 					,alpha=gp$background$alpha
 					)
 	)
+#	browser()
+		
     panel.text(x, y, labels=labels, col=gp$col, cex=gp$cex,
                linheight=gp$lineheigt, alpha=gp$alpha, font=gp$font)
 }

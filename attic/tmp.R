@@ -313,9 +313,41 @@ xyplot(Grade~factor(name)|Patient+Visit,data=pData(fs))
 require(flowWorkspace)
 library(flowStats)
 library(flowClust)
-lapply(list.files("~/rglab/workspace/HIMCLyoplate/Gottardo/pipeline/R",full=T),source)
+lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 
 load("~/rglab/workspace/HIMCLyoplate/Gottardo/flowCAP/wf.rda")
 png("~/rglab/workspace/HIMCLyoplate/Gottardo/pipeline/analysis/Tcell/flowVizFixed.png",width=800,height=600)
 plotGate(wf)
 dev.off()
+
+overlay(wf[1:2],gate=4,overlay.gate.indices=c(4,5))
+
+overlay <- function(gs,gate=9,overlay.gate.indices=c(9,40),trans=TRUE,grid=65,h=c(0.1,0.1),nlines=25,wh=1,...){
+	#gs is a gating set, and we want to generate one plot at a time..
+	browser()
+	gh <- gs[[wh]]
+	p <- getParent(gh,gate)
+	d <- getData(gh,p)
+	g <- getGate(gh,gate)
+	cn <- colnames(g@boundaries)
+	d <- exprs(d)[,cn]
+	
+	x <- d[,1]
+	y <- d[,2]
+	
+	ogi <- and(do.call(cbind,lapply(overlay.gate.indices,function(i)flowWorkspace:::getIndices(gh,i))))
+	a <- and(do.call(cbind,lapply(c(overlay.gate.indices,gate),function(i)flowWorkspace:::getIndices(gh,i))))
+	b<-flowWorkspace:::getIndices(gh,p)
+	prop <- prop.table(table(a[b]))[2]
+	cl <- kde2d(x=x,y=y,h=h,n=grid)
+	if(trans){
+		cl$z <- sqrt(cl$z)
+	}
+	contour(cl,n=nlines,...)
+	d <- exprs(getData(gh)[,cn])[ogi,,drop=FALSE]
+	points(x=d[,1],y=d[,2],col="red",cex=3,pch='.')
+	
+	polygon(getGate(gh,gate)@boundaries,border="blue")
+	text(3.5,2,signif(prop,3))
+}
+

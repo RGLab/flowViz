@@ -196,7 +196,7 @@ panel.xyplot.flowframe <- function(x,
                                    gp
 								   ,xbins=0
 						   		   ,binTrans=sqrt
-						   			,stat=FALSE
+						   			,stats=FALSE
 									,pos=0.5
 									,prec=2
 									,abs=FALSE
@@ -299,7 +299,7 @@ panel.xyplot.flowframe <- function(x,
 			#using hexbin package to do the hexagon plot	
 			bin<-hexbin(x,y,xbins=xbins)
 			if (is.null(argcolramp))
-				argcolramp<-flowViz.getOption("argcolramp")
+				argcolramp<-flowViz.par.get("argcolramp")
 #			if (is.null(argcolramp))
 #				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
 #			browser()
@@ -309,10 +309,7 @@ panel.xyplot.flowframe <- function(x,
 		}else
 		{
 			if (is.null(argcolramp))
-				argcolramp<-flowViz.getOption("argcolramp")
-#			if (is.null(argcolramp))
-#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
-#			browser()
+				argcolramp<-flowViz.par.get("argcolramp")
 			if(gpar$density)
 				col <- densCols(x, y, colramp=argcolramp)
 			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
@@ -351,7 +348,7 @@ panel.xyplot.flowframe <- function(x,
 						}else
 						{
 							
-							if(stat)
+							if(stats)
 							{
 								if (!is(curFilter, "filterResult")) 
 									curFilter <- filter(frame, curFilter)
@@ -406,7 +403,7 @@ panel.xyplot.flowframe <- function(x,
 			}else
 			{
 				
-				if(stat)
+				if(stats)
 				{
 					if (!is(filter, "filterResult")) 
 						filter <- filter(frame, filter)
@@ -480,7 +477,7 @@ setMethod("xyplot",
           ## back it in there manually
            
 		  gp<-par.settings
-		  par.settings<-flowViz.getOption("flowVizTheme")#default theme for lattice
+		  par.settings<-flowViz.par.get()#default theme for lattice
 		  
 		  if(!is.null(gp))#update the default theme if necessary
 		  {

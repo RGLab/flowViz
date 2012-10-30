@@ -50,9 +50,15 @@ panel.densityplot.flowset <-
              alpha=superpose.polygon$alpha,
              col=superpose.polygon$border,
              groups=NULL, refline=NULL,
-             margin=0.005,
-             gpar, ...)
+             margin=0.005
+			 ,stats=FALSE
+			 ,pos=0.5
+			 ,prec=2
+			 ,abs=FALSE
+			 ,fitGate=TRUE
+             ,gp, ...)
 {
+	
     margin <- min(1, max(0, margin))
     which.channel <- tail(which.packet(), 1)
     lc <- length(channel)
@@ -88,7 +94,9 @@ panel.densityplot.flowset <-
         }
     }  
     ny <- nlevels(y)
-    superpose.polygon <- trellis.par.get("superpose.polygon")
+#	browser()
+#    superpose.polygon <- trellis.par.get("superpose.polygon")
+	superpose.polygon <- flowViz.par.get("superpose.polygon")
     border <- rep(col, length = ny)
     col <- rep(fill, length = ny)
     if(!is.null(groups))
@@ -99,7 +107,7 @@ panel.densityplot.flowset <-
     x <- as.character(x)
     height <- (1 + overlap)
     parm <- gsub("`", "", as.character(channel))
-    plotType("gdensity", parm)
+	ptList<-plotType("gdensity", parm)
     for (i in rev(seq_len(ny))){
         if (i %in% ycode)
         {
@@ -127,37 +135,88 @@ panel.densityplot.flowset <-
                 panel.polygon(x=xl,y=yl, col=col[i], border=NA, alpha=alpha[i])
                 ## add the filterResult if possible, we get them from the output of
                 ## glpolygon (with plot=FALSE)
+				
                 if(!is.null(filter[[nm]]) && validName){    
-                    bounds <- glpolygon(filter[[nm]], frames[[nm]],
-                                        channels=parm,
-                                        verbose=FALSE, plot=FALSE)
+#					
+					curFilter<-filter[[nm]]
+					
+					if(stats)
+					{
+						if (!is(curFilter, "filterResult")) 
+							curFilter <- filter(frames[[nm]], curFilter)
+						curFres<-curFilter
+#					browser()	
+						p.stats<-summary(curFres)@p
+						popNames<-names(p.stats)
+						p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+						names<-p.stats
+						names(names)<-popNames
+					}else
+					{
+						names<-list(...)$names
+						if(is.null(names))
+							names<-FALSE
+					}
+					
+#					browser()
+					#this plot routine is only for 2-d scatter plot
+					#thus set plot as FALSE,just use it to get bounds
+					#add plot stats/names
+                    bounds <- glpolygon(curFilter, frames[[nm]],
+                                        channels=parm
+										,ptList=ptList
+                                        ,verbose=FALSE
+										, plot=FALSE 
+										,names=names
+										,xlim=r
+										,ylim=c(i,i+1)
+										,strict=FALSE)
                     oo <- options(warn=-1)
                     on.exit(options(oo))
                     if(!is.na(bounds)){
                         ## iterate over gate regions
                         for(j in seq_along(bounds)){
                             tb <- bounds[[j]]
-                            if(ncol(tb) == 1 && colnames(tb) == parm){
-                                sel <- xl >= min(tb) & xl <= max(tb)
-                                if(any(sel)){
-                                    afun <- approxfun(xl, yl)
-                                    xr <- c(min(tb), seq(min(tb), max(tb), len=100),
-                                            max(tb))
-                                    yr <- c(i, afun(xr[-c(1, length(xr))]), i)
-                                    panel.polygon(xr, yr, border=gpar$col, col=gpar$fill,
-                                                  alpha=gpar$alpha, lwd=gpar$lwd,
-                                                  lty=gpar$lty)
-                                }
-                            }
+#							browser()
+							if(fitGate)
+							{
+								if(ncol(tb) == 1 && colnames(tb) == parm){
+									sel <- xl >= min(tb) & xl <= max(tb)
+									if(any(sel)){
+										afun <- approxfun(xl, yl)
+										xr <- c(min(tb), seq(min(tb), max(tb), len=100),
+												max(tb))
+										yr <- c(i, afun(xr[-c(1, length(xr))]), i)
+										gpd<-gp$density
+										panel.polygon(xr, yr, border=gpd$col, col=gpd$fill,
+												alpha=gpd$alpha, lwd=gpd$lwd,
+												lty=gpd$lty)
+									}
+								}	
+							}else
+							{
+#								browser()
+								gpg<-gp$gate
+								panel.lines(x=c(tb[1],tb[1]),y=c(i,i+height)
+										,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+								panel.lines(x=c(tb[2],tb[2]),y=c(i,i+height)
+										,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+							}
+                            
                         }
                     }
+					
+					
+					
                     options(oo)
                 }
+#				browser()
                 panel.lines(x=xl,y=yl, col=border[i], lty=lty[i],lwd=lwd[i])
-                panel.lines(rl, rep(i,2), col="black")
+#                panel.lines(rl, rep(i,2), col="black")
             }else{
                 panel.lines(rl, rep(i,2), col="black")
             }
+			
         }
     }
     if(!is.null(refline))
@@ -294,7 +353,7 @@ setMethod("densityplot",
               gpar <- lattice:::updateList(gpar, gp)
           if(!missing(groups))
               ccall$groups <- as.factor(eval(substitute(groups), pData(data)))
-          ccall$gpar <- gpar$gate.density
+          ccall$gp <- gpar
           ccall$x <- new.x
           ccall$data <- pd
           ccall$prepanel <- prepanel
