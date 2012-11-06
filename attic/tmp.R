@@ -1,15 +1,24 @@
 ## load a flowFrame
 library(flowViz)
+lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 data(GvHD)
 fcs1 <- GvHD[[1]]
 fcs2 <- GvHD[[1]]
 colnames(fcs2)[1] <- "noname"
 
-source("R/gateplotting_utils.R")
-source("R/lines-methods.R")
-source("R/polygon-methods.R")
-source("R/points-methods.R")
-state <- function(x) flowViz:::flowViz.state[[x]]
+##plot overlayed pops
+xyplot(`PE Cy55-A`~`FITC-A`
+		,getData(wf[[1]],5)
+		,filter=getGate(wf[[1]],6)
+		,overlay=getData(wf[[1]],8)
+#		,contour=T
+	)
+xyplot(`PE Cy55-A`~`FITC-A`,getData(wf[1:2],5),filter=getGate(wf[1:2],6)
+		,overlay=getData(wf[1:2],8))
+
+
+
+
 
 ## a wrapper that catches and reports errors
 wrap <- function(x)
@@ -298,7 +307,7 @@ xyplot(`FSC-H` ~ `SSC-H`, GvHD[1:3], smooth=F,xbin=128)
 library(flowViz)
 library(IDPmisc)
 data(GvHD)
-lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
+
 fs<-GvHD[c(1,2,9,10)]
 
 xyplot(`SSC-H` ~ `FSC-H`|Patient:Visit:name ,data =fs)
@@ -319,6 +328,8 @@ load("~/rglab/workspace/HIMCLyoplate/Gottardo/flowCAP/wf.rda")
 png("~/rglab/workspace/HIMCLyoplate/Gottardo/pipeline/analysis/Tcell/flowVizFixed.png",width=800,height=600)
 plotGate(wf)
 dev.off()
+
+
 
 overlay(wf[1:2],gate=4,overlay.gate.indices=c(4,5))
 
@@ -350,4 +361,21 @@ overlay <- function(gs,gate=9,overlay.gate.indices=c(9,40),trans=TRUE,grid=65,h=
 	polygon(getGate(gh,gate)@boundaries,border="blue")
 	text(3.5,2,signif(prop,3))
 }
-
+or <- function(x,...){
+	if(ncol(x)==1){
+		x
+	}else if(ncol(x)==2){
+		x[,1]|x[,2]
+	}else{
+		Recall(x[,-1L])
+	}
+}
+and <- function(x,...){
+	if(ncol(x)==1){
+		x
+	}else if(ncol(x)==2){
+		x[,1]&x[,2]
+	}else{
+		Recall(x[,-1L])
+	}
+}

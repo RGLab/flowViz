@@ -129,6 +129,7 @@ setMethod("xyplot",
                               smooth=TRUE,
                               prepanel=prepanel.xyplot.flowframe,
                               panel=panel.xyplot.flowframe,
+							  overlay=NULL,#a flowframe
                               ...)
       {
           ## par.settings will not be passed on to the panel functions, so
@@ -145,11 +146,22 @@ setMethod("xyplot",
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
 #		  browser()
+		if(!is.null(overlay))
+		{
+			overlay.x <- flowViz:::evalInFlowFrame(channel.x, overlay)
+			overlay.y <- flowViz:::evalInFlowFrame(channel.y, overlay)
+		}else
+		{
+			overlay.x <- NULL
+			overlay.y <-NULL
+		}
+			
           ## call data.frame xyplot method with our panel function
           xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth,
                  prepanel=prepanel, panel=panel, frame=data,
                  channel.x.name=channel.x.name,
                  channel.y.name=channel.y.name,
+				 overlay.x=overlay.x,overlay.y=overlay.y,
                  gp=gp, ...)
       })
 
@@ -180,6 +192,7 @@ prepanel.xyplot.flowframe <-
 ## is done by either the panel.smoothScatter or the default lattice panel.xyplot
 ## function
 ##when xbins>0, we do the hexagon plot provided by hexbin package to improve the speed
+#overlay is a list(x=,y=), which is the extra points need to be plotted on top of the x,y 
 panel.xyplot.flowframe <- function(x,
                                    y,
                                    frame,
@@ -200,6 +213,10 @@ panel.xyplot.flowframe <- function(x,
 									,pos=0.5
 									,prec=2
 									,abs=FALSE
+									,overlay.x=NULL
+									,overlay.y=NULL
+									,contour=FALSE
+									,grid=65,h=c(0.1,0.1),nlines=25
 						   			,...)
 {
 	
@@ -226,52 +243,24 @@ panel.xyplot.flowframe <- function(x,
     # plot it
     validName <- !(length(grep("\\(", channel.x.name)) ||
                    length(grep("\\(", channel.y.name)))
+	
+	 ## in order to display overlay ,smooth needs to be set as TRUE
+	 if(!is.null(overlay.x))
+		smooth<-TRUE
 #browser()
 	if(nrow(frame)==0)
 		return (NULL)
     ## We remove margin events before passing on the data to panel.smoothScatter
     ## and after plotting indicate those events by grayscale lines on the plot
     ## margins
-    if (smooth){
-		if(margin){
-			r <- range(frame, c(channel.x.name, channel.y.name))
-			l <- length(x)
-			inc <- apply(r, 2, diff)/1e5
-			dots <- list(...)
-			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
-			selxL <- x > r[2,channel.x.name]-inc[1]
-			selxS <- x < r[1,channel.x.name]+inc[1]
-			selyL <- y > r[2,channel.y.name]-inc[2]
-			selyS <- y < r[1,channel.y.name]+inc[2]
-			allsel <- !(selxL | selxS | selyL | selyS)
-			
-            if(sum(allsel)>0)
-            {
-                panel.smoothScatter(x[allsel], y[allsel],
-                                    range.x=list(r[,1], r[,2]), ...)
-                addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
-                addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
-                addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
-                addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
-            }
-            else
-            {
-                panel.smoothScatter(x, y, ...)
-            }
-        }else{
-            panel.smoothScatter(x, y, ...)
-        }
-		ptList<-plotType("gsmooth", c(channel.x.name, channel.y.name))
-    }else{
-		#for non-smoothed plot:
-		#1:always remove boundary events for hexbin version 
-		#since they are going to affect the color encoding for density
-		#2.for non-hexbin version,when gpar$density=FALSE,which means one-color non-densityscatter plot
-		#we then keep the boundary events 
+	l <- length(x)
+	if(contour){
+		stop("contour plot is not supported yet!")
+		
 		if(margin){
 			
 			r <- range(frame, c(channel.x.name, channel.y.name))
-			l <- length(x)
+#			l <- length(x)
 			inc <- apply(r, 2, diff)/1e5
 			dots <- list(...)
 			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
@@ -288,35 +277,107 @@ panel.xyplot.flowframe <- function(x,
 				addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
 				addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
 			}
-				
+			
 			x<-x[allsel]
 			y<-y[allsel]
 			
 		}
-#		browser()
-		if(xbins>0)
-		{
-			#using hexbin package to do the hexagon plot	
-			bin<-hexbin(x,y,xbins=xbins)
-			if (is.null(argcolramp))
-				argcolramp<-flowViz.par.get("argcolramp")
-#			if (is.null(argcolramp))
-#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
-#			browser()
-			grid.hexagons(bin,colramp = argcolramp,trans=binTrans)		
-			
-			
-		}else
-		{
-			if (is.null(argcolramp))
-				argcolramp<-flowViz.par.get("argcolramp")
-			if(gpar$density)
-				col <- densCols(x, y, colramp=argcolramp)
-			panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-
+		
+		cl <- kde2d(x=x,y=y,h=h,n=grid)
+		cl$z <- binTrans(cl$z)
+		##TODO:replace it with lattice contour plot
+#		contour(cl,n=nlines)
+		ptList<-plotType("contour", c(channel.x.name, channel.y.name))
+	}else
+	{
+		
+		
+	    if (smooth){
+			if(margin){
+				r <- range(frame, c(channel.x.name, channel.y.name))
+#				l <- length(x)
+				inc <- apply(r, 2, diff)/1e5
+				dots <- list(...)
+				nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+				selxL <- x > r[2,channel.x.name]-inc[1]
+				selxS <- x < r[1,channel.x.name]+inc[1]
+				selyL <- y > r[2,channel.y.name]-inc[2]
+				selyS <- y < r[1,channel.y.name]+inc[2]
+				allsel <- !(selxL | selxS | selyL | selyS)
+				
+	            if(sum(allsel)>0)
+	            {
+	                panel.smoothScatter(x[allsel], y[allsel],
+	                                    range.x=list(r[,1], r[,2]), ...)
+	                addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+	                addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+	                addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+	                addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+	            }
+	            else
+	            {
+	                panel.smoothScatter(x, y, ...)
+	            }
+	        }else{
+	            panel.smoothScatter(x, y, ...)
+	        }
+			ptList<-plotType("gsmooth", c(channel.x.name, channel.y.name))
+	    }else{
+			#for non-smoothed plot:
+			#1:always remove boundary events for hexbin version 
+			#since they are going to affect the color encoding for density
+			#2.for non-hexbin version,when gpar$density=FALSE,which means one-color non-densityscatter plot
+			#we then keep the boundary events 
+			if(margin){
+				
+				r <- range(frame, c(channel.x.name, channel.y.name))
+#				l <- length(x)
+				inc <- apply(r, 2, diff)/1e5
+				dots <- list(...)
+				nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+				selxL <- x > r[2,channel.x.name]-inc[1]
+				selxS <- x < r[1,channel.x.name]+inc[1]
+				selyL <- y > r[2,channel.y.name]-inc[2]
+				selyS <- y < r[1,channel.y.name]+inc[2]
+				allsel <- !(selxL | selxS | selyL | selyS)
+				#we may want to skip marginal events in non-smoothed version to save time			
+				if(sum(allsel)>0)
+				{
+					addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+					addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+					addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+					addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+				}
+					
+				x<-x[allsel]
+				y<-y[allsel]
+				
+			}
+	#		browser()
+			if(xbins>0)
+			{
+				#using hexbin package to do the hexagon plot	
+				bin<-hexbin(x,y,xbins=xbins)
+				if (is.null(argcolramp))
+					argcolramp<-flowViz.par.get("argcolramp")
+	#			if (is.null(argcolramp))
+	#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
+	#			browser()
+				grid.hexagons(bin,colramp = argcolramp,trans=binTrans)		
+				
+				
+			}else
+			{
+				if (is.null(argcolramp))
+					argcolramp<-flowViz.par.get("argcolramp")
+				if(gpar$density)
+					col <- densCols(x, y, colramp=argcolramp)
+				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+	
+			}
+		   
+			ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
-	   
-		ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
 	}
 #    browser()
 	#plot gate
@@ -434,11 +495,28 @@ panel.xyplot.flowframe <- function(x,
 				)
 			}
 		}
-		
-		
-		
 	}
 	
+	if(!is.null(overlay.x)&&!is.null(overlay.y))
+	{
+		lpoints(overlay.x,overlay.y,col="red",cex=cex*3,pch=pch)
+		#plot stats for bool gates
+		if(stats&&is.null(filter))
+		{
+			p.stats<-length(overlay.x)/l
+			p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+#			browser()
+			xx<-xlim
+			yy<-ylim
+		
+			pos <- rep(pos, length=2)[1:2]
+			xx<-xx[1]+diff(xx)*pos[1]
+			yy<-yy[1]+diff(yy)*pos[2]
+			
+			gltext(xx, yy, labels=p.stats, adj=0.5, gp=gpar$gate.text)
+		}
+	}
+		
 	
 }
 
@@ -565,7 +643,8 @@ panel.xyplot.flowset <- function(x,
                                  frames,
                                  filter=NULL,
                                  channel.x,
-                                 channel.y
+                                 channel.y,
+								 overlay=NULL#a flowset
 						 ,...)
 {
     nm <- as.character(x)
@@ -591,8 +670,19 @@ panel.xyplot.flowset <- function(x,
     }
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
+#	browser()
+	if(!is.null(overlay))
+	{
+		overlay.x <- flowViz:::evalInFlowFrame(channel.x, overlay[[nm]])
+		overlay.y <- flowViz:::evalInFlowFrame(channel.y, overlay[[nm]])
+	}else
+	{
+		overlay.x <- NULL
+		overlay.y <-NULL
+	}
+		
 	
-    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], ...)
+    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], overlay.x=overlay.x,overlay.y=overlay.y,...)
 }
 
 
