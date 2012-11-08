@@ -207,10 +207,11 @@ setMethod("glpolygon",
           res <- vector(4, mode="list")
 		  #quadrant iteration in this loop goes by :x-y+,x+y+,x-y-,x+y-
 		  #	yet populations generated from quadGate is:++,-+,+-,--
-		  #so we need to re-order the names character	
+		  #so we need to re-order the names character
+		  if(length(names)==1)
+			  names<-rep(names,4)
 		  names<-names[c(2,1,4,3)]
 		  # fix the location of gate labels at four corners for quadGate
-			
 		  
 		  poslist<-vector(mode="list",4)
 		  poslist[[1]]<-c(0.15,0.9)
