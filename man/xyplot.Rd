@@ -103,7 +103,7 @@ panel.xyplot.flowframe(
     gp
     ,xbins=0
     ,binTrans=sqrt
-    ,stat=FALSE
+    ,stats=FALSE
     ,pos=0.5
     ,prec=2
     ,abs=FALSE
@@ -306,9 +306,9 @@ panel.xyplot.flowset(
 					It is \code{\link[base:sqrt]{sqrt}} by default.
 		    		}    			 		
 	
- 	\item{stat,pos,prec,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted
+ 	\item{stats,pos,prec,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted
  	 					Currently only population proportion/percentage is supported.
- 	 					\code{stat} is a \code{logical} scalar indicating whether to display statistics. Default is FALSE.
+ 	 					\code{stats} is a \code{logical} scalar indicating whether to display statistics. Default is FALSE.
 						\code{pos} is the \code{numeric} scalar (range within c(0,1)) or vector(length of 2,first is for x-axis,second for y-axis)
 								  to control the position of the statistics label. It is set as 0.5,which is the center.
 						\code{prec} is an \code{integer} indicating the number of digits to the right of the decimal point when displaying the percentage of population statistics,Default is 2.
@@ -540,7 +540,7 @@ n2gate.results <- filter(GvHD, n2gate)
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD,
        subset=Patient == "6",
        filter=n2gate.results, smooth=FALSE
-       ,stat=TRUE
+       ,stats=TRUE
        ,abs=TRUE
        ,prec=3 #3 digits after decimal point
        )
@@ -555,7 +555,7 @@ trans_data<-transform(GvHD[[1]],trans)
 xyplot(`FL2-H` ~ `FL3-H`
 	   ,data=trans_data 
        ,filter=filters1
-       ,stat=TRUE
+       ,stats=TRUE
        ,margin=FALSE
        )
 
@@ -564,7 +564,7 @@ overlay<-Subset(trans_data,recGate2)
 xyplot(`FL2-H` ~ `FL3-H`
 	   ,data=trans_data 
        ,filter=recGate1
-       ,stat=TRUE
+       ,stats=TRUE
        ,margin=FALSE
        ,overlay=overlay
        )

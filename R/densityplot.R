@@ -187,10 +187,12 @@ panel.densityplot.flowset <-
 										xr <- c(min(tb), seq(min(tb), max(tb), len=100),
 												max(tb))
 										yr <- c(i, afun(xr[-c(1, length(xr))]), i)
-										gpd<-gp$density
-										panel.polygon(xr, yr, border=gpd$col, col=gpd$fill,
+										gpd<-gp$gate.density
+										panel.polygon(xr, yr
+												, border=gpd$col, col=gpd$fill,
 												alpha=gpd$alpha, lwd=gpd$lwd,
-												lty=gpd$lty)
+												lty=gpd$lty
+												)
 									}
 								}	
 							}else
