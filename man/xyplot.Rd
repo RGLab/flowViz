@@ -73,6 +73,7 @@ panel.xyplot.flowframe.time(
     smooth=TRUE,
     prepanel=prepanel.xyplot.flowframe,
     panel=panel.xyplot.flowframe,
+    overlay=NULL,
     \dots)
 
 
@@ -104,7 +105,10 @@ panel.xyplot.flowframe(
     ,binTrans=sqrt
     ,stat=FALSE
     ,pos=0.5
+    ,prec=2
     ,abs=FALSE
+    ,overlay.x=NULL
+	,overlay.y=NULL
     ,\dots)
 
 
@@ -140,6 +144,7 @@ panel.xyplot.flowset(
     filter=NULL,
     channel.x,
     channel.y,
+    overlay=NULL,
     \dots)
 
 
@@ -212,7 +217,10 @@ panel.xyplot.flowset(
   
   \item{binSize}{The size of a bin (i.e., the number of events within a
     bin) used for the smoothed average timeline plots. }
-
+	
+   \item{overlay}{The extra cell events plotted on top of the current cell population.
+   				It is a \code{flowSet} for \code{panel.xyplot.flowset} function and a \code{flowFrame} for \code{xyplot(c("formula","flowFrame"))} method.
+   	}
   
   \item{channel.x.name, channel.y.name}{ Character strings giving
     corresponding names used to match filter parameters if applicable. }
@@ -298,14 +306,17 @@ panel.xyplot.flowset(
 					It is \code{\link[base:sqrt]{sqrt}} by default.
 		    		}    			 		
 	
- 	\item{stat,pos,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted
+ 	\item{stat,pos,prec,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted
  	 					Currently only population proportion/percentage is supported.
- 	 					\code{stat} is a logical scalar indicating whether to display statistics. Default is FALSE.
-						\code{pos} is the numeric scalar (range within c(0,1)) or vector(length of 2,first is for x-axis,second for y-axis)
+ 	 					\code{stat} is a \code{logical} scalar indicating whether to display statistics. Default is FALSE.
+						\code{pos} is the \code{numeric} scalar (range within c(0,1)) or vector(length of 2,first is for x-axis,second for y-axis)
 								  to control the position of the statistics label. It is set as 0.5,which is the center.
-						\code{abs} is a logical scalar indicating whether the \code{pos} is relative to the gate boundary or the entire xy-axis(absolute position).
+						\code{prec} is an \code{integer} indicating the number of digits to the right of the decimal point when displaying the percentage of population statistics,Default is 2.
+						\code{abs} is a \code{logical} scalar indicating whether the \code{pos} is relative to the gate boundary or the entire xy-axis(absolute position).
 									By default it is set as FALSE,which indicates the position is relative to gate. 
   						}
+  	\item{overlay.x,overlay.y}{ The x,y coordinates of overlay cell points.}  	
+  	
   \item{\dots}{ More arguments, usually passed on to the underlying
     lattice methods. }
     
@@ -531,18 +542,33 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD,
        filter=n2gate.results, smooth=FALSE
        ,stat=TRUE
        ,abs=TRUE
+       ,prec=3 #3 digits after decimal point
        )
+
        
 ## displaying multiple filters in one panel with stats
 recGate1<-rectangleGate("FL3-H"=c(2.3,4.1),"FL2-H"=c(6.8,9))
 recGate2<-rectangleGate("FL3-H"=c(1,3),"FL2-H"=c(4,6))
 filters1<-filters(list(recGate1,recGate2))
+trans<-transform("FL2-H"=asinh,"FL3-H"=asinh)
+trans_data<-transform(GvHD[[1]],trans)
 xyplot(`FL2-H` ~ `FL3-H`
-	   ,data=transform("FL2-H"=asinh,"FL3-H"=asinh) \%on\% GvHD[[1]]
+	   ,data=trans_data 
        ,filter=filters1
        ,stat=TRUE
        ,margin=FALSE
        )
+
+#display recGate2 as a overlay 
+overlay<-Subset(trans_data,recGate2)
+xyplot(`FL2-H` ~ `FL3-H`
+	   ,data=trans_data 
+       ,filter=recGate1
+       ,stat=TRUE
+       ,margin=FALSE
+       ,overlay=overlay
+       )
+
 
 
 }

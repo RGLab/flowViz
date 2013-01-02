@@ -215,8 +215,8 @@ panel.xyplot.flowframe <- function(x,
 									,abs=FALSE
 									,overlay.x=NULL
 									,overlay.y=NULL
-									,contour=FALSE
-									,grid=65,h=c(0.1,0.1),nlines=25
+#									,contour=FALSE
+#									,grid=65,h=c(0.1,0.1),nlines=25
 						   			,...)
 {
 	
@@ -254,42 +254,42 @@ panel.xyplot.flowframe <- function(x,
     ## and after plotting indicate those events by grayscale lines on the plot
     ## margins
 	l <- length(x)
-	if(contour){
-		stop("contour plot is not supported yet!")
+#	if(contour){
+#		stop("contour plot is not supported yet!")
 		
-		if(margin){
-			
-			r <- range(frame, c(channel.x.name, channel.y.name))
-#			l <- length(x)
-			inc <- apply(r, 2, diff)/1e5
-			dots <- list(...)
-			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
-			selxL <- x > r[2,channel.x.name]-inc[1]
-			selxS <- x < r[1,channel.x.name]+inc[1]
-			selyL <- y > r[2,channel.y.name]-inc[2]
-			selyS <- y < r[1,channel.y.name]+inc[2]
-			allsel <- !(selxL | selxS | selyL | selyS)
-			#we may want to skip marginal events in non-smoothed version to save time			
-			if(sum(allsel)>0)
-			{
-				addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
-				addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
-				addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
-				addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
-			}
-			
-			x<-x[allsel]
-			y<-y[allsel]
-			
-		}
-		
-		cl <- kde2d(x=x,y=y,h=h,n=grid)
-		cl$z <- binTrans(cl$z)
-		##TODO:replace it with lattice contour plot
-#		contour(cl,n=nlines)
-		ptList<-plotType("contour", c(channel.x.name, channel.y.name))
-	}else
-	{
+#		if(margin){
+#			
+#			r <- range(frame, c(channel.x.name, channel.y.name))
+##			l <- length(x)
+#			inc <- apply(r, 2, diff)/1e5
+#			dots <- list(...)
+#			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+#			selxL <- x > r[2,channel.x.name]-inc[1]
+#			selxS <- x < r[1,channel.x.name]+inc[1]
+#			selyL <- y > r[2,channel.y.name]-inc[2]
+#			selyS <- y < r[1,channel.y.name]+inc[2]
+#			allsel <- !(selxL | selxS | selyL | selyS)
+#			#we may want to skip marginal events in non-smoothed version to save time			
+#			if(sum(allsel)>0)
+#			{
+#				addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+#				addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+#				addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+#				addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+#			}
+#			
+#			x<-x[allsel]
+#			y<-y[allsel]
+#			
+#		}
+#		
+#		cl <- kde2d(x=x,y=y,h=h,n=grid)
+#		cl$z <- binTrans(cl$z)
+#		##TODO:replace it with lattice contour plot
+##		contour(cl,n=nlines)
+#		ptList<-plotType("contour", c(channel.x.name, channel.y.name))
+#	}else
+#	{
 		
 		
 	    if (smooth){
@@ -378,7 +378,7 @@ panel.xyplot.flowframe <- function(x,
 		   
 			ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
-	}
+#	}
 #    browser()
 	#plot gate
 	if(!is.null(filter) && validName){
