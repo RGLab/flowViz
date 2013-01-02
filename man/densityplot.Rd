@@ -78,7 +78,7 @@ panel.densityplot.flowset(
 	 ,prec=2
 	 ,abs=FALSE
 	 ,fitGate=TRUE
-    ,gpar,
+    ,gp,
     \dots)
 
 
@@ -188,7 +188,7 @@ panel.densityplot.flowset(
 	\item{fitGate}{A \code{logical} scalar indicating whether to display the gate as fitted 1d density gate region 
 					or simply display the gate boundaries using vertical lines. The latter would be helpful to display the gate when the gated density region is too small to see. }
 	
-  \item{gpar}{ A list of graphical parameters that are passed down to
+  \item{gp}{ A list of graphical parameters that are passed down to
     the low level panel functions. This is for internal use only. The
     public user interface to set graphical parameters is either
     \code{par.settings} for customization of a single call or
