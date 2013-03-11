@@ -1,5 +1,7 @@
 ## load a flowFrame
 library(flowViz)
+library(grid)
+library(IDPmisc)
 lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 data(GvHD)
 fcs1 <- GvHD[[1]]
@@ -17,6 +19,12 @@ xyplot(`PE Cy55-A`~`FITC-A`,getData(wf[1:2],5),filter=getGate(wf[1:2],6)
 		,overlay=getData(wf[1:2],8))
 
 
+xyplot(`<G560-A>`~`<R660-A>`
+        ,data=getData(gs[[1]],"cd19&cd20")
+        ,filter=getGate(gs[[1]],"transitional")
+        ,stats=T
+        ,digits=2
+      )
 
 
 

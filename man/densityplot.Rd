@@ -75,7 +75,7 @@ panel.densityplot.flowset(
     margin=0.005
    ,stats=FALSE
 	 ,pos=0.5
-	 ,prec=2
+	 ,digits=2
 	 ,abs=FALSE
 	 ,fitGate=TRUE
     ,gp,
@@ -183,7 +183,7 @@ panel.densityplot.flowset(
     events. \code{1} means to ignore margin events completetly. For
     \code{0} bars are added even if there is only a single margin event.}
 
-   \item{stats,pos,prec,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted.
+   \item{stats,pos,digits,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted.
 						see \link[flowViz]{xyplot} for details.}
 	\item{fitGate}{A \code{logical} scalar indicating whether to display the gate as fitted 1d density gate region 
 					or simply display the gate boundaries using vertical lines. The latter would be helpful to display the gate when the gated density region is too small to see. }

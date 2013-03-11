@@ -211,7 +211,7 @@ panel.xyplot.flowframe <- function(x,
 						   		   ,binTrans=sqrt
 						   			,stats=FALSE
 									,pos=0.5
-									,prec=2
+									,digits=2
 									,abs=FALSE
 									,overlay.x=NULL
 									,overlay.y=NULL
@@ -417,7 +417,8 @@ panel.xyplot.flowframe <- function(x,
 #					browser()	
 								p.stats<-summary(curFres)@p
 								popNames<-names(p.stats)
-								p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+#								p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+                                p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
 								names<-p.stats
 								names(names)<-popNames
 							}else
@@ -472,7 +473,8 @@ panel.xyplot.flowframe <- function(x,
 #					browser()	
 					p.stats<-summary(curFres)@p
 					popNames<-names(p.stats)
-					p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+#					p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+                    p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
 					names<-p.stats
 					names(names)<-popNames
 				}else
@@ -504,7 +506,8 @@ panel.xyplot.flowframe <- function(x,
 		if(stats&&is.null(filter))
 		{
 			p.stats<-length(overlay.x)/l
-			p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+#			p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+            p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
 #			browser()
 			xx<-xlim
 			yy<-ylim
