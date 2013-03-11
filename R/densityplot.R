@@ -53,7 +53,7 @@ panel.densityplot.flowset <-
              margin=0.005
 			 ,stats=FALSE
 			 ,pos=0.5
-			 ,prec=2
+			 ,digits=2
 			 ,abs=FALSE
 			 ,fitGate=TRUE
              ,gp, ...)
@@ -148,7 +148,8 @@ panel.densityplot.flowset <-
 #					browser()	
 						p.stats<-summary(curFres)@p
 						popNames<-names(p.stats)
-						p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+#						p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+                        p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
 						names<-p.stats
 						names(names)<-popNames
 					}else

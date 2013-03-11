@@ -1,15 +1,32 @@
 ## load a flowFrame
 library(flowViz)
+library(grid)
+library(IDPmisc)
+lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 data(GvHD)
 fcs1 <- GvHD[[1]]
 fcs2 <- GvHD[[1]]
 colnames(fcs2)[1] <- "noname"
 
-source("R/gateplotting_utils.R")
-source("R/lines-methods.R")
-source("R/polygon-methods.R")
-source("R/points-methods.R")
-state <- function(x) flowViz:::flowViz.state[[x]]
+##plot overlayed pops
+xyplot(`PE Cy55-A`~`FITC-A`
+		,getData(wf[[1]],5)
+		,filter=getGate(wf[[1]],6)
+		,overlay=getData(wf[[1]],8)
+#		,contour=T
+	)
+xyplot(`PE Cy55-A`~`FITC-A`,getData(wf[1:2],5),filter=getGate(wf[1:2],6)
+		,overlay=getData(wf[1:2],8))
+
+
+xyplot(`<G560-A>`~`<R660-A>`
+        ,data=getData(gs[[1]],"cd19&cd20")
+        ,filter=getGate(gs[[1]],"transitional")
+        ,stats=T
+        ,digits=2
+      )
+
+
 
 ## a wrapper that catches and reports errors
 wrap <- function(x)
@@ -296,14 +313,77 @@ xyplot(`FSC-H` ~ `SSC-H`, GvHD[1:3], smooth=F,xbin=128)
 ############################################################################
 
 library(flowViz)
+library(IDPmisc)
 data(GvHD)
-lapply(list.files("/home/wjiang2/rglab/workspace/flowViz/R",full=T),source)
+
 fs<-GvHD[c(1,2,9,10)]
 
 xyplot(`SSC-H` ~ `FSC-H`|Patient:Visit:name ,data =fs)
 xyplot(`SSC-H` ~ `FSC-H`|Patient:name ,data =fs)
 
+xyplot(`SSC-H` ~ `FSC-H` ,data =fs)
+exprs(fs[[3]])<-exprs(fs[[3]])[0,,drop=F]
+xyplot(`SSC-H` ~ `FSC-H` ,data =fs[[3]])
+
 xyplot(Grade~factor(name)|Patient+Visit,data=pData(fs))
 
+require(flowWorkspace)
+library(flowStats)
+library(flowClust)
+lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
+
+load("~/rglab/workspace/HIMCLyoplate/Gottardo/flowCAP/wf.rda")
+png("~/rglab/workspace/HIMCLyoplate/Gottardo/pipeline/analysis/Tcell/flowVizFixed.png",width=800,height=600)
+plotGate(wf)
+dev.off()
 
 
+
+overlay(wf[1:2],gate=4,overlay.gate.indices=c(4,5))
+
+overlay <- function(gs,gate=9,overlay.gate.indices=c(9,40),trans=TRUE,grid=65,h=c(0.1,0.1),nlines=25,wh=1,...){
+	#gs is a gating set, and we want to generate one plot at a time..
+	browser()
+	gh <- gs[[wh]]
+	p <- getParent(gh,gate)
+	d <- getData(gh,p)
+	g <- getGate(gh,gate)
+	cn <- colnames(g@boundaries)
+	d <- exprs(d)[,cn]
+	
+	x <- d[,1]
+	y <- d[,2]
+	
+	ogi <- and(do.call(cbind,lapply(overlay.gate.indices,function(i)flowWorkspace:::getIndices(gh,i))))
+	a <- and(do.call(cbind,lapply(c(overlay.gate.indices,gate),function(i)flowWorkspace:::getIndices(gh,i))))
+	b<-flowWorkspace:::getIndices(gh,p)
+	prop <- prop.table(table(a[b]))[2]
+	cl <- kde2d(x=x,y=y,h=h,n=grid)
+	if(trans){
+		cl$z <- sqrt(cl$z)
+	}
+	contour(cl,n=nlines,...)
+	d <- exprs(getData(gh)[,cn])[ogi,,drop=FALSE]
+	points(x=d[,1],y=d[,2],col="red",cex=3,pch='.')
+	
+	polygon(getGate(gh,gate)@boundaries,border="blue")
+	text(3.5,2,signif(prop,3))
+}
+or <- function(x,...){
+	if(ncol(x)==1){
+		x
+	}else if(ncol(x)==2){
+		x[,1]|x[,2]
+	}else{
+		Recall(x[,-1L])
+	}
+}
+and <- function(x,...){
+	if(ncol(x)==1){
+		x
+	}else if(ncol(x)==2){
+		x[,1]&x[,2]
+	}else{
+		Recall(x[,-1L])
+	}
+}

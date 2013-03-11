@@ -105,7 +105,7 @@ panel.xyplot.flowframe(
     ,binTrans=sqrt
     ,stats=FALSE
     ,pos=0.5
-    ,prec=2
+    ,digits=2
     ,abs=FALSE
     ,overlay.x=NULL
 	,overlay.y=NULL
@@ -306,12 +306,12 @@ panel.xyplot.flowset(
 					It is \code{\link[base:sqrt]{sqrt}} by default.
 		    		}    			 		
 	
- 	\item{stats,pos,prec,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted
+ 	\item{stats,pos,digits,abs}{Arguments to control statistics that is associated with \code{\link[flowCore:filter-class]{filter}} to be plotted
  	 					Currently only population proportion/percentage is supported.
  	 					\code{stats} is a \code{logical} scalar indicating whether to display statistics. Default is FALSE.
 						\code{pos} is the \code{numeric} scalar (range within c(0,1)) or vector(length of 2,first is for x-axis,second for y-axis)
 								  to control the position of the statistics label. It is set as 0.5,which is the center.
-						\code{prec} is an \code{integer} indicating the number of digits to the right of the decimal point when displaying the percentage of population statistics,Default is 2.
+						\code{digits} is an \code{integer} indicating the number of significant digits to be used when displaying the percentage of population statistics,Default is 2. see more details from \code{\link[base]{format}}
 						\code{abs} is a \code{logical} scalar indicating whether the \code{pos} is relative to the gate boundary or the entire xy-axis(absolute position).
 									By default it is set as FALSE,which indicates the position is relative to gate. 
   						}
@@ -542,7 +542,7 @@ xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD,
        filter=n2gate.results, smooth=FALSE
        ,stats=TRUE
        ,abs=TRUE
-       ,prec=3 #3 digits after decimal point
+       ,digits=3 
        )
 
        
