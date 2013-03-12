@@ -33,7 +33,7 @@ importFrom(latticeExtra, ecdfplot)
 
 importFrom(MASS, kde2d)
 
-importFrom(methods, "@<-", as, is)
+importFrom(methods,  as, is)
 
 importFrom(RColorBrewer, brewer.pal)
 
