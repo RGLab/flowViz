@@ -139,25 +139,8 @@ panel.densityplot.flowset <-
                 if(!is.null(filter[[nm]]) && validName){    
 #					
 					curFilter<-filter[[nm]]
-					
-					if(stats)
-					{
-						if (!is(curFilter, "filterResult")) 
-							curFilter <- filter(frames[[nm]], curFilter)
-						curFres<-curFilter
-#					browser()	
-						p.stats<-summary(curFres)@p
-						popNames<-names(p.stats)
-#						p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
-                        p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
-						names<-p.stats
-						names(names)<-popNames
-					}else
-					{
-						names<-list(...)$names
-						if(is.null(names))
-							names<-FALSE
-					}
+#					browser()
+                    names <- .getStats(curFilter,stats[[nm]], frames[[nm]], digits, ...)
 					
 #					browser()
 					#this plot routine is only for 2-d scatter plot

@@ -228,14 +228,12 @@ panel.xyplot.flowframe <- function(x,
                                    gp
 								   ,xbins=0
 						   		   ,binTrans=sqrt
-						   			,stats=FALSE
+						   			,stats = FALSE
 									,pos=0.5
 									,digits=2
 									,abs=FALSE
 									,overlay.x=NULL
 									,overlay.y=NULL
-#									,contour=FALSE
-#									,grid=65,h=c(0.1,0.1),nlines=25
 						   			,...)
 {
 	
@@ -273,42 +271,6 @@ panel.xyplot.flowframe <- function(x,
     ## and after plotting indicate those events by grayscale lines on the plot
     ## margins
 	l <- length(x)
-#	if(contour){
-#		stop("contour plot is not supported yet!")
-		
-#		if(margin){
-#			
-#			r <- range(frame, c(channel.x.name, channel.y.name))
-##			l <- length(x)
-#			inc <- apply(r, 2, diff)/1e5
-#			dots <- list(...)
-#			nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
-#			selxL <- x > r[2,channel.x.name]-inc[1]
-#			selxS <- x < r[1,channel.x.name]+inc[1]
-#			selyL <- y > r[2,channel.y.name]-inc[2]
-#			selyS <- y < r[1,channel.y.name]+inc[2]
-#			allsel <- !(selxL | selxS | selyL | selyS)
-#			#we may want to skip marginal events in non-smoothed version to save time			
-#			if(sum(allsel)>0)
-#			{
-#				addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
-#				addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
-#				addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
-#				addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
-#			}
-#			
-#			x<-x[allsel]
-#			y<-y[allsel]
-#			
-#		}
-#		
-#		cl <- kde2d(x=x,y=y,h=h,n=grid)
-#		cl$z <- binTrans(cl$z)
-#		##TODO:replace it with lattice contour plot
-##		contour(cl,n=nlines)
-#		ptList<-plotType("contour", c(channel.x.name, channel.y.name))
-#	}else
-#	{
 		
 		
 	    if (smooth){
@@ -403,7 +365,8 @@ panel.xyplot.flowframe <- function(x,
 	if(!is.null(filter) && validName){
 		if(is(filter,"filters"))
 		{
-			lapply(filter,function(curFilter){
+
+			mapply(filter,stats,FUN=function(curFilter,curStats){
 						
 						
 						if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
@@ -427,28 +390,11 @@ panel.xyplot.flowframe <- function(x,
 							
 						}else
 						{
+                          
+                            names <- .getStats(curFilter,curStats, frame, digits, ...)
 							
-							if(stats)
-							{
-								if (!is(curFilter, "filterResult")) 
-									curFilter <- filter(frame, curFilter)
-								curFres<-curFilter
-#					browser()	
-								p.stats<-summary(curFres)@p
-								popNames<-names(p.stats)
-#								p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
-                                p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
-								names<-p.stats
-								names(names)<-popNames
-							}else
-							{
-								names<-list(...)$names
-								if(is.null(names))
-									names<-FALSE
-							}
-#				browser()
 							glpolygon(curFilter, frame,
-#						channels=c(channel.x.name, channel.y.name),
+
 									verbose=FALSE, gpar=gpar
 									, names=names
 									,strict=FALSE
@@ -483,25 +429,8 @@ panel.xyplot.flowframe <- function(x,
 				
 			}else
 			{
-				
-				if(stats)
-				{
-					if (!is(filter, "filterResult")) 
-						filter <- filter(frame, filter)
-					curFres<-filter
-#					browser()	
-					p.stats<-summary(curFres)@p
-					popNames<-names(p.stats)
-#					p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
-                    p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
-					names<-p.stats
-					names(names)<-popNames
-				}else
-				{
-					names<-list(...)$names
-					if(is.null(names))
-						names<-FALSE
-				}
+              names <- .getStats(filter,stats, frame, digits, ...) 
+                  
 #				browser()
 				glpolygon(filter, frame,
 #						channels=c(channel.x.name, channel.y.name),
@@ -670,10 +599,11 @@ prepanel.xyplot.flowset <-
 ## is done by panel.xyplot.flowframe
 panel.xyplot.flowset <- function(x,
                                  frames,
-                                 filter=NULL,
+                                 filter = NULL,
                                  channel.x,
                                  channel.y,
-								 overlay=NULL#a flowset
+								 overlay= NULL#a flowset
+                                ,stats = FALSE
 						 ,...)
 {
     nm <- as.character(x)
@@ -699,7 +629,7 @@ panel.xyplot.flowset <- function(x,
     }
     x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
     y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
-#	browser()
+	
 	if(!is.null(overlay))
 	{
 		overlay.x <- flowViz:::evalInFlowFrame(channel.x, overlay[[nm]])
@@ -709,9 +639,17 @@ panel.xyplot.flowset <- function(x,
 		overlay.x <- NULL
 		overlay.y <-NULL
 	}
-		
 	
-    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]], overlay.x=overlay.x,overlay.y=overlay.y,...)
+    if(!is.list(stats)){
+        stats <- lapply(seq_along(nm), function(x) stats)
+        names(stats) <- nm
+      
+    }
+    
+    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]]
+                              , overlay.x=overlay.x,overlay.y=overlay.y
+                              , stats = stats[[nm]]
+                               , ...)
 }
 
 
