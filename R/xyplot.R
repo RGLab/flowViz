@@ -52,14 +52,24 @@ setMethod("xyplot",
 ## is constant since we have the same time recordings for each channel. We also record
 ## the data ranges in the internal state environment for further use.
 prepanel.xyplot.flowframe.time <- 
-    function(x, y, frame, time, ...)
+    function(x, y, frame, time, xlim, ylim, ...)
 {
     yc <- as.character(y)
-    expr <- exprs(frame)
-    xx <- expr[, time]
-    yy <- expr[, yc]
-    xlim <- range(xx, finite=TRUE)
-    ylim <- unlist(range(frame, yc))
+    expr <- exprs(frame)  
+    
+    if(missing(xlim)){
+      #use default calculation
+      xx <- expr[, time]
+      xlim <- range(xx, finite=TRUE)
+    }
+    
+    if(missing(ylim)){
+      #use default calculation
+      yy <- expr[, yc]
+      ylim <- unlist(range(frame, yc))
+    }
+
+
     
     return(list(xlim=xlim, ylim=ylim))
 }
@@ -171,19 +181,28 @@ setMethod("xyplot",
 ## range instead of the absolute range of the data. We also record the data ranges
 ## in the internal state environment for further use.
 prepanel.xyplot.flowframe <- 
-    function(frame, channel.x.name, channel.y.name, ...)
+    function(frame, channel.x.name, channel.y.name, x, y, xlim, ylim,  ...)
 {
     ranges <- range(frame)
-    xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
-        tmp <- ranges[, channel.x.name]
-        xd <- diff(tmp)/15
-        tmp + c(-1,1)*xd
-    }else NULL
-    ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
-        tmp <- ranges[, channel.y.name]
-        yd <- diff(tmp)/15
-        tmp + c(-1,1)*yd
-    }else NULL
+#    browser()
+    if(missing(xlim)){
+      #use default calculation
+      xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+          tmp <- ranges[, channel.x.name]
+          xd <- diff(tmp)/15
+          tmp + c(-1,1)*xd
+        }else NULL
+    }
+    
+    if(missing(ylim)){
+      #use default calculation
+        ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
+          tmp <- ranges[, channel.y.name]
+          yd <- diff(tmp)/15
+          tmp + c(-1,1)*yd
+        }else NULL
+    }
+    
     
     return(list(xlim=xlim, ylim=ylim))
 }
@@ -605,23 +624,30 @@ setMethod("xyplot",
 ## range instead of the absolute range of the data. We also record the data ranges
 ## in the internal state environment for further use.
 prepanel.xyplot.flowset <- 
-    function(x, frames, channel.x.name, channel.y.name, ...)
+    function(x, frames, channel.x.name, channel.y.name
+      , xlim , ylim, ...)
 {
-    if (length(nm <- as.character(x)) > 1)
-        stop("must have only one flow frame per panel")
+  if (length(nm <- as.character(x)) > 1)
+    stop("must have only one flow frame per panel")
+    
     if (length(nm) == 1){
         ranges <- range(frames[[nm]])
-        xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
-            tmp <- ranges[, channel.x.name]
-            xd <- diff(tmp)/15
-            tmp + c(-1,1)*xd
-        }else NULL
+        if(missing(xlim)){
+          #use default calculation
+          xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+              tmp <- ranges[, channel.x.name]
+              xd <- diff(tmp)/15
+              tmp + c(-1,1)*xd
+          }else NULL
+      }
+      if(missing(ylim)){
+        #use default calculation
         ylim <- if(!length(grep("`", channel.y.name, fixed=TRUE))){
             tmp <- ranges[, channel.y.name]
             yd <- diff(tmp)/15
             tmp + c(-1,1)*yd
         }else NULL
-        
+      }
         return(list(xlim=xlim, ylim=ylim))
     }else
 		return(list())
