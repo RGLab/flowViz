@@ -212,9 +212,7 @@ prepanel.xyplot.flowframe <-
 ## function
 ##when xbins>0, we do the hexagon plot provided by hexbin package to improve the speed
 #overlay is a list(x=,y=), which is the extra points need to be plotted on top of the x,y 
-panel.xyplot.flowframe <- function(x,
-                                   y,
-                                   frame,
+panel.xyplot.flowframe <- function(frame,
                                    filter=NULL,
                                    smooth=TRUE,
                                    margin=TRUE,
@@ -236,7 +234,11 @@ panel.xyplot.flowframe <- function(x,
 									,overlay.y=NULL
 						   			,...)
 {
-	
+  
+	x <-exprs(frame)[,channel.x.name]
+    y <-exprs(frame)[,channel.y.name]
+    
+
     ## graphical parameter defaults
 	limits<-prepanel.xyplot.flowframe(frame,channel.x.name,channel.y.name)
 	xlim<-limits$xlim
@@ -334,7 +336,7 @@ panel.xyplot.flowframe <- function(x,
 				y<-y[allsel]
 				
 			}
-	#		browser()
+#			browser()
 			if(xbins>0)
 			{
 				#using hexbin package to do the hexagon plot	
@@ -539,6 +541,7 @@ setMethod("xyplot",
           ## use densityplot method with dedicated panel and prepanel
           ## functions to do the actual plotting
 #		  browser()
+          data <- data[,c(channel.x.name,channel.y.name)]
           densityplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data@frames, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
@@ -627,8 +630,8 @@ panel.xyplot.flowset <- function(x,
             filter <- NULL
         }
     }
-    x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
-    y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
+#    x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
+#    y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
 	
 	if(!is.null(overlay))
 	{
@@ -645,8 +648,8 @@ panel.xyplot.flowset <- function(x,
         names(stats) <- nm
       
     }
-    
-    panel.xyplot.flowframe(x, y, frame=frames[[nm]], filter=filter[[nm]]
+#    browser()
+    panel.xyplot.flowframe(frame=frames[[nm]], filter=filter[[nm]]
                               , overlay.x=overlay.x,overlay.y=overlay.y
                               , stats = stats[[nm]]
                                , ...)
