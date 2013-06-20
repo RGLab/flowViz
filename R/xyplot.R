@@ -131,52 +131,62 @@ panel.xyplot.flowframe.time <-
 ## xyplot for flowFrames with a formula.  We'll make this very simple;
 ## the drawback being that the expression matrix will be copied,
 ## the upshot being that all the fancy xyplot formula stuff will be valid.
+#setMethod("xyplot",
+#          signature=signature(x="formula",
+#                              data="flowFrame"),
+#          definition=function(x,
+#                              data,
+#                              smooth=TRUE,
+#                              prepanel=prepanel.xyplot.flowframe,
+#                              panel=panel.xyplot.flowframe,
+#							  overlay=NULL,#a flowframe
+#                              ...)
+#      {
+#          ## par.settings will not be passed on to the panel functions, so
+#          ## we have to fetch it from ... and stick the gate relevant stuff
+#          ## back it in there manually
+#          gp <- list(...)[["par.settings"]]
+#          
+#          ## deparse the formula structure
+#          ## FIXME: shouldn't all.vars be helpful here?!?
+#          channel.y <- x[[2]]
+#          channel.x <- x[[3]]
+#          if (length(channel.x) == 3)
+#              channel.x <- channel.x[[2]]
+#          channel.x.name <- expr2char(channel.x)
+#          channel.y.name <- expr2char(channel.y)
+##		  browser()
+#		if(!is.null(overlay))
+#		{
+#			overlay.x <- flowViz:::evalInFlowFrame(channel.x, overlay)
+#			overlay.y <- flowViz:::evalInFlowFrame(channel.y, overlay)
+#		}else
+#		{
+#			overlay.x <- NULL
+#			overlay.y <-NULL
+#		}
+#        data <- data[,c(channel.x.name,channel.y.name)]
+#        
+#          ## call data.frame xyplot method with our panel function
+#          xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth,
+#                 prepanel=prepanel, panel=panel, frame=data,
+#                 channel.x.name=channel.x.name,
+#                 channel.y.name=channel.y.name,
+#				 overlay.x=overlay.x,overlay.y=overlay.y,
+#                 gp=gp, ...)
+#      })
+
 setMethod("xyplot",
-          signature=signature(x="formula",
-                              data="flowFrame"),
-          definition=function(x,
-                              data,
-                              smooth=TRUE,
-                              prepanel=prepanel.xyplot.flowframe,
-                              panel=panel.xyplot.flowframe,
-							  overlay=NULL,#a flowframe
-                              ...)
-      {
-          ## par.settings will not be passed on to the panel functions, so
-          ## we have to fetch it from ... and stick the gate relevant stuff
-          ## back it in there manually
-          gp <- list(...)[["par.settings"]]
-          
-          ## deparse the formula structure
-          ## FIXME: shouldn't all.vars be helpful here?!?
-          channel.y <- x[[2]]
-          channel.x <- x[[3]]
-          if (length(channel.x) == 3)
-              channel.x <- channel.x[[2]]
-          channel.x.name <- expr2char(channel.x)
-          channel.y.name <- expr2char(channel.y)
-#		  browser()
-		if(!is.null(overlay))
-		{
-			overlay.x <- flowViz:::evalInFlowFrame(channel.x, overlay)
-			overlay.y <- flowViz:::evalInFlowFrame(channel.y, overlay)
-		}else
-		{
-			overlay.x <- NULL
-			overlay.y <-NULL
-		}
-			
-          ## call data.frame xyplot method with our panel function
-          xyplot(x, data=as.data.frame(exprs(data)), smooth=smooth,
-                 prepanel=prepanel, panel=panel, frame=data,
-                 channel.x.name=channel.x.name,
-                 channel.y.name=channel.y.name,
-				 overlay.x=overlay.x,overlay.y=overlay.y,
-                 gp=gp, ...)
-      })
-
-
-
+    signature=signature(x="formula",
+        data="flowFrame"),
+    definition=function(x,
+                        data
+                        , ...)
+{
+  data <- as(data,"flowSet")
+  
+  xyplot(x, data, defaultCond = NULL, ...) #remove strip by setting cond as NULL 
+})
 ## Prepanel function to set up dimensions. We want to use the instrument measurement
 ## range instead of the absolute range of the data. We also record the data ranges
 ## in the internal state environment for further use.
@@ -492,14 +502,22 @@ setMethod("xyplot",
                               panel=panel.xyplot.flowset,
                               xlab=channel.x.name,
                               ylab=channel.y.name,
-                              par.settings=NULL,
-                              ...)
+                              par.settings=NULL
+                              ,defaultCond = "name" #to override the default conditional variable 'name'
+                                            #mainly used for plotting single flowFrame
+                              , ...)
       {
+       
           ## no conditioning variable, we chose 'name' as default
           if (length(x[[3]]) == 1){
-              tmp <- x[[3]]
-              x[[3]] <- (~dummy | name)[[2]]
-              x[[3]][[2]] <- tmp
+              if(!is.null(defaultCond)){
+                tmp <- x[[3]]
+                strFormula <- "~dummy"  
+                strFormula <- paste(strFormula,defaultCond,sep = "|")
+                strFormula <-as.formula(strFormula)
+                x[[3]] <- (strFormula)[[2]]
+                x[[3]][[2]] <- tmp
+              }
           }
           if(! "name" %in% names(pData(data)))
               pData(data)$name <- sampleNames(data)
