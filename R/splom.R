@@ -21,7 +21,7 @@ panel.splom.flowframe <- function(x,
         tmp + c(-1,1)*yd
     }else NULL
     
-    panel.xyplot.flowframe(x=x, channel.x.name=channel.x.name,
+    panel.xyplot.flowframe.old(x=x, channel.x.name=channel.x.name,
                            channel.y.name=channel.y.name, frame=frame
 				   			,xlim=xlim,ylim=ylim
                            ,...)

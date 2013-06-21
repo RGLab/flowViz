@@ -234,6 +234,266 @@ prepanel.xyplot.flowframe <-
     return(list(xlim=xlim, ylim=ylim))
 }
 
+#old version of panel function that still expects x,y vectors
+panel.xyplot.flowframe.old <- function(x,y,frame,
+    filter=NULL,
+    smooth=TRUE,
+    margin=TRUE,
+    outline=FALSE,
+    channel.x.name,
+    channel.y.name,
+    pch=gpar$flow.symbol$pch,
+    alpha=gpar$flow.symbol$alpha,
+    cex=gpar$flow.symbol$cex,
+    col=gpar$flow.symbol$col,
+    gp
+    ,xbins=0
+    ,binTrans=sqrt
+    ,stats = FALSE
+    ,pos=0.5
+    ,digits=2
+    ,abs=FALSE
+    ,overlay.x=NULL
+    ,overlay.y=NULL
+    ,...)
+{
+  
+  
+  ## graphical parameter defaults
+  limits<-prepanel.xyplot.flowframe(frame,channel.x.name,channel.y.name)
+  xlim<-limits$xlim
+  ylim<-limits$ylim
+  argcolramp <- list(...)$colramp
+  gpar <- flowViz.par.get()
+  parameters<-c(channel.x.name, channel.y.name)
+  if(!is.null(gp))
+    gpar <- lattice:::updateList(gpar, gp)
+  if(is.null(gpar$gate$cex))
+    gpar$gate$cex <- cex
+  if(is.null(gpar$gate$pch))
+    gpar$gate$pch <- pch
+#   browser()
+  if(is.null(gpar$gate$plotType))
+    gpar$gate$plotType<-"l"
+  if(is.null(gpar$density))
+    gpar$density<-TRUE
+  ## Whenever we have a function call in the formula we might no longer be the
+  ## original scale in which the gate was defined, and we have no clue how to
+  # plot it
+  validName <- !(length(grep("\\(", channel.x.name)) ||
+        length(grep("\\(", channel.y.name)))
+  
+  ## in order to display overlay ,smooth needs to be set as TRUE
+  if(!is.null(overlay.x))
+    smooth<-TRUE
+#browser()
+  if(nrow(frame)==0)
+    return (NULL)
+  ## We remove margin events before passing on the data to panel.smoothScatter
+  ## and after plotting indicate those events by grayscale lines on the plot
+  ## margins
+  l <- length(x)
+  
+  
+  if (smooth){
+    if(margin){
+      r <- range(frame, c(channel.x.name, channel.y.name))
+#               l <- length(x)
+      inc <- apply(r, 2, diff)/1e5
+      dots <- list(...)
+      nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+      selxL <- x > r[2,channel.x.name]-inc[1]
+      selxS <- x < r[1,channel.x.name]+inc[1]
+      selyL <- y > r[2,channel.y.name]-inc[2]
+      selyS <- y < r[1,channel.y.name]+inc[2]
+      allsel <- !(selxL | selxS | selyL | selyS)
+      
+      if(sum(allsel)>0)
+      {
+        panel.smoothScatter(x[allsel], y[allsel],
+            range.x=list(r[,1], r[,2]), ...)
+        addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+        addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+        addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+        addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+      }
+      else
+      {
+        panel.smoothScatter(x, y, ...)
+      }
+    }else{
+      panel.smoothScatter(x, y, ...)
+    }
+    ptList<-plotType("gsmooth", c(channel.x.name, channel.y.name))
+  }else{
+    #for non-smoothed plot:
+    #1:always remove boundary events for hexbin version 
+    #since they are going to affect the color encoding for density
+    #2.for non-hexbin version,when gpar$density=FALSE,which means one-color non-densityscatter plot
+    #we then keep the boundary events 
+    if(margin){
+      
+      r <- range(frame, c(channel.x.name, channel.y.name))
+#               l <- length(x)
+      inc <- apply(r, 2, diff)/1e5
+      dots <- list(...)
+      nb <- if("nbin" %in% names(dots)) rep(dots$nbin, 2) else rep(64, 2)
+      selxL <- x > r[2,channel.x.name]-inc[1]
+      selxS <- x < r[1,channel.x.name]+inc[1]
+      selyL <- y > r[2,channel.y.name]-inc[2]
+      selyS <- y < r[1,channel.y.name]+inc[2]
+      allsel <- !(selxL | selxS | selyL | selyS)
+      #we may want to skip marginal events in non-smoothed version to save time           
+      if(sum(allsel)>0)
+      {
+        addMargin(r[1,channel.x.name], y[selxS], r, l, nb)
+        addMargin(r[2,channel.x.name], y[selxL], r, l, nb, b=TRUE)
+        addMargin(x[selyS], r[1,channel.y.name], r, l, nb)
+        addMargin(x[selyL], r[2,channel.y.name], r, l, nb, b=TRUE)
+      }
+      
+      x<-x[allsel]
+      y<-y[allsel]
+      
+    }
+#           browser()
+    if(xbins>0)
+    {
+      #using hexbin package to do the hexagon plot    
+      bin<-hexbin(x,y,xbins=xbins)
+      if (is.null(argcolramp))
+        argcolramp<-flowViz.par.get("argcolramp")
+      #           if (is.null(argcolramp))
+      #               argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
+      #           browser()
+      grid.hexagons(bin,colramp = argcolramp,trans=binTrans)      
+      
+      
+    }else
+    {
+      if (is.null(argcolramp))
+        argcolramp<-flowViz.par.get("argcolramp")
+      if(gpar$density)
+        col <- densCols(x, y, colramp=argcolramp)
+      panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
+      
+    }
+    
+    ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
+  }
+#   }
+#    browser()
+  #plot gate
+  if(!is.null(filter) && validName){
+    if(is(filter,"filters"))
+    {
+      
+      mapply(filter,stats,FUN=function(curFilter,curStats){
+            
+            
+            if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+            {
+              if(!is(curFilter, "filterResult"))
+                curFilter <- filter(frame, curFilter)
+              rest <- Subset(frame, !filter)
+              x <- exprs(rest[,channel.x.name])
+              y <- exprs(rest[,channel.y.name])
+              
+              
+              glpoints(curFilter, frame,
+                  channels=c(channel.x.name, channel.y.name),
+                  verbose=FALSE, gpar=gpar, strict=FALSE,ptList=ptList, ...)
+              if(outline)
+                glpolygon(curFilter, frame,
+                    channels=c(channel.x.name, channel.y.name),
+                    verbose=FALSE, gpar=gpar, names=FALSE,
+                    strict=FALSE,ptList=ptList,xlim=xlim
+                    ,ylim=ylim)
+              
+            }else
+            {
+              
+              names <- .getStats(curFilter,curStats, frame, digits, ...)
+              
+              glpolygon(curFilter, frame,
+                  
+                  verbose=FALSE, gpar=gpar
+                  , names=names
+                  ,strict=FALSE
+                  ,pos=pos
+                  ,abs=abs
+                  ,ptList=ptList
+                  ,xlim=xlim
+                  ,ylim=ylim
+              )
+            }
+          })
+    }else
+    {
+      if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+      {
+        if(!is(filter, "filterResult"))
+          filter <- filter(frame, filter)
+        rest <- Subset(frame, !filter)
+        x <- exprs(rest[,channel.x.name])
+        y <- exprs(rest[,channel.y.name])
+        
+        
+        glpoints(filter, frame,
+            channels=c(channel.x.name, channel.y.name),
+            verbose=FALSE, gpar=gpar, strict=FALSE,ptList=ptList, ...)
+        if(outline)
+          glpolygon(filter, frame,
+              channels=c(channel.x.name, channel.y.name),
+              verbose=FALSE, gpar=gpar, names=FALSE,
+              strict=FALSE,ptList=ptList,xlim=xlim
+              ,ylim=ylim)
+        
+      }else
+      {
+        names <- .getStats(filter,stats, frame, digits, ...) 
+        
+#               browser()
+        glpolygon(filter, frame,
+#                       channels=c(channel.x.name, channel.y.name),
+            verbose=FALSE, gpar=gpar
+            , names=names
+            ,strict=FALSE
+            ,pos=pos
+            ,abs=abs
+            ,ptList=ptList
+            ,xlim=xlim
+            ,ylim=ylim
+        )
+      }
+    }
+  }
+  
+  if(!is.null(overlay.x)&&!is.null(overlay.y))
+  {
+    lpoints(overlay.x,overlay.y,col="red",cex=cex*3,pch=pch)
+    #plot stats for bool gates
+    if(stats&&is.null(filter))
+    {
+      p.stats<-length(overlay.x)/l
+#           p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+      p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
+#           browser()
+      xx<-xlim
+      yy<-ylim
+      
+      pos <- rep(pos, length=2)[1:2]
+      xx<-xx[1]+diff(xx)*pos[1]
+      yy<-yy[1]+diff(yy)*pos[2]
+      
+      gltext(xx, yy, labels=p.stats, adj=0.5, gp=gpar$gate.text)
+    }
+  }
+  
+  
+}
+
+
 ## Panel function that allows us to add filters on the plot. The actual plotting
 ## is done by either the panel.smoothScatter or the default lattice panel.xyplot
 ## function

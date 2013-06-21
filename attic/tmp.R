@@ -8,24 +8,6 @@ fcs1 <- GvHD[[1]]
 fcs2 <- GvHD[[1]]
 colnames(fcs2)[1] <- "noname"
 
-##plot overlayed pops
-xyplot(`PE Cy55-A`~`FITC-A`
-		,getData(wf[[1]],5)
-		,filter=getGate(wf[[1]],6)
-		,overlay=getData(wf[[1]],8)
-#		,contour=T
-	)
-xyplot(`PE Cy55-A`~`FITC-A`,getData(wf[1:2],5),filter=getGate(wf[1:2],6)
-		,overlay=getData(wf[1:2],8))
-
-
-xyplot(`<G560-A>`~`<R660-A>`
-        ,data=getData(gs[[1]],"cd19&cd20")
-        ,filter=getGate(gs[[1]],"transitional")
-        ,stats=T
-        ,digits=2
-      )
-
 
 
 ## a wrapper that catches and reports errors
