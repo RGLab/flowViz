@@ -344,11 +344,12 @@ setMethod("densityplot",
           ccall$data <- pd
           ccall$prepanel <- prepanel
           ccall$panel <- panel
-          ccall$frames <- data@frames
+          
           ccall$channel <- formula.struct$right.comps ## channel
           ## That is super ugly!!! How do we get to the channel name
           ## from the formula???
           ccall$channel.name <- gsub("^.*\\(`|`\\).*$", "", channel.name)
+          ccall$frames <- data[,ccall$channel.name]@frames
           ccall$as.table <- as.table
           overlap <- max(-0.5, overlap)
           ccall$overlap <- overlap
