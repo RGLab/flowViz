@@ -740,8 +740,10 @@ panel.xyplot.flowframe <- function(frame,
 	{
 		lpoints(overlay.x,overlay.y,col="red",cex=cex*3,pch=pch)
 		#plot stats for bool gates
-		if(stats&&is.null(filter))
+		if(is.null(filter))
 		{
+          if(is.logical(stats)&&stats)
+          {
 			p.stats<-length(overlay.x)/l
 #			p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
             p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
@@ -754,6 +756,7 @@ panel.xyplot.flowframe <- function(frame,
 			yy<-yy[1]+diff(yy)*pos[2]
 			
 			gltext(xx, yy, labels=p.stats, adj=0.5, gp=gpar$gate.text)
+          }
 		}
 	}
 		
