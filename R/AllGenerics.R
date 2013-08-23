@@ -53,23 +53,16 @@ setGeneric("flowPlot",function(x,...) standardGeneric("flowPlot"))
 ## ===========================================================================
 ## contour plots:
 ## ---------------------------------------------------------------------------
-setGeneric("contour", function(x,...) standardGeneric("contour"))
+setGeneric("contour")
 
 
 ## ===========================================================================
 ## Generics for all plot types defined in lattice:
 ## ---------------------------------------------------------------------------
-setGeneric("xyplot", function(x, data, ...)
-           standardGeneric("xyplot"))
-setGeneric("densityplot", function(x, data, ...)
-           standardGeneric("densityplot"))
-setGeneric("ecdfplot", function(x, data, ...)
-           standardGeneric("ecdfplot"))
-setGeneric("levelplot", function(x, data, ...)
-           standardGeneric("levelplot"))
-setGeneric("qqmath", function(x, data, ...)
-           standardGeneric("qqmath"))
-setGeneric("splom", function(x, data, ...)
-           standardGeneric("splom"))
-setGeneric("parallel", function(x, data, ...)
-           standardGeneric("parallel"))
+setGeneric("xyplot")
+setGeneric("densityplot")
+setGeneric("ecdfplot")
+setGeneric("levelplot")
+setGeneric("qqmath")
+setGeneric("splom")
+setGeneric("parallel")

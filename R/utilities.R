@@ -19,8 +19,8 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
     if(curStats)
     {
       if (!is(curFilter, "filterResult")) 
-        filter <- filter(frame, curFilter)
-      curFres<-filter
+        curFilter <- filter(frame, curFilter)
+      curFres<-curFilter
       #                   browser()   
       p.stats<-summary(curFres)@p
       #                       popNames<-names(p.stats)
