@@ -7,7 +7,7 @@ data(GvHD)
 fcs1 <- GvHD[[1]]
 fcs2 <- GvHD[[1]]
 colnames(fcs2)[1] <- "noname"
-
+xyplot(`FSC-H`~`SSC-H`,GvHD[1:2])
 
 
 ## a wrapper that catches and reports errors

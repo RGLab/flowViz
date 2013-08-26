@@ -773,7 +773,18 @@ panel.xyplot.flowframe <- function(frame,
 setMethod("xyplot",
           signature=signature(x="formula",
                               data="flowSet"),
-          definition=function(x,
+          definition= function(x,data, ...){
+            thisTrellisObj <- .xyplot.flowSet(x, data, ...)
+#            browser()
+            thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
+            thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData@frames
+            thisTrellisObj
+          })
+      
+## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
+## it is within flowViz::xyplot method that changes it back to data@frames
+## however ncdfFlow::xyplot keeps it as it is
+.xyplot.flowSet <- function(x,
                               data,
                               smooth=TRUE,
                               filter=NULL,
@@ -841,12 +852,13 @@ setMethod("xyplot",
 #		  browser()
           data <- data[,c(channel.x.name,channel.y.name)]
           densityplot(x, data=pd, prepanel=prepanel, panel=panel,
-                      frames=data@frames, channel.x=channel.x,
+                      frames=data, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
                       smooth=smooth, gp=gp, as.table=as.table, filter=filter,
                       par.settings=par.settings, ...)
-      })
+          
+      }
 
 
 

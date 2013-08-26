@@ -279,7 +279,7 @@ setMethod("glpolygon",
               data <- channels
           xp <- x@boundaries[,data[1]]
           yp <- x@boundaries[,data[2]]
-          class(gpar) <- "gpar"
+#          class(gpar) <- "gpar"
           if(plot){
               if(inverse){
                   mx <- which.min(yp)
