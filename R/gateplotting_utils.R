@@ -38,18 +38,6 @@ flowViz.state[["lattice.theme"]] <-
                                          col="black",
                                          lwd=1,
                                          lty="dotted")
-		 				,superpose.polygon=list(alpha=rep(1,7)
-												,col=RColorBrewer::brewer.pal(7, "Set2")
-												,border=rep("black",7)
-												,lty=rep(1,7)
-												,lwd=rep(1,7)
-												)	
-						
-						,strip.background=list(col=rev(gray(seq(0.3,0.8,length=5))))
-						
-						,background=list(col="white")
-
-						
 						
 						,argcolramp = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
 						,argcolramp_bin = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
@@ -358,7 +346,7 @@ flowViz.par.get <- function (name = NULL)
 {
     ## FIXME: We want this to be device-specific, needs to be set up in the same
     ## way as it is done in lattice.
-    lPars <- c(flowViz.state[["lattice.theme"]]$X11cairo, trellis.par.get(name))
+    lPars <- c(flowViz.state[["lattice.theme"]]$X11cairo, ggplot2like())
     if (is.null(name)) 
         lPars
     else if (name %in% names(lPars)) 
@@ -397,3 +385,5 @@ flowViz.par.set <- function (name, value, ..., theme, warn = TRUE, strict = FALS
         lattice:::updateList(flowViz.state[["lattice.theme"]]$X11cairo, theme[fvPars])
     invisible()
 }
+
+

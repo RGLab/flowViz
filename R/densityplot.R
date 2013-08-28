@@ -94,8 +94,6 @@ panel.densityplot.flowset <-
         }
     }  
     ny <- nlevels(y)
-#	browser()
-#    superpose.polygon <- trellis.par.get("superpose.polygon")
 	superpose.polygon <- flowViz.par.get("superpose.polygon")
     border <- rep(col, length = ny)
     col <- rep(fill, length = ny)
@@ -276,8 +274,8 @@ setMethod("densityplot",
       {
           ocall <- sys.call(sys.parent())
           ccall <- match.call(expand.dots = TRUE)
-          ## ccall <- match.call(expand.dots = FALSE)
-          ## ccall <- manipulate.call(ocall, ccall)
+          
+          
           if(! "name" %in% names(pData(data)))
               pData(data)$name <- sampleNames(data)
           pd <- pData(phenoData(data))
@@ -344,7 +342,7 @@ setMethod("densityplot",
           ccall$data <- pd
           ccall$prepanel <- prepanel
           ccall$panel <- panel
-          
+          ccall$par.settings <- gpar
           ccall$channel <- formula.struct$right.comps ## channel
           ## That is super ugly!!! How do we get to the channel name
           ## from the formula???

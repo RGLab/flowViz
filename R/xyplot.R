@@ -816,8 +816,8 @@ setMethod("xyplot",
           ## we have to fetch it from ... and stick the gate relevant stuff
           ## back it in there manually
            
-		  gp<-par.settings
-		  par.settings<-flowViz.par.get()#default theme for lattice
+		  gp <- par.settings
+		  par.settings <- flowViz.par.get()#default theme for lattice
 		  
 		  if(!is.null(gp))#update the default theme if necessary
 		  {
