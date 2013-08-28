@@ -11,7 +11,7 @@ prepanel.densityplot.flowset <-
 {
     channel.name <- unique(which.channel[subscripts])
     stopifnot(length(channel.name) == 1)
-    xl <- range(eapply(frames, range, channel.name), finite=TRUE)
+    xl <- range(eapply(frames@frames, range, channel.name), finite=TRUE)
     list(xlim=xl + c(-1,1)*0.07*diff(xl))   
 }
 
@@ -265,7 +265,17 @@ analyzeDensityFormula <- function(x, dot.names)
 
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, channels, xlab,
+          function(x, data, ...){
+            
+            #construct lattice object
+            thisTrellisObj <- .densityplot.flowSet(x, data, ...)
+            #pass frames slot
+            thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
+            thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData@frames
+            thisTrellisObj
+    })
+
+.densityplot.flowSet <- function(x, data, channels, xlab,
                    as.table = TRUE, overlap = 0.3,
                    prepanel = prepanel.densityplot.flowset,
                    panel = panel.densityplot.flowset,
@@ -347,7 +357,7 @@ setMethod("densityplot",
           ## That is super ugly!!! How do we get to the channel name
           ## from the formula???
           ccall$channel.name <- gsub("^.*\\(`|`\\).*$", "", channel.name)
-          ccall$frames <- data[,ccall$channel.name]@frames
+          ccall$frames <- data
           ccall$as.table <- as.table
           overlap <- max(-0.5, overlap)
           ccall$overlap <- overlap
@@ -364,7 +374,7 @@ setMethod("densityplot",
           ans <- eval.parent(ccall)
           ans$call <- ocall
           ans
-      })
+      }
 
 
 

@@ -775,7 +775,6 @@ setMethod("xyplot",
                               data="flowSet"),
           definition= function(x,data, ...){
             thisTrellisObj <- .xyplot.flowSet(x, data, ...)
-#            browser()
             thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
             thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData@frames
             thisTrellisObj
@@ -849,8 +848,7 @@ setMethod("xyplot",
           channel.y <- as.expression(channel.y)
           ## use densityplot method with dedicated panel and prepanel
           ## functions to do the actual plotting
-#		  browser()
-          data <- data[,c(channel.x.name,channel.y.name)]
+          
           densityplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
