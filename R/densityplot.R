@@ -504,7 +504,7 @@ setMethod("densityplot",
                    prepanel = prepanel.densityplot.flowset,
                    panel = panel.densityplot.flowset,
                    filter=NULL, scales=list(y=list(draw=F)),
-                   groups, ...)
+                   groups, axis= axis.grid, ...)
       {
           ocall <- sys.call(sys.parent())
           ccall <- match.call(expand.dots = TRUE)
@@ -585,6 +585,7 @@ setMethod("densityplot",
           ccall$as.table <- as.table
           overlap <- max(-0.5, overlap)
           ccall$overlap <- overlap
+          ccall$axis <- axis
           ccall$xlab <- xlab
           ccall$horizontal <- TRUE
           ccall$subscripts <- TRUE

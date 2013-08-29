@@ -26,7 +26,7 @@ importFrom(KernSmooth, bkde2D)
 
 importFrom(utils, modifyList)
 
-importFrom(latticeExtra, ecdfplot,ggplot2like)
+importFrom(latticeExtra, ecdfplot,ggplot2like,axis.grid)
 
 importFrom(MASS, kde2d)
 
