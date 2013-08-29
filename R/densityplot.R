@@ -56,6 +56,7 @@ panel.densityplot.flowset <-
 			 ,digits=2
 			 ,abs=FALSE
 			 ,fitGate=TRUE
+             ,checkName = TRUE
              ,gp, ...)
 {
 	
@@ -66,6 +67,15 @@ panel.densityplot.flowset <-
     channel.name <- channel.name[which.channel]
     ycode <- as.numeric(y)
     validName <- !length(grep("\\(", channel.name))
+    if(checkName)
+      validName <- !(length(grep("\\(", channel.x.name)) ||
+            length(grep("\\(", channel.y.name)))
+    else
+      validName <- TRUE
+    
+    if(!validName)
+      warning("Gate will not be plotted because channel names contain '(' character! Try to set checkName to FALSE to skip this check.")
+
     if (any(duplicated(ycode)))
         warning("Some combinations seem to have multiple samples.  \n  ",
                 "Only one will be used.")
@@ -293,6 +303,7 @@ panel.densityplot.flowFrame <-
         ,abs=FALSE
         ,fitGate=TRUE
         ,refline=NULL
+        ,checkName = TRUE
         ,...
         )
 {
@@ -300,7 +311,14 @@ panel.densityplot.flowFrame <-
   
           margin <- min(1, max(0, margin))
           validName <- !length(grep("\\(", channel.x.name))
+          if(checkName)
+            validName <- !(length(grep("\\(", channel.x.name)) ||
+                  length(grep("\\(", channel.y.name)))
+          else
+            validName <- TRUE
           
+          if(!validName)
+            warning("Gate will not be plotted because channel names contain '(' character! Try to set checkName to FALSE to skip this check.")
           border <- col
           parm <- channel.x.name
           ptList<-plotType("gdensity", parm)

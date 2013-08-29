@@ -498,7 +498,8 @@ panel.xyplot.flowframe.old <- function(x,y,frame,
 ## is done by either the panel.smoothScatter or the default lattice panel.xyplot
 ## function
 ##when xbins>0, we do the hexagon plot provided by hexbin package to improve the speed
-#overlay is a list(x=,y=), which is the extra points need to be plotted on top of the x,y 
+#overlay is a list(x=,y=), which is the extra points need to be plotted on top of the x,y
+#' @param checkName \code{logical} indicating whether to skip checking the bracket '(' in channel name
 panel.xyplot.flowframe <- function(frame,
                                    filter=NULL,
                                    smooth=TRUE,
@@ -519,6 +520,7 @@ panel.xyplot.flowframe <- function(frame,
 									,abs=FALSE
 									,overlay.x=NULL
 									,overlay.y=NULL
+                                    ,checkName = TRUE
 						   			,...)
 {
   
@@ -545,9 +547,14 @@ panel.xyplot.flowframe <- function(frame,
     ## Whenever we have a function call in the formula we might no longer be the
     ## original scale in which the gate was defined, and we have no clue how to
     # plot it
-    validName <- !(length(grep("\\(", channel.x.name)) ||
+    if(checkName)
+      validName <- !(length(grep("\\(", channel.x.name)) ||
                    length(grep("\\(", channel.y.name)))
+    else
+      validName <- TRUE
 	
+    if(!validName)
+      warning("Gate will not be plotted because channel names contain '(' character! Try to set checkName to FALSE to skip this check.")
 	 ## in order to display overlay ,smooth needs to be set as TRUE
 	 if(!is.null(overlay.x))
 		smooth<-TRUE
@@ -646,7 +653,7 @@ panel.xyplot.flowframe <- function(frame,
 		   
 			ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
-#	}
+
 #    browser()
 	#plot gate
 	if(!is.null(filter) && validName){

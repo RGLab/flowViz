@@ -14,11 +14,11 @@ fs <- GvHD[c(1,2,8,9)]
 fs <- ncdfFlowSet(fs)
 system.time(
     xyplot(`FSC-H`~`SSC-H`|Visit+Patient,fs,xbin=32,smooth=F
-#            ,par.settings=trellis.par.get()
+#        ,par.settings=list(axis.line=list(col="black"))
             )
 )
-aa <- flowViz.par.get()
-
+aa <- trellis.par.get()
+bb <- flowViz.par.get()
 dev.off()
 x11()
 system.time(
@@ -27,7 +27,9 @@ densityplot(~`SSC-H`
               ,stack=F
               ,filter = rectangleGate("SSC-H"=c(400,Inf))
               ,fitGate = F
-            ,col="black"
+             
+             
+#            ,col="black"
 #,fill ="red"
             
           )
