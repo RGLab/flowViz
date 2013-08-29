@@ -1,15 +1,38 @@
 ## load a flowFrame
 library(flowViz)
+library(ncdfFlow)
 library(grid)
 library(IDPmisc)
+library(hexbin)
+library(latticeExtra)
 lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 data(GvHD)
 fcs1 <- GvHD[[1]]
 fcs2 <- GvHD[[1]]
 colnames(fcs2)[1] <- "noname"
-xyplot(`FSC-H`~`SSC-H`,GvHD[1:2])
+fs <- GvHD[c(1,2,8,9)]
+fs <- ncdfFlowSet(fs)
+system.time(
+    xyplot(`FSC-H`~`SSC-H`|Visit+Patient,fs,xbin=32,smooth=F
+#            ,par.settings=trellis.par.get()
+            )
+)
+aa <- flowViz.par.get()
 
+dev.off()
+x11()
+system.time(
+densityplot(~`SSC-H`
+                ,fs
+              ,stack=F
+              ,filter = rectangleGate("SSC-H"=c(400,Inf))
+              ,fitGate = F
+#            ,col="black"
+            
+          )
 
+)
+pData(GvHD)
 ## a wrapper that catches and reports errors
 wrap <- function(x)
 {

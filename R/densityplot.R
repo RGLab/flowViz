@@ -138,7 +138,11 @@ panel.densityplot.flowset <-
 #					
 					curFilter<-filter[[nm]]
 #					browser()
-                    names <- .getStats(curFilter,stats[[nm]], frames[[nm]], digits, ...)
+                    if(is.list(stats))
+                      thisStats <- stats[[nm]]
+                    else
+                      thisStats <- stats
+                    names <- .getStats(curFilter,thisStats, frames[[nm]], digits, ...)
 					
 #					browser()
 					#this plot routine is only for 2-d scatter plot
@@ -208,6 +212,197 @@ panel.densityplot.flowset <-
 }
 
 
+prepanel.densityplot.flowset.ex <- 
+    function(x, frames, channel.x.name, xlim , ...)
+{
+  
+  if (length(nm <- as.character(x)) > 1)
+    stop("must have only one flow frame per panel")
+  
+  if (length(nm) == 1){
+    ranges <- range(frames[[nm]])
+    if(missing(xlim)){
+      #use default calculation
+      xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+            tmp <- ranges[, channel.x.name]
+            xd <- diff(tmp)/15
+            tmp + c(-1,1)*xd
+          }else NULL
+    }
+    
+    return(list(xlim=xlim,ylim = c(0,1)))
+  }else
+    return(list())
+}
+
+panel.densityplot.flowset.ex <- function(x,
+    frames,
+    filter = NULL,
+    channel.x,
+    channel.y
+    ,stats = FALSE
+    ,...)
+{
+  
+  nm <- as.character(x)
+  if (length(nm) < 1) return()
+  ## 'filter' either has to be a single filter, or a list of filters matching
+  ## the flowSet's sample names, or a filterResultList.
+  
+  if(!is.null(filter)){
+    if(!is.list(filter)){
+      if(is(filter, "filter")){
+        filter <- lapply(seq_along(nm), function(x) filter)
+        names(filter) <- nm
+      }
+    }else if(!is(filter, "filterResultList")&&!is(filter, "filtersList"))
+      filter <- as(filter, "filterResultList")
+    
+    if(!nm %in% names(filter) || !(is(filter[[nm]] ,"filter")||is(filter[[nm]] ,"filters"))){
+      warning("'filter' must either be a filtersList,filterResultList, a single\n",
+          "filter object or a named list of filter objects.",
+          call.=FALSE)
+      filter <- NULL
+    }
+  }
+  
+  if(!is.list(stats)){
+    stats <- lapply(seq_along(nm), function(x) stats)
+    names(stats) <- nm
+    
+  }
+  panel.densityplot.flowFrame(frame=frames[[nm]], filter=filter[[nm]], stats = stats[[nm]], ...)
+}
+panel.densityplot.flowFrame <-
+    function(frame,
+        darg=list(n=50, na.rm=TRUE),
+        filter=NULL,
+        margin=0.005,
+        outline=FALSE,
+        channel.x.name,
+        channel.y.name,
+        fill= "#619CFF",
+        lty= 1,
+        lwd= 1,
+        alpha= 1,
+        col= "transparent",
+        gp
+        ,stats = FALSE
+        ,pos=0.5
+        ,digits=2
+        ,abs=FALSE
+        ,fitGate=TRUE
+        ,refline=NULL
+        ,...
+        )
+{
+          
+  
+          margin <- min(1, max(0, margin))
+          validName <- !length(grep("\\(", channel.x.name))
+          
+          border <- col
+          parm <- channel.x.name
+          ptList<-plotType("gdensity", parm)
+         
+          xx <- exprs(frame)[,channel.x.name]
+          r <- unlist(range(frame, channel.x.name))
+          ## we ignore data that has piled up on the margins
+          rl <- r + c(-1,1)*min(100, 0.06*diff(r))
+          pl <- xx<=r[1]
+          pr <- xx>=r[2]
+          xxt <- xx[!(pl | pr)]
+          ## we indicate piled up data by vertical lines (if > 1%) unless
+          ## margin=FALSE
+          if(margin<1)
+            mbar(xx, list(pl, pr), r, 1, col, margin)
+          ## we need a smaller bandwidth than the default and keep it constant
+          if(length(xxt)){
+            if(!("bw" %in% names(darg)))
+              darg$bw <- diff(r)/50
+            h <- do.call(density, c(list(x=xxt), darg))
+            n <- length(h$x)
+            max.d <- max(h$y)
+            xl <- h$x[c(1, 1:n, n)]
+            yl <- c(0, h$y, 0) / max.d
+#            browser()
+            panel.polygon(x=xl,y=yl, col=fill, border=NA, alpha=alpha)
+            ## add the filterResult if possible, we get them from the output of
+            ## glpolygon (with plot=FALSE)
+            if(!is.null(filter) && validName){    
+    
+              names <- .getStats(filter,stats, frame, digits, ...)
+              
+    
+              #this plot routine is only for 2-d scatter plot
+              #thus set plot as FALSE,just use it to get bounds
+              #add plot stats/names
+              bounds <- glpolygon(filter, frame,
+                  channels=parm
+                  ,ptList=ptList
+                  ,verbose=FALSE
+                  , plot=FALSE 
+                  ,names=names
+                  ,xlim=r
+                  ,ylim=c(0,1)
+                  ,strict=FALSE)
+              oo <- options(warn=-1)
+              on.exit(options(oo))
+              if(!is.na(bounds)){
+                ## iterate over gate regions
+                for(j in seq_along(bounds)){
+                  tb <- bounds[[j]]
+                  
+                  if(fitGate)
+                  {
+                    tb_min <- min(tb)
+                    tb_max <- max(tb)
+                    
+                    tb_min <- max(min(xl),tb_min)
+                    tb_max <- min(max(xl),tb_max)
+                    if(ncol(tb) == 1 && colnames(tb) == parm){
+                      sel <- xl >= tb_min & xl <= tb_max
+                      if(any(sel)){
+                        afun <- approxfun(xl, yl)
+                        xr <- c(tb_min, seq(tb_min, tb_max, len=100), tb_max)
+#                        browser()
+                        yr <- c(0,afun(xr[-c(1, length(xr))]),0)
+                        gpd<-gp$gate.density
+                        panel.polygon(xr, yr
+                                      , border=gpd$col
+                                      , col=gpd$fill,
+                                      alpha=gpd$alpha, lwd=gpd$lwd,
+                                      lty=gpd$lty
+                                   )
+                      }
+                    }	
+                  }else
+                  {
+    #								browser()
+                    gpg<-gp$gate
+                    panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
+                        ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                    panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
+                        ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                  }
+                  
+                }
+              }
+              
+              
+              
+              options(oo)
+            }
+
+            panel.lines(x=xl,y=yl, col=border, lty=lty,lwd=lwd)
+    
+          }else{
+            panel.lines(rl, rep(0,2), col="black")
+          }
+      if(!is.null(refline))
+        panel.abline(v=refline)
+}
+
 analyzeDensityFormula <- function(x, dot.names)
 {
     ans <- list()
@@ -262,18 +457,38 @@ analyzeDensityFormula <- function(x, dot.names)
 
 
 
-
+#' @param stack \code{logical} indicating whether to stack `name` on y axis
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, ...){
+          function(x, data, stack = TRUE, ...){
             
             #construct lattice object
-            thisTrellisObj <- .densityplot.flowSet(x, data, ...)
+            if(stack)
+              thisTrellisObj <- .densityplot.flowSet(x, data, ...)
+            else
+            {
+#              browser()
+              #add dummy y term in order to use .xyplot.flowSet to construct lattice object
+              if(length(x[[2]]) == 1)
+                xTerm <- x[[2]]
+              else
+                xTerm <- x[[2]][[2]]
+              thisFormula <- eval(substitute(thisX~y, list(thisX = xTerm)))
+              thisFormula[[3]] <- x[[2]]
+              
+              thisTrellisObj <- .xyplot.flowSet(thisFormula, data
+                                              , panel = panel.densityplot.flowset.ex
+                                              , prepanel = prepanel.densityplot.flowset.ex
+                                              , ylab = ""
+                                              ,...)
+            }
+              
             #pass frames slot
             thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
             thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData@frames
             thisTrellisObj
     })
+
 
 .densityplot.flowSet <- function(x, data, channels, xlab,
                    as.table = TRUE, overlap = 0.3,

@@ -510,7 +510,7 @@ panel.xyplot.flowframe <- function(frame,
                                    alpha=gpar$flow.symbol$alpha,
                                    cex=gpar$flow.symbol$cex,
                                    col=gpar$flow.symbol$col,
-                                   gp
+                                   gpar
 								   ,xbins=0
 						   		   ,binTrans=sqrt
 						   			,stats = FALSE
@@ -531,10 +531,8 @@ panel.xyplot.flowframe <- function(frame,
 	xlim<-limits$xlim
 	ylim<-limits$ylim
     argcolramp <- list(...)$colramp
-	gpar <- flowViz.par.get()
+	
 	parameters<-c(channel.x.name, channel.y.name)
-    if(!is.null(gp))
-        gpar <- lattice:::updateList(gpar, gp)
     if(is.null(gpar$gate$cex))
         gpar$gate$cex <- cex
     if(is.null(gpar$gate$pch))
@@ -781,8 +779,8 @@ setMethod("xyplot",
           })
       
 ## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
-## it is within flowViz::xyplot method that changes it back to data@frames
-## however ncdfFlow::xyplot keeps it as it is
+## within flowViz::xyplot method that changes it back to data@frames
+## however ncdfFlow::xyplot keeps data as it is
 .xyplot.flowSet <- function(x,
                               data,
                               smooth=TRUE,
@@ -815,13 +813,17 @@ setMethod("xyplot",
           ## we have to fetch it from ... and stick the gate relevant stuff
           ## back it in there manually
            
-		  gp <- par.settings
-		  par.settings <- flowViz.par.get()#default theme for lattice
+		  this.par.settings <- par.settings #copy the customized settings
+		  gpar <- flowViz.par.get()# grab the default theme
 		  
-		  if(!is.null(gp))#update the default theme if necessary
+          #update the customized settings 
+		  if(!is.null(this.par.settings))
 		  {
-			  par.settings<-lattice:::updateList(par.settings,gp)  
-		  }
+            this.par.settings <- lattice:::updateList(gpar, this.par.settings)
+              
+		  }else
+            this.par.settings <- gpar
+            
           ## ugly hack to suppress warnings about coercion introducing
           ## NAs (needs to be `undone' inside prepanel and panel
           ## functions):
@@ -848,13 +850,12 @@ setMethod("xyplot",
           channel.y <- as.expression(channel.y)
           ## use densityplot method with dedicated panel and prepanel
           ## functions to do the actual plotting
-          
           densityplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
-                      smooth=smooth, gp=gp, as.table=as.table, filter=filter,
-                      par.settings=par.settings, ...)
+                      smooth=smooth, gp=this.par.settings, as.table=as.table, filter=filter,
+                      par.settings=this.par.settings, ...)
           
       }
 
