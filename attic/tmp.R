@@ -27,7 +27,8 @@ densityplot(~`SSC-H`
               ,stack=F
               ,filter = rectangleGate("SSC-H"=c(400,Inf))
               ,fitGate = F
-#            ,col="black"
+            ,col="black"
+#,fill ="red"
             
           )
 

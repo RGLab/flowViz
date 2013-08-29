@@ -457,31 +457,13 @@ analyzeDensityFormula <- function(x, dot.names)
 
 
 
-#' @param stack \code{logical} indicating whether to stack `name` on y axis
+
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, stack = TRUE, ...){
+          function(x, data, ...){
             
             #construct lattice object
-            if(stack)
-              thisTrellisObj <- .densityplot.flowSet(x, data, ...)
-            else
-            {
-#              browser()
-              #add dummy y term in order to use .xyplot.flowSet to construct lattice object
-              if(length(x[[2]]) == 1)
-                xTerm <- x[[2]]
-              else
-                xTerm <- x[[2]][[2]]
-              thisFormula <- eval(substitute(thisX~y, list(thisX = xTerm)))
-              thisFormula[[3]] <- x[[2]]
-              
-              thisTrellisObj <- .xyplot.flowSet(thisFormula, data
-                                              , panel = panel.densityplot.flowset.ex
-                                              , prepanel = prepanel.densityplot.flowset.ex
-                                              , ylab = ""
-                                              ,...)
-            }
+            thisTrellisObj <- .densityplot.adapor(x, data, ...) 
               
             #pass frames slot
             thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
@@ -489,6 +471,33 @@ setMethod("densityplot",
             thisTrellisObj
     })
 
+#' dispatch to different trellis object contructing function based on stack argument
+#' @param stack \code{logical} indicating whether to stack `name` on y axis
+.densityplot.adapor <- function(x, data, stack = TRUE, ...){
+  
+      if(stack)
+        thisObj <- .densityplot.flowSet(x, data, ...)
+      else
+      {
+    #              browser()
+        #add dummy y term in order to use .xyplot.flowSet to construct lattice object
+        if(length(x[[2]]) == 1)
+          xTerm <- x[[2]]
+        else
+          xTerm <- x[[2]][[2]]
+        thisFormula <- eval(substitute(thisX~y, list(thisX = xTerm)))
+        thisFormula[[3]] <- x[[2]]
+        
+        thisObj <- .xyplot.flowSet(thisFormula, data
+            , panel = panel.densityplot.flowset.ex
+            , prepanel = prepanel.densityplot.flowset.ex
+            , ylab = ""
+            ,...)
+        #append channel.name to work ncdfFlow::densityplot
+        thisObj$panel.args.common$channel.name <- thisObj$panel.args.common$channel.x.name
+      }
+      thisObj
+}
 
 .densityplot.flowSet <- function(x, data, channels, xlab,
                    as.table = TRUE, overlap = 0.3,
