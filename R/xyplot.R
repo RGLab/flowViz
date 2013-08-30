@@ -801,6 +801,7 @@ setMethod("xyplot",
                               , axis= axis.grid
                               ,defaultCond = "name" #to override the default conditional variable 'name'
                                             #mainly used for plotting single flowFrame
+                              , between = list(x=0.2,y=0.2)                              
                               , ...)
       {
        
@@ -863,7 +864,7 @@ setMethod("xyplot",
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
                       smooth=smooth, gp=this.par.settings, as.table=as.table, filter=filter,
-                      par.settings=this.par.settings, axis = axis, ...)
+                      par.settings=this.par.settings, axis = axis, between = between, ...)
           
       }
 

@@ -68,8 +68,8 @@ panel.densityplot.flowset <-
     ycode <- as.numeric(y)
     validName <- !length(grep("\\(", channel.name))
     if(checkName)
-      validName <- !(length(grep("\\(", channel.x.name)) ||
-            length(grep("\\(", channel.y.name)))
+      validName <- !(length(grep("\\(", channel.name)) ||
+            length(grep("\\(", channel.name)))
     else
       validName <- TRUE
     
@@ -497,7 +497,7 @@ setMethod("densityplot",
         thisObj <- .densityplot.flowSet(x, data, ...)
       else
       {
-    #              browser()
+    
         #add dummy y term in order to use .xyplot.flowSet to construct lattice object
         if(length(x[[2]]) == 1)
           xTerm <- x[[2]]
