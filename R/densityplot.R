@@ -388,7 +388,7 @@ panel.densityplot.flowFrame <-
                 mapply(filter,stats,FUN=function(curFilter,curStats){
                       
 #                      browser()
-                      names <- .getStats(curFilter,stats, frame, digits, ...)
+                      names <- .getStats(curFilter,curStats, frame, digits, ...)
                       
                       
                       #this plot routine is only for 2-d scatter plot

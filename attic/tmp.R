@@ -19,14 +19,13 @@ overlay <- Subset(fs[1],g2)
 dev.off()
 x11()
 grid.arrange(
-    xyplot(`FSC-H`~`SSC-H`,fs
+    xyplot(`FSC-H`~`SSC-H`,fs[1]
               ,xbin=64
               ,smooth=F 
-              , par.settings = list(overlay.symbol = list(fill = "red")
-                                     ,axis.line = list(col = "black")
-                                      ,strip.border = list (col = "black")
-                                    )
-#            ,filter = g1, overlay =overlay
+            ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
+#              ,filter = g1
+#    , overlay =overlay
+    ,stats=T
       )
   ,xyplot(`FSC-H`~`SSC-H`, fs[1]
       ,xbin=64
@@ -43,9 +42,11 @@ bb <- flowViz.par.get()
 system.time(
 densityplot(~`SSC-H`
                 ,fs
-              ,stack=F
-              ,filter = rectangleGate("SSC-H"=c(400,Inf))
+              ,stack=T
+#              ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
+              ,filter =g1
               ,fitGate = F
+      ,stats =T
           )
 
 )
