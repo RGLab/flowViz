@@ -62,6 +62,7 @@ panel.densityplot.flowset <-
 	
     margin <- min(1, max(0, margin))
     which.channel <- tail(which.packet(), 1)
+    
     lc <- length(channel)
     channel <- channel[[which.channel]]
     channel.name <- channel.name[which.channel]
@@ -80,29 +81,7 @@ panel.densityplot.flowset <-
         warning("Some combinations seem to have multiple samples.  \n  ",
                 "Only one will be used.")
     nnm <- as.character(x)
-    if(!is.null(filter)){
-        if(lc > 1){
-            if(!is.list(filter) && is(filter, "filterResultList") ||
-               length(filter) != lc)
-                stop("You are plotting several channels. Argument 'filter'/n",
-                     "must be a list of the same length as number of channels.",
-                     call.=FALSE)
-            filter <- filter[[which.channel]]
-        }
-        if(!is.list(filter)){
-            if(is(filter, "filter")){
-                filter <- lapply(seq_along(nnm), function(x) filter)
-                names(filter) <- nnm
-            }
-        }else if(!is(filter, "filterResultList"))
-            filter <- as(filter, "filterResultList")
-        if(!(nnm %in% names(filter) || !is(filter[[nnm]] ,"filter"))){
-            warning("'filter' must either be a filterResultList, a single\n",
-                    "filter object or a named list of filter objects.",
-                    call.=FALSE)
-            filter <- NULL
-        }
-    }  
+    filter <- .processFilter(filter, nnm, lc = lc, which.channel = which.channel)  
     ny <- nlevels(y)
 	superpose.polygon <- flowViz.par.get("superpose.polygon")
     border <- rep(col, length = ny)
@@ -144,8 +123,76 @@ panel.densityplot.flowset <-
                 ## add the filterResult if possible, we get them from the output of
                 ## glpolygon (with plot=FALSE)
 				
-                if(!is.null(filter[[nm]]) && validName){    
-#					
+                if(!is.null(filter[[nm]]) && validName){
+                  curFilter <- filter[[nm]]
+                  
+                  if(is.list(stats))
+                    curStats <- stats[[nm]]
+                  else
+                    curStats <- stats
+#                browser()
+                if(is(curFilter,"filters"))
+                {
+                  mapply(curFilter,curStats,FUN=function(thisFilter,thisStats){
+#                        browser()              
+                         names <- .getStats(thisFilter,thisStats, frames[[nm]], digits, ...)
+                        
+
+                        #this plot routine is only for 2-d scatter plot
+                        #thus set plot as FALSE,just use it to get bounds
+                        #add plot stats/names
+                        bounds <- glpolygon(thisFilter, frames[[nm]],
+                            channels=parm
+                            ,ptList=ptList
+                            ,verbose=FALSE
+                            , plot=FALSE 
+                            ,names=names
+                            ,xlim=r
+                            ,ylim=c(i,i+1)
+                            ,strict=FALSE)
+                        oo <- options(warn=-1)
+                        on.exit(options(oo))
+                        if(!is.na(bounds)){
+                          ## iterate over gate regions
+                          for(j in seq_along(bounds)){
+                            tb <- bounds[[j]]
+#							browser()
+                            if(fitGate)
+                            {
+                              if(ncol(tb) == 1 && colnames(tb) == parm){
+                                sel <- xl >= min(tb) & xl <= max(tb)
+                                if(any(sel)){
+                                  afun <- approxfun(xl, yl)
+                                  xr <- c(min(tb), seq(min(tb), max(tb), len=100),
+                                      max(tb))
+                                  yr <- c(i, afun(xr[-c(1, length(xr))]), i)
+                                  gpd<-gp$gate.density
+                                  panel.polygon(xr, yr
+                                      , border=gpd$col, col=gpd$fill,
+                                      alpha=gpd$alpha, lwd=gpd$lwd,
+                                      lty=gpd$lty
+                                  )
+                                }
+                              }	
+                            }else
+                            {
+#								browser()
+                              gpg<-gp$gate
+                              panel.lines(x=c(tb[1],tb[1]),y=c(i,i+height)
+                                  ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                              panel.lines(x=c(tb[2],tb[2]),y=c(i,i+height)
+                                  ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                            }
+                            
+                          }
+                        }
+                        
+                        
+                        
+                        options(oo)
+                      })
+                }else
+                {
 					curFilter<-filter[[nm]]
 #					browser()
                     if(is.list(stats))
@@ -208,6 +255,7 @@ panel.densityplot.flowset <-
 					
                     options(oo)
                 }
+               }
 #				browser()
                 panel.lines(x=xl,y=yl, col=border[i], lty=lty[i],lwd=lwd[i])
 #                panel.lines(rl, rep(i,2), col="black")
@@ -256,25 +304,8 @@ panel.densityplot.flowset.ex <- function(x,
   
   nm <- as.character(x)
   if (length(nm) < 1) return()
-  ## 'filter' either has to be a single filter, or a list of filters matching
-  ## the flowSet's sample names, or a filterResultList.
   
-  if(!is.null(filter)){
-    if(!is.list(filter)){
-      if(is(filter, "filter")){
-        filter <- lapply(seq_along(nm), function(x) filter)
-        names(filter) <- nm
-      }
-    }else if(!is(filter, "filterResultList")&&!is(filter, "filtersList"))
-      filter <- as(filter, "filterResultList")
-    
-    if(!nm %in% names(filter) || !(is(filter[[nm]] ,"filter")||is(filter[[nm]] ,"filters"))){
-      warning("'filter' must either be a filtersList,filterResultList, a single\n",
-          "filter object or a named list of filter objects.",
-          call.=FALSE)
-      filter <- NULL
-    }
-  }
+  filter <- .processFilter(filter, nm)
   
   if(!is.list(stats)){
     stats <- lapply(seq_along(nm), function(x) stats)
@@ -343,73 +374,118 @@ panel.densityplot.flowFrame <-
             max.d <- max(h$y)
             xl <- h$x[c(1, 1:n, n)]
             yl <- c(0, h$y, 0) / max.d
-#            browser()
+
             panel.polygon(x=xl,y=yl, col=fill, border=NA, alpha=alpha)
+            
+#                        browser()
             ## add the filterResult if possible, we get them from the output of
             ## glpolygon (with plot=FALSE)
             if(!is.null(filter) && validName){    
-    
-              names <- .getStats(filter,stats, frame, digits, ...)
-              
-    
-              #this plot routine is only for 2-d scatter plot
-              #thus set plot as FALSE,just use it to get bounds
-              #add plot stats/names
-              bounds <- glpolygon(filter, frame,
-                  channels=parm
-                  ,ptList=ptList
-                  ,verbose=FALSE
-                  , plot=FALSE 
-                  ,names=names
-                  ,xlim=r
-                  ,ylim=c(0,1)
-                  ,strict=FALSE)
-              oo <- options(warn=-1)
-              on.exit(options(oo))
-              if(!is.na(bounds)){
-                ## iterate over gate regions
-                for(j in seq_along(bounds)){
-                  tb <- bounds[[j]]
-                  
-                  if(fitGate)
-                  {
-                    tb_min <- min(tb)
-                    tb_max <- max(tb)
-                    
-                    tb_min <- max(min(xl),tb_min)
-                    tb_max <- min(max(xl),tb_max)
-                    if(ncol(tb) == 1 && colnames(tb) == parm){
-                      sel <- xl >= tb_min & xl <= tb_max
-                      if(any(sel)){
-                        afun <- approxfun(xl, yl)
-                        xr <- c(tb_min, seq(tb_min, tb_max, len=100), tb_max)
-#                        browser()
-                        yr <- c(0,afun(xr[-c(1, length(xr))]),0)
-                        gpd<-gp$gate.density
-                        panel.polygon(xr, yr
-                                      , border=gpd$col
-                                      , col=gpd$fill,
-                                      alpha=gpd$alpha, lwd=gpd$lwd,
-                                      lty=gpd$lty
-                                   )
+              if(is(filter,"filters"))
+              {
+                fitGate <- FALSE #it is hard to plot multiple fitted gates
+                
+                mapply(filter,stats,FUN=function(curFilter,curStats){
+                      
+#                      browser()
+                      names <- .getStats(curFilter,stats, frame, digits, ...)
+                      
+                      
+                      #this plot routine is only for 2-d scatter plot
+                      #thus set plot as FALSE,just use it to get bounds
+                      #add plot stats/names
+                      bounds <- glpolygon(curFilter, frame,
+                          channels=parm
+                          ,ptList=ptList
+                          ,verbose=FALSE
+                          , plot=FALSE 
+                          ,names=names
+                          ,xlim=r
+                          ,ylim=c(0,1)
+                          ,strict=FALSE)
+                      oo <- options(warn=-1)
+                      on.exit(options(oo))
+                      if(!is.na(bounds)){
+                        ## iterate over gate regions
+                        for(j in seq_along(bounds)){
+                          tb <- bounds[[j]]
+                          
+                          
+                            gpg<-gp$gate
+                            panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
+                                ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                            panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
+                                ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                          }
+                          
                       }
-                    }	
-                  }else
-                  {
-    #								browser()
-                    gpg<-gp$gate
-                    panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
-                        ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-                    panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
-                        ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                      
+                      options(oo)
+                    })
+              }else
+              {
+                  names <- .getStats(filter,stats, frame, digits, ...)
+                  
+        
+                  #this plot routine is only for 2-d scatter plot
+                  #thus set plot as FALSE,just use it to get bounds
+                  #add plot stats/names
+                  bounds <- glpolygon(filter, frame,
+                      channels=parm
+                      ,ptList=ptList
+                      ,verbose=FALSE
+                      , plot=FALSE 
+                      ,names=names
+                      ,xlim=r
+                      ,ylim=c(0,1)
+                      ,strict=FALSE)
+                  oo <- options(warn=-1)
+                  on.exit(options(oo))
+                  if(!is.na(bounds)){
+                    ## iterate over gate regions
+                    for(j in seq_along(bounds)){
+                      tb <- bounds[[j]]
+                      
+                      if(fitGate)
+                      {
+                        tb_min <- min(tb)
+                        tb_max <- max(tb)
+                        
+                        tb_min <- max(min(xl),tb_min)
+                        tb_max <- min(max(xl),tb_max)
+                        if(ncol(tb) == 1 && colnames(tb) == parm){
+                          sel <- xl >= tb_min & xl <= tb_max
+                          if(any(sel)){
+                            afun <- approxfun(xl, yl)
+                            xr <- c(tb_min, seq(tb_min, tb_max, len=100), tb_max)
+    #                        browser()
+                            yr <- c(0,afun(xr[-c(1, length(xr))]),0)
+                            gpd<-gp$gate.density
+                            panel.polygon(xr, yr
+                                          , border=gpd$col
+                                          , col=gpd$fill,
+                                          alpha=gpd$alpha, lwd=gpd$lwd,
+                                          lty=gpd$lty
+                                       )
+                          }
+                        }	
+                      }else
+                      {
+        #								browser()
+                        gpg<-gp$gate
+                        panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
+                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                        panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
+                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                      }
+                      
+                    }
                   }
                   
-                }
+                  
+                  
+                  options(oo)
               }
-              
-              
-              
-              options(oo)
             }
 
             panel.lines(x=xl,y=yl, col=border, lty=lty,lwd=lwd)

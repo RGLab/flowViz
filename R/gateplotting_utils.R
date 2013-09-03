@@ -28,6 +28,12 @@ flowViz.state[["lattice.theme"]] <-
 											  				,alpha=1
 											  				)
 	  									),
+                       overlay.symbol = list(alpha = 0.5
+                                             ,col = "transparent"
+                                             ,fill = "red"
+                                             ,cex = 0.5
+                                             , pch = 19
+                                            ),                 
                        flow.symbol=list(alpha=1,
                                         cex=0.8,
                                         pch=".",

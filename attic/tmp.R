@@ -5,6 +5,7 @@ library(grid)
 library(IDPmisc)
 library(hexbin)
 library(latticeExtra)
+library(gridExtra)
 lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 data(GvHD)
 fcs1 <- GvHD[[1]]
@@ -12,26 +13,39 @@ fcs2 <- GvHD[[1]]
 colnames(fcs2)[1] <- "noname"
 fs <- GvHD[c(1,2,8,9)]
 fs <- ncdfFlowSet(fs)
-system.time(
-    xyplot(`FSC-H`~`SSC-H`|Visit+Patient,fs,xbin=32,smooth=F
-#        ,par.settings=list(axis.line=list(col="black"))
-            )
-)
-aa <- trellis.par.get()
-bb <- flowViz.par.get()
+g1 <- rectangleGate("SSC-H"=c(400,Inf))
+g2 <- rectangleGate("SSC-H"=c(900,950))
+overlay <- Subset(fs[1],g2)
 dev.off()
 x11()
+grid.arrange(
+    xyplot(`FSC-H`~`SSC-H`,fs
+              ,xbin=64
+              ,smooth=F 
+              , par.settings = list(overlay.symbol = list(fill = "red")
+                                     ,axis.line = list(col = "black")
+                                      ,strip.border = list (col = "black")
+                                    )
+#            ,filter = g1, overlay =overlay
+      )
+  ,xyplot(`FSC-H`~`SSC-H`, fs[1]
+      ,xbin=64
+                ,smooth=F 
+      , par.settings = list(overlay.symbol = list(fill = "black")
+      )
+      ,filter = g1, overlay =overlay
+      )
+  )
+  
+aa <- trellis.par.get()
+bb <- flowViz.par.get()
+
 system.time(
 densityplot(~`SSC-H`
                 ,fs
               ,stack=F
               ,filter = rectangleGate("SSC-H"=c(400,Inf))
               ,fitGate = F
-             
-             
-#            ,col="black"
-#,fill ="red"
-            
           )
 
 )

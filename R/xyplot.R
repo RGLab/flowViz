@@ -555,10 +555,11 @@ panel.xyplot.flowframe <- function(frame,
 	
     if(!validName)
       warning("Gate will not be plotted because channel names contain '(' character! Try to set checkName to FALSE to skip this check.")
-	 ## in order to display overlay ,smooth needs to be set as TRUE
-	 if(!is.null(overlay.x))
-		smooth<-TRUE
-#browser()
+
+    ## in order to display overlay ,smooth needs to be set as TRUE
+    if(!is.null(overlay.x))
+         smooth<-TRUE
+    
 	if(nrow(frame)==0)
 		return (NULL)
     ## We remove margin events before passing on the data to panel.smoothScatter
@@ -740,17 +741,23 @@ panel.xyplot.flowframe <- function(frame,
 			}
 		}
 	}
-	
+#	browser()
 	if(!is.null(overlay.x)&&!is.null(overlay.y))
 	{
-		lpoints(overlay.x,overlay.y,col="red",cex=cex*3,pch=pch)
+        lpoints(overlay.x, overlay.y
+                  , col = gpar$overlay.symbol$fill
+                  , alpha = gpar$overlay.symbol$alpha
+                  , cex= gpar$overlay.symbol$cex 
+                  , pch = gpar$overlay.symbol$pch
+                  )
+		
 		#plot stats for bool gates
 		if(is.null(filter))
 		{
           if(is.logical(stats)&&stats)
           {
 			p.stats<-length(overlay.x)/l
-#			p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
+
             p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
 #			browser()
 			xx<-xlim
@@ -903,7 +910,50 @@ prepanel.xyplot.flowset <-
 		return(list())
 }
 
+## 'filter' either has to be a single filter, or a list of filters matching
+## the flowSet's sample names, or a filterResultList.
+#' @param nm \code{character} sample names
+#' @param lc \code{numeric} number of channels, only used for stacked densityplot validity check, ignored for xyplot and non-stacked densityplot
+#' @param which.channel \code{numeric} index of channel, only used for stacked densityplot validity check, ignored for xyplot and non-stacked densityplot
+.processFilter <- function(filter, nm, lc = 0, which.channel = 0){
+#  browser()
+  if(!is.null(filter)){
 
+    if(lc > 1){
+      if(!is.list(filter) && is(filter, "filterResultList") ||
+          length(filter) != lc)
+        stop("You are plotting several channels. Argument 'filter'/n",
+            "must be a list of the same length as number of channels.",
+            call.=FALSE)
+      filter <- filter[[which.channel]]
+    }
+    
+    if(!is.list(filter)){
+      if(is(filter, "filter")){
+        filter <- lapply(seq_along(nm), function(x) filter)
+        names(filter) <- nm
+      }
+    }else if(!is(filter, "filterResultList")&&!is(filter, "filtersList"))
+      filter <- as(filter, "filterResultList")
+    
+    
+    if(any(!nm %in% names(filter)) || any(sapply(nm,function(thisNM)
+                                                  !(is(filter[[thisNM]] ,"filter")||is(filter[[thisNM]] ,"filters"))
+                                            )))
+    {
+          warning("'filter' must either be a filtersList,filterResultList, a single\n",
+          "filter object or a named list of filter objects.",
+          call.=FALSE)
+      filter <- NULL
+    }
+  }
+  filter
+  
+  
+    
+   
+  
+}
 
 ## FIXMES:
 ##   - How can we cleanly deparse the formula to get to the channel
@@ -929,27 +979,9 @@ panel.xyplot.flowset <- function(x,
 {
     nm <- as.character(x)
     if (length(nm) < 1) return()
-    ## 'filter' either has to be a single filter, or a list of filters matching
-    ## the flowSet's sample names, or a filterResultList.
-  
-	if(!is.null(filter)){
-        if(!is.list(filter)){
-            if(is(filter, "filter")){
-                filter <- lapply(seq_along(nm), function(x) filter)
-                names(filter) <- nm
-            }
-        }else if(!is(filter, "filterResultList")&&!is(filter, "filtersList"))
-            filter <- as(filter, "filterResultList")
-		
-        if(!nm %in% names(filter) || !(is(filter[[nm]] ,"filter")||is(filter[[nm]] ,"filters"))){
-            warning("'filter' must either be a filtersList,filterResultList, a single\n",
-                    "filter object or a named list of filter objects.",
-                    call.=FALSE)
-            filter <- NULL
-        }
-    }
-#    x <- flowViz:::evalInFlowFrame(channel.x, frames[[nm]])
-#    y <- flowViz:::evalInFlowFrame(channel.y, frames[[nm]])
+   
+    filter <- .processFilter(filter, nm)
+
 	
 	if(!is.null(overlay))
 	{
