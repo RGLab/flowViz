@@ -11,7 +11,7 @@ setMethod("addName",
           parms <- parameters(x)
           
 		  
-#		  browser()
+
 		  
           ## 1D rectangular gate (region gate).
           if(length(parms)==1){
@@ -44,7 +44,7 @@ setMethod("addName",
 		  pos <- rep(pos, length=2)[1:2]
 		  xx<-xx[1]+diff(xx)*pos[1]
 		  yy<-yy[1]+diff(yy)*pos[2]
-		  
+          		  
 		  gltext(xx, yy, labels=name, adj=0.5, gp=gp)
           return(invisible())
       })

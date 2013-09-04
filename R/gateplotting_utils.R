@@ -1,10 +1,24 @@
 ## Helper functions that will be needed for all of the gate plotting functions
 ## These are mostly functions that do some sanity checking.
-require(grDevices)  # RColorBrewer assumes 'rgb' on the search path
+#require(grDevices)  # RColorBrewer assumes 'rgb' on the search path
 
 ## Store state info in this internal environment
 flowViz.state <- new.env(hash = FALSE)
-flowViz.state[["par"]] <- get.gpar()
+
+
+# based on colorRampPalette
+# add the optional alpha control
+#' @param alpha \code{numeric} range from 0 to 1
+.colRmpPlt <- function (alpha = 1, ...) 
+{
+  
+  colors <- rev(brewer.pal(11, "Spectral"))
+  ramp <- colorRamp(colors, ...)
+  function(n) {
+    x <- ramp(seq.int(0, 1, length.out = n))
+    rgb(x[, 1L], x[, 2L], x[, 3L], maxColorValue = 255, alpha = alpha * 255)
+  }
+}
 
 ## FIXME: We hardcode a lattice theme for the X11xcairo device for now which will be
 ## used for all other devices as well. Later this should follow the example from the
@@ -29,6 +43,7 @@ flowViz.state[["lattice.theme"]] <-
 											  				)
 	  									),
                        overlay.symbol = list(alpha = 0.5
+                                             ,bg.alpha = 0.3
                                              ,col = "transparent"
                                              ,fill = "red"
                                              ,cex = 0.5
@@ -45,9 +60,9 @@ flowViz.state[["lattice.theme"]] <-
                                          lwd=1,
                                          lty="dotted")
 						
-						,argcolramp = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
-						,argcolramp_bin = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
-						,argcolramp_flowJo = colorRampPalette(IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0)),bias=1)
+						,argcolramp = .colRmpPlt()
+#						,argcolramp_bin = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
+#						,argcolramp_flowJo = colorRampPalette(IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0)),bias=1)
 		 			
 		 			
 		 ))
@@ -63,18 +78,6 @@ plotType <- function(type, parms){
 				,parameters= parms)
 			)
 }
-## set or return graphical parameters from the internal environment
-flowViz.par <- function(x){
-    if(missing(x))
-        return(flowViz.state[["par"]])
-    if(!is.null(names(flowViz.state[["par"]])))
-        flowViz.state[["par"]][x]
-    else
-        NULL
-}
-set.flowViz.par <- function(x)
-   flowViz.state[["par"]] <- modifyList(flowViz.state[["par"]], x)
-
 
 
 
@@ -305,7 +308,7 @@ addLpoints <- function(x, data, channels, verbose=TRUE,
         x <- filterResult
     }
     exp <- exprs(Subset(data, x))
-    opar <- flowViz.par()
+    
     panel.points(exp[,channels[1]], exp[,channels[2]],
                  pch=gpar$pch, cex=gpar$cex, col=gpar$col,
                  fill=gpar$fill, alpha=gpar$alpha, ...)

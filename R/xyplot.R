@@ -507,11 +507,11 @@ panel.xyplot.flowframe <- function(frame,
                                    outline=FALSE,
                                    channel.x.name,
                                    channel.y.name,
-                                   pch=gpar$flow.symbol$pch,
-                                   alpha=gpar$flow.symbol$alpha,
-                                   cex=gpar$flow.symbol$cex,
-                                   col=gpar$flow.symbol$col,
-                                   gpar
+                                   pch=gp$flow.symbol$pch,
+                                   alpha=gp$flow.symbol$alpha,
+                                   cex=gp$flow.symbol$cex,
+                                   col=gp$flow.symbol$col,
+                                   gp
 								   ,xbins=0
 						   		   ,binTrans=sqrt
 						   			,stats = FALSE
@@ -535,15 +535,15 @@ panel.xyplot.flowframe <- function(frame,
     argcolramp <- list(...)$colramp
 	
 	parameters<-c(channel.x.name, channel.y.name)
-    if(is.null(gpar$gate$cex))
-        gpar$gate$cex <- cex
-    if(is.null(gpar$gate$pch))
-        gpar$gate$pch <- pch
+    if(is.null(gp$gate$cex))
+        gp$gate$cex <- cex
+    if(is.null(gp$gate$pch))
+        gp$gate$pch <- pch
 #	browser()
-	if(is.null(gpar$gate$plotType))
-		gpar$gate$plotType<-"l"
-	if(is.null(gpar$density))
-		gpar$density<-TRUE
+	if(is.null(gp$gate$plotType))
+		gp$gate$plotType<-"l"
+	if(is.null(gp$density))
+		gp$density<-TRUE
     ## Whenever we have a function call in the formula we might no longer be the
     ## original scale in which the gate was defined, and we have no clue how to
     # plot it
@@ -557,8 +557,8 @@ panel.xyplot.flowframe <- function(frame,
       warning("Gate will not be plotted because channel names contain '(' character! Try to set checkName to FALSE to skip this check.")
 
     ## in order to display overlay ,smooth needs to be set as TRUE
-    if(!is.null(overlay.x))
-         smooth<-TRUE
+#    if(!is.null(overlay.x))
+#         smooth<-TRUE
     
 	if(nrow(frame)==0)
 		return (NULL)
@@ -602,7 +602,7 @@ panel.xyplot.flowframe <- function(frame,
 			#for non-smoothed plot:
 			#1:always remove boundary events for hexbin version 
 			#since they are going to affect the color encoding for density
-			#2.for non-hexbin version,when gpar$density=FALSE,which means one-color non-densityscatter plot
+			#2.for non-hexbin version,when gp$density=FALSE,which means one-color non-densityscatter plot
 			#we then keep the boundary events 
 			if(margin){
 				
@@ -630,28 +630,31 @@ panel.xyplot.flowframe <- function(frame,
 				
 			}
 #			browser()
-			if(xbins>0)
+        
+            if (is.null(argcolramp))
+              argcolramp <- flowViz.par.get("argcolramp")
+            if(!is.null(overlay.x)){
+              argcolramp <- .colRmpPlt(alpha = gp$overlay.symbol$bg.alpha)
+            }
+              
+			if(xbins > 0)
 			{
 				#using hexbin package to do the hexagon plot	
-				bin<-hexbin(x,y,xbins=xbins)
-				if (is.null(argcolramp))
-					argcolramp<-flowViz.par.get("argcolramp")
-	#			if (is.null(argcolramp))
-	#				argcolramp<-colorRampPalette(c("blue","green","yellow","red"),bias=1)
-	#			browser()
-				grid.hexagons(bin,colramp = argcolramp,trans=binTrans)		
+				bin <- hexbin(x,y,xbins=xbins)
+    
+				grid.hexagons(bin,colramp = argcolramp, trans=binTrans, border =0)		
 				
 				
 			}else
 			{
-				if (is.null(argcolramp))
-					argcolramp<-flowViz.par.get("argcolramp")
-				if(gpar$density)
+				
+				if(gp$density)
 					col <- densCols(x, y, colramp=argcolramp)
+            
 				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
 	
 			}
-		   
+            
 			ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
 		}
 
@@ -664,7 +667,7 @@ panel.xyplot.flowframe <- function(frame,
 			mapply(filter,stats,FUN=function(curFilter,curStats){
 						
 						
-						if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+						if(gp$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
 						{
 							if(!is(curFilter, "filterResult"))
 								curFilter <- filter(frame, curFilter)
@@ -675,7 +678,7 @@ panel.xyplot.flowframe <- function(frame,
 							
 							glpoints(curFilter, frame,
 									channels=c(channel.x.name, channel.y.name),
-									verbose=FALSE, gpar=gpar, strict=FALSE,ptList=ptList, ...)
+									verbose=FALSE, gpar=gp, strict=FALSE,ptList=ptList, ...)
 							if(outline)
 								glpolygon(curFilter, frame,
 										channels=c(channel.x.name, channel.y.name),
@@ -690,7 +693,7 @@ panel.xyplot.flowframe <- function(frame,
 							
 							glpolygon(curFilter, frame,
 
-									verbose=FALSE, gpar=gpar
+									verbose=FALSE, gpar=gp
 									, names=names
 									,strict=FALSE
 									,pos=pos
@@ -703,7 +706,7 @@ panel.xyplot.flowframe <- function(frame,
 					})
 		}else
 		{
-			if(gpar$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
+			if(gp$gate$plotType=="p")##highlight the dots within gate,by default it is now disabled 
 			{
 				if(!is(filter, "filterResult"))
 					filter <- filter(frame, filter)
@@ -714,11 +717,11 @@ panel.xyplot.flowframe <- function(frame,
 				
 				glpoints(filter, frame,
 						channels=c(channel.x.name, channel.y.name),
-						verbose=FALSE, gpar=gpar, strict=FALSE,ptList=ptList, ...)
+						verbose=FALSE, gpar=gp, strict=FALSE,ptList=ptList, ...)
 				if(outline)
 					glpolygon(filter, frame,
 							channels=c(channel.x.name, channel.y.name),
-							verbose=FALSE, gpar=gpar, names=FALSE,
+							verbose=FALSE, gpar=gp, names=FALSE,
 							strict=FALSE,ptList=ptList,xlim=xlim
 							,ylim=ylim)
 				
@@ -729,7 +732,7 @@ panel.xyplot.flowframe <- function(frame,
 #				browser()
 				glpolygon(filter, frame,
 #						channels=c(channel.x.name, channel.y.name),
-						verbose=FALSE, gpar=gpar
+						verbose=FALSE, gpar=gp
 						, names=names
 						,strict=FALSE
 						,pos=pos
@@ -745,10 +748,10 @@ panel.xyplot.flowframe <- function(frame,
 	if(!is.null(overlay.x)&&!is.null(overlay.y))
 	{
         lpoints(overlay.x, overlay.y
-                  , col = gpar$overlay.symbol$fill
-                  , alpha = gpar$overlay.symbol$alpha
-                  , cex= gpar$overlay.symbol$cex 
-                  , pch = gpar$overlay.symbol$pch
+                  , col = gp$overlay.symbol$fill
+                  , alpha = gp$overlay.symbol$alpha
+                  , cex= gp$overlay.symbol$cex 
+                  , pch = gp$overlay.symbol$pch
                   )
 		
 		#plot stats for bool gates
@@ -767,7 +770,7 @@ panel.xyplot.flowframe <- function(frame,
 			xx<-xx[1]+diff(xx)*pos[1]
 			yy<-yy[1]+diff(yy)*pos[2]
 			
-			gltext(xx, yy, labels=p.stats, adj=0.5, gp=gpar$gate.text)
+			gltext(xx, yy, labels=p.stats, adj=0.5, gp=gp$gate.text)
           }
 		}
 	}

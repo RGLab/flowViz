@@ -1,51 +1,57 @@
 ## load a flowFrame
+unloadNamespace("flowViz")
+
 library(flowViz)
 library(ncdfFlow)
 library(grid)
 library(IDPmisc)
 library(hexbin)
 library(latticeExtra)
+library(grDevices)
 library(gridExtra)
 lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 data(GvHD)
-fcs1 <- GvHD[[1]]
-fcs2 <- GvHD[[1]]
-colnames(fcs2)[1] <- "noname"
+#fcs1 <- GvHD[[1]]
+#fcs2 <- GvHD[[1]]
+#colnames(fcs2)[1] <- "noname"
 fs <- GvHD[c(1,2,8,9)]
-fs <- ncdfFlowSet(fs)
+#fs <- ncdfFlowSet(fs)
 g1 <- rectangleGate("SSC-H"=c(400,Inf))
 g2 <- rectangleGate("SSC-H"=c(900,950))
 overlay <- Subset(fs[1],g2)
 dev.off()
 x11()
-grid.arrange(
-    xyplot(`FSC-H`~`SSC-H`,fs[1]
+#grid.arrange(
+    xyplot(`FSC-H`~`SSC-H`,fs
               ,xbin=64
               ,smooth=F 
             ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
 #              ,filter = g1
-#    , overlay =overlay
+    , overlay =overlay
     ,stats=T
       )
-  ,xyplot(`FSC-H`~`SSC-H`, fs[1]
-      ,xbin=64
-                ,smooth=F 
-      , par.settings = list(overlay.symbol = list(fill = "black")
-      )
-      ,filter = g1, overlay =overlay
-      )
-  )
-  
+#  ,xyplot(`FSC-H`~`SSC-H`, fs[1]
+#      ,xbin=64
+#                ,smooth=F 
+#      , par.settings = list(overlay.symbol = list(fill = "black")
+#      )
+#      ,filter = g1, overlay =overlay
+#      )
+#  )
+
+
+
+
 aa <- trellis.par.get()
 bb <- flowViz.par.get()
 
 system.time(
 densityplot(~`SSC-H`
                 ,fs
-              ,stack=T
+              ,stack=F
 #              ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
               ,filter =g1
-              ,fitGate = F
+              ,fitGate = T
       ,stats =T
           )
 

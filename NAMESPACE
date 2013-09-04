@@ -12,7 +12,7 @@ importFrom(graphics, abline, axis, barplot, contour, hist, layout,
            lines, pairs, par, points, polygon, rect,
            smoothScatter)
 
-importFrom(grid, get.gpar, grid.points, grid.polygon, grid.rect,
+importFrom(grid, gpar, get.gpar, grid.points, grid.polygon, grid.rect,
            current.viewport, unit)
 
 importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
@@ -21,7 +21,7 @@ importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
            panel.smoothScatter, panel.text, panel.xyplot, parallel,
            prepanel.default.parallel, qqmath, splom, trellis.par.get,
            trellis.par.set, which.packet, xyplot,standard.theme)
-
+importFrom(grDevices, rgb, colorRamp, colorRampPalette, col2rgb)
 importFrom(KernSmooth, bkde2D)
 
 importFrom(utils, modifyList)
