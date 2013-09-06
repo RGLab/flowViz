@@ -7,7 +7,41 @@
 ## with length > 1
 expr2char <- function(x) paste(deparse(x), collapse = "")
 
-
+##return a formatted stats for display
+.getStats <- function(curFilter,curStats,frame, digits, ...){
+  
+  popNames<-identifier(curFilter)
+  if(is.numeric(curStats)){
+    names <- curStats
+  }else if(is.logical(curStats))
+  {
+    
+    if(curStats)
+    {
+      if (!is(curFilter, "filterResult")) 
+        curFilter <- filter(frame, curFilter)
+      curFres<-curFilter
+      #                   browser()   
+      p.stats<-summary(curFres)@p
+      #                       popNames<-names(p.stats)
+      names<-p.stats
+      
+    }else
+    {
+      names<-list(...)$names
+      if(is.null(names))
+        names<-FALSE
+    }
+  }
+  if(!is.logical(names))
+  {
+    if(is.numeric(names)){
+      names<-paste(format(names*100,digits=digits),"%",sep="")  
+    }
+    names(names)<-popNames
+  }
+  names
+}
 evalInFlowFrame <- function(expr, envir, enclos = baseenv())
 {
     expr <- as.expression(expr)
