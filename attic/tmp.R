@@ -25,8 +25,8 @@ x11()
     xyplot(`FSC-H`~`SSC-H`,fs
               ,xbin=64
               ,smooth=F 
-            ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
-#              ,filter = g1
+#            ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
+              ,filter = g1
     , overlay =overlay
     ,stats=T
       )
@@ -48,10 +48,10 @@ bb <- flowViz.par.get()
 system.time(
 densityplot(~`SSC-H`
                 ,fs
-              ,stack=F
+              ,stack = T
 #              ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
               ,filter =g1
-              ,fitGate = T
+              ,fitGate = F
       ,stats =T
           )
 
