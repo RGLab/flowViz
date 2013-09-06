@@ -11,7 +11,7 @@ prepanel.densityplot.flowset <-
 {
     channel.name <- unique(which.channel[subscripts])
     stopifnot(length(channel.name) == 1)
-    xl <- range(eapply(frames, range, channel.name), finite=TRUE)
+    xl <- range(eapply(frames@frames, range, channel.name), finite=TRUE)
     list(xlim=xl + c(-1,1)*0.07*diff(xl))   
 }
 
@@ -56,46 +56,33 @@ panel.densityplot.flowset <-
 			 ,digits=2
 			 ,abs=FALSE
 			 ,fitGate=TRUE
+             ,checkName = TRUE
              ,gp, ...)
 {
 	
     margin <- min(1, max(0, margin))
     which.channel <- tail(which.packet(), 1)
+    
     lc <- length(channel)
     channel <- channel[[which.channel]]
     channel.name <- channel.name[which.channel]
     ycode <- as.numeric(y)
     validName <- !length(grep("\\(", channel.name))
+    if(checkName)
+      validName <- !(length(grep("\\(", channel.name)) ||
+            length(grep("\\(", channel.name)))
+    else
+      validName <- TRUE
+    
+    if(!validName)
+      warning("Gate will not be plotted because channel names contain '(' character! Try to set checkName to FALSE to skip this check.")
+
     if (any(duplicated(ycode)))
         warning("Some combinations seem to have multiple samples.  \n  ",
                 "Only one will be used.")
     nnm <- as.character(x)
-    if(!is.null(filter)){
-        if(lc > 1){
-            if(!is.list(filter) && is(filter, "filterResultList") ||
-               length(filter) != lc)
-                stop("You are plotting several channels. Argument 'filter'/n",
-                     "must be a list of the same length as number of channels.",
-                     call.=FALSE)
-            filter <- filter[[which.channel]]
-        }
-        if(!is.list(filter)){
-            if(is(filter, "filter")){
-                filter <- lapply(seq_along(nnm), function(x) filter)
-                names(filter) <- nnm
-            }
-        }else if(!is(filter, "filterResultList"))
-            filter <- as(filter, "filterResultList")
-        if(!(nnm %in% names(filter) || !is(filter[[nnm]] ,"filter"))){
-            warning("'filter' must either be a filterResultList, a single\n",
-                    "filter object or a named list of filter objects.",
-                    call.=FALSE)
-            filter <- NULL
-        }
-    }  
+    filter <- .processFilter(filter, nnm, lc = lc, which.channel = which.channel)  
     ny <- nlevels(y)
-#	browser()
-#    superpose.polygon <- trellis.par.get("superpose.polygon")
 	superpose.polygon <- flowViz.par.get("superpose.polygon")
     border <- rep(col, length = ny)
     col <- rep(fill, length = ny)
@@ -136,28 +123,83 @@ panel.densityplot.flowset <-
                 ## add the filterResult if possible, we get them from the output of
                 ## glpolygon (with plot=FALSE)
 				
-                if(!is.null(filter[[nm]]) && validName){    
-#					
+                if(!is.null(filter[[nm]]) && validName){
+                  curFilter <- filter[[nm]]
+                  
+                  if(is.list(stats))
+                    curStats <- stats[[nm]]
+                  else
+                    curStats <- stats
+#                browser()
+                if(is(curFilter,"filters"))
+                {
+                  mapply(curFilter,curStats,FUN=function(thisFilter,thisStats){
+#                        browser()              
+                         names <- .getStats(thisFilter,thisStats, frames[[nm]], digits, ...)
+                        
+
+                        #this plot routine is only for 2-d scatter plot
+                        #thus set plot as FALSE,just use it to get bounds
+                        #add plot stats/names
+                        bounds <- glpolygon(thisFilter, frames[[nm]],
+                            channels=parm
+                            ,ptList=ptList
+                            ,verbose=FALSE
+                            , plot=FALSE 
+                            ,names=names
+                            ,xlim=r
+                            ,ylim=c(i,i+1)
+                            ,strict=FALSE)
+                        oo <- options(warn=-1)
+                        on.exit(options(oo))
+                        if(!is.na(bounds)){
+                          ## iterate over gate regions
+                          for(j in seq_along(bounds)){
+                            tb <- bounds[[j]]
+#							browser()
+                            if(fitGate)
+                            {
+                              if(ncol(tb) == 1 && colnames(tb) == parm){
+                                sel <- xl >= min(tb) & xl <= max(tb)
+                                if(any(sel)){
+                                  afun <- approxfun(xl, yl)
+                                  xr <- c(min(tb), seq(min(tb), max(tb), len=100),
+                                      max(tb))
+                                  yr <- c(i, afun(xr[-c(1, length(xr))]), i)
+                                  gpd<-gp$gate.density
+                                  panel.polygon(xr, yr
+                                      , border=gpd$col, col=gpd$fill,
+                                      alpha=gpd$alpha, lwd=gpd$lwd,
+                                      lty=gpd$lty
+                                  )
+                                }
+                              }	
+                            }else
+                            {
+#								browser()
+                              gpg<-gp$gate
+                              panel.lines(x=c(tb[1],tb[1]),y=c(i,i+height)
+                                  ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                              panel.lines(x=c(tb[2],tb[2]),y=c(i,i+height)
+                                  ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                            }
+                            
+                          }
+                        }
+                        
+                        
+                        
+                        options(oo)
+                      })
+                }else
+                {
 					curFilter<-filter[[nm]]
-					
-					if(stats)
-					{
-						if (!is(curFilter, "filterResult")) 
-							curFilter <- filter(frames[[nm]], curFilter)
-						curFres<-curFilter
-#					browser()	
-						p.stats<-summary(curFres)@p
-						popNames<-names(p.stats)
-#						p.stats<-sprintf(paste("%.",prec,"f%%",sep=""),p.stats*100)
-                        p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
-						names<-p.stats
-						names(names)<-popNames
-					}else
-					{
-						names<-list(...)$names
-						if(is.null(names))
-							names<-FALSE
-					}
+#					browser()
+                    if(is.list(stats))
+                      thisStats <- stats[[nm]]
+                    else
+                      thisStats <- stats
+                    names <- .getStats(curFilter,thisStats, frames[[nm]], digits, ...)
 					
 #					browser()
 					#this plot routine is only for 2-d scatter plot
@@ -213,6 +255,7 @@ panel.densityplot.flowset <-
 					
                     options(oo)
                 }
+               }
 #				browser()
                 panel.lines(x=xl,y=yl, col=border[i], lty=lty[i],lwd=lwd[i])
 #                panel.lines(rl, rep(i,2), col="black")
@@ -226,6 +269,233 @@ panel.densityplot.flowset <-
         panel.abline(v=refline)
 }
 
+
+prepanel.densityplot.flowset.ex <- 
+    function(x, frames, channel.x.name, xlim , ...)
+{
+  
+  if (length(nm <- as.character(x)) > 1)
+    stop("must have only one flow frame per panel")
+  
+  if (length(nm) == 1){
+    ranges <- range(frames[[nm]])
+    if(missing(xlim)){
+      #use default calculation
+      xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
+            tmp <- ranges[, channel.x.name]
+            xd <- diff(tmp)/15
+            tmp + c(-1,1)*xd
+          }else NULL
+    }
+    
+    return(list(xlim=xlim,ylim = c(0,1)))
+  }else
+    return(list())
+}
+
+panel.densityplot.flowset.ex <- function(x,
+    frames,
+    filter = NULL,
+    channel.x,
+    channel.y
+    ,stats = FALSE
+    ,...)
+{
+  
+  nm <- as.character(x)
+  if (length(nm) < 1) return()
+  
+  filter <- .processFilter(filter, nm)
+  
+  if(!is.list(stats)){
+    stats <- lapply(seq_along(nm), function(x) stats)
+    names(stats) <- nm
+    
+  }
+  panel.densityplot.flowFrame(frame=frames[[nm]], filter=filter[[nm]], stats = stats[[nm]], ...)
+}
+panel.densityplot.flowFrame <-
+    function(frame,
+        darg=list(n=50, na.rm=TRUE),
+        filter=NULL,
+        margin=0.005,
+        outline=FALSE,
+        channel.x.name,
+        channel.y.name,
+        fill= "#619CFF",
+        lty= 1,
+        lwd= 1,
+        alpha= 1,
+        col= "transparent",
+        gp
+        ,stats = FALSE
+        ,pos=0.5
+        ,digits=2
+        ,abs=FALSE
+        ,fitGate=TRUE
+        ,refline=NULL
+        ,checkName = TRUE
+        ,...
+        )
+{
+          
+  
+          margin <- min(1, max(0, margin))
+          validName <- !length(grep("\\(", channel.x.name))
+          if(checkName)
+            validName <- !(length(grep("\\(", channel.x.name)) ||
+                  length(grep("\\(", channel.y.name)))
+          else
+            validName <- TRUE
+          
+          if(!validName)
+            warning("Gate will not be plotted because channel names contain '(' character! Try to set checkName to FALSE to skip this check.")
+          border <- col
+          parm <- channel.x.name
+          ptList<-plotType("gdensity", parm)
+         
+          xx <- exprs(frame)[,channel.x.name]
+          r <- unlist(range(frame, channel.x.name))
+          ## we ignore data that has piled up on the margins
+          rl <- r + c(-1,1)*min(100, 0.06*diff(r))
+          pl <- xx<=r[1]
+          pr <- xx>=r[2]
+          xxt <- xx[!(pl | pr)]
+          ## we indicate piled up data by vertical lines (if > 1%) unless
+          ## margin=FALSE
+          if(margin<1)
+            mbar(xx, list(pl, pr), r, 1, col, margin)
+          ## we need a smaller bandwidth than the default and keep it constant
+          if(length(xxt)){
+            if(!("bw" %in% names(darg)))
+              darg$bw <- diff(r)/50
+            h <- do.call(density, c(list(x=xxt), darg))
+            n <- length(h$x)
+            max.d <- max(h$y)
+            xl <- h$x[c(1, 1:n, n)]
+            yl <- c(0, h$y, 0) / max.d
+
+            panel.polygon(x=xl,y=yl, col=fill, border=NA, alpha=alpha)
+            
+#                        browser()
+            ## add the filterResult if possible, we get them from the output of
+            ## glpolygon (with plot=FALSE)
+            if(!is.null(filter) && validName){    
+              if(is(filter,"filters"))
+              {
+                fitGate <- FALSE #it is hard to plot multiple fitted gates
+                
+                mapply(filter,stats,FUN=function(curFilter,curStats){
+                      
+#                      browser()
+                      names <- .getStats(curFilter,curStats, frame, digits, ...)
+                      
+                      
+                      #this plot routine is only for 2-d scatter plot
+                      #thus set plot as FALSE,just use it to get bounds
+                      #add plot stats/names
+                      bounds <- glpolygon(curFilter, frame,
+                          channels=parm
+                          ,ptList=ptList
+                          ,verbose=FALSE
+                          , plot=FALSE 
+                          ,names=names
+                          ,xlim=r
+                          ,ylim=c(0,1)
+                          ,strict=FALSE)
+                      oo <- options(warn=-1)
+                      on.exit(options(oo))
+                      if(!is.na(bounds)){
+                        ## iterate over gate regions
+                        for(j in seq_along(bounds)){
+                          tb <- bounds[[j]]
+                          
+                          
+                            gpg<-gp$gate
+                            panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
+                                ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                            panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
+                                ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                          }
+                          
+                      }
+                      
+                      options(oo)
+                    })
+              }else
+              {
+                  names <- .getStats(filter,stats, frame, digits, ...)
+                  
+        
+                  #this plot routine is only for 2-d scatter plot
+                  #thus set plot as FALSE,just use it to get bounds
+                  #add plot stats/names
+                  bounds <- glpolygon(filter, frame,
+                      channels=parm
+                      ,ptList=ptList
+                      ,verbose=FALSE
+                      , plot=FALSE 
+                      ,names=names
+                      ,xlim=r
+                      ,ylim=c(0,1)
+                      ,strict=FALSE)
+                  oo <- options(warn=-1)
+                  on.exit(options(oo))
+                  if(!is.na(bounds)){
+                    ## iterate over gate regions
+                    for(j in seq_along(bounds)){
+                      tb <- bounds[[j]]
+                      
+                      if(fitGate)
+                      {
+                        tb_min <- min(tb)
+                        tb_max <- max(tb)
+                        
+                        tb_min <- max(min(xl),tb_min)
+                        tb_max <- min(max(xl),tb_max)
+                        if(ncol(tb) == 1 && colnames(tb) == parm){
+                          sel <- xl >= tb_min & xl <= tb_max
+                          if(any(sel)){
+                            afun <- approxfun(xl, yl)
+                            xr <- c(tb_min, seq(tb_min, tb_max, len=100), tb_max)
+    #                        browser()
+                            yr <- c(0,afun(xr[-c(1, length(xr))]),0)
+                            gpd<-gp$gate.density
+                            panel.polygon(xr, yr
+                                          , border=gpd$col
+                                          , col=gpd$fill,
+                                          alpha=gpd$alpha, lwd=gpd$lwd,
+                                          lty=gpd$lty
+                                       )
+                          }
+                        }	
+                      }else
+                      {
+        #								browser()
+                        gpg<-gp$gate
+                        panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
+                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                        panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
+                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                      }
+                      
+                    }
+                  }
+                  
+                  
+                  
+                  options(oo)
+              }
+            }
+
+            panel.lines(x=xl,y=yl, col=border, lty=lty,lwd=lwd)
+    
+          }else{
+            panel.lines(rl, rep(0,2), col="black")
+          }
+      if(!is.null(refline))
+        panel.abline(v=refline)
+}
 
 analyzeDensityFormula <- function(x, dot.names)
 {
@@ -284,17 +554,56 @@ analyzeDensityFormula <- function(x, dot.names)
 
 setMethod("densityplot",
           signature(x = "formula", data = "flowSet"),
-          function(x, data, channels, xlab,
+          function(x, data, ...){
+            
+            #construct lattice object
+            thisTrellisObj <- .densityplot.adapor(x, data, ...) 
+              
+            #pass frames slot
+            thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
+            thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData@frames
+            thisTrellisObj
+    })
+
+#' dispatch to different trellis object contructing function based on stack argument
+#' @param stack \code{logical} indicating whether to stack `name` on y axis
+.densityplot.adapor <- function(x, data, stack = TRUE, ...){
+  
+      if(stack)
+        thisObj <- .densityplot.flowSet(x, data, ...)
+      else
+      {
+    
+        #add dummy y term in order to use .xyplot.flowSet to construct lattice object
+        if(length(x[[2]]) == 1)
+          xTerm <- x[[2]]
+        else
+          xTerm <- x[[2]][[2]]
+        thisFormula <- eval(substitute(thisX~y, list(thisX = xTerm)))
+        thisFormula[[3]] <- x[[2]]
+        
+        thisObj <- .xyplot.flowSet(thisFormula, data
+            , panel = panel.densityplot.flowset.ex
+            , prepanel = prepanel.densityplot.flowset.ex
+            , ylab = ""
+            ,...)
+        #append channel.name to work ncdfFlow::densityplot
+        thisObj$panel.args.common$channel.name <- thisObj$panel.args.common$channel.x.name
+      }
+      thisObj
+}
+
+.densityplot.flowSet <- function(x, data, channels, xlab,
                    as.table = TRUE, overlap = 0.3,
                    prepanel = prepanel.densityplot.flowset,
                    panel = panel.densityplot.flowset,
                    filter=NULL, scales=list(y=list(draw=F)),
-                   groups, ...)
+                   groups, axis= axis.grid, ...)
       {
           ocall <- sys.call(sys.parent())
           ccall <- match.call(expand.dots = TRUE)
-          ## ccall <- match.call(expand.dots = FALSE)
-          ## ccall <- manipulate.call(ocall, ccall)
+          
+          
           if(! "name" %in% names(pData(data)))
               pData(data)$name <- sampleNames(data)
           pd <- pData(phenoData(data))
@@ -361,14 +670,16 @@ setMethod("densityplot",
           ccall$data <- pd
           ccall$prepanel <- prepanel
           ccall$panel <- panel
-          ccall$frames <- data@frames
+          ccall$par.settings <- gpar
           ccall$channel <- formula.struct$right.comps ## channel
           ## That is super ugly!!! How do we get to the channel name
           ## from the formula???
           ccall$channel.name <- gsub("^.*\\(`|`\\).*$", "", channel.name)
+          ccall$frames <- data
           ccall$as.table <- as.table
           overlap <- max(-0.5, overlap)
           ccall$overlap <- overlap
+          ccall$axis <- axis
           ccall$xlab <- xlab
           ccall$horizontal <- TRUE
           ccall$subscripts <- TRUE
@@ -382,7 +693,7 @@ setMethod("densityplot",
           ans <- eval.parent(ccall)
           ans$call <- ocall
           ans
-      })
+      }
 
 
 

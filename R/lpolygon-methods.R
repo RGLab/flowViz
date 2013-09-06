@@ -112,7 +112,7 @@ setMethod("glpolygon",
               
           }
 		  ## add names if necessary
-		  addName(x, names, data, gpar$gate.text,xlim=xlim,ylim=ylim,...)
+		  addName(x, names, data, gp = gpar$gate.text,xlim=xlim,ylim=ylim,...)
           res <- rbind(x@min[data], x@max[data])
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
           return(invisible(list(res)))
@@ -154,7 +154,7 @@ setMethod("glpolygon",
 	  ## We coerce to a polygon gate and plot that
           res <- ell2Polygon(x, parameters(x))
           glpolygon(res, verbose=verbose, gpar=gpar, plot=plot, ...)
-          addName(x, names, data, gpar$gate.text,...)
+          addName(x, names, data, gp = gpar$gate.text,...)
           return(invisible(res@boundaries))
       })
 
@@ -256,7 +256,7 @@ setMethod("glpolygon",
           dropWarn("flowFrame", "quadGates", verbose=verbose)
           res <- glpolygon(x=x, verbose=verbose, gpar=gpar,
                     names=FALSE, ...)
-          addName(x, names, data=data, gp=gpar$gate.text,...)
+          addName(x, names, data=data, gp = gpar$gate.text,...)
           return(invisible(res))
       })
 
@@ -279,7 +279,7 @@ setMethod("glpolygon",
               data <- channels
           xp <- x@boundaries[,data[1]]
           yp <- x@boundaries[,data[2]]
-          class(gpar) <- "gpar"
+#          class(gpar) <- "gpar"
           if(plot){
               if(inverse){
                   mx <- which.min(yp)
@@ -313,7 +313,7 @@ setMethod("glpolygon",
                   glpoly(xp, yp, gp=gpar$gate)
               }
           }
-          addName(x, names, data, gpar$gate.text,xlim=xlim,ylim=ylim,...)
+          addName(x, names, data, gp = gpar$gate.text,xlim=xlim,ylim=ylim,...)
           res <- cbind(xp,yp)
           res <- res[,!apply(res, 2, function(z) all(is.na(z))), drop=FALSE]
           return(invisible(list(res)))

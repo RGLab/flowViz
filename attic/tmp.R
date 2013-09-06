@@ -1,33 +1,62 @@
 ## load a flowFrame
+unloadNamespace("flowViz")
+
 library(flowViz)
+library(ncdfFlow)
 library(grid)
 library(IDPmisc)
+library(hexbin)
+library(latticeExtra)
+library(grDevices)
+library(gridExtra)
 lapply(list.files("~/rglab/workspace/flowViz/R",full=T),source)
 data(GvHD)
-fcs1 <- GvHD[[1]]
-fcs2 <- GvHD[[1]]
-colnames(fcs2)[1] <- "noname"
-
-##plot overlayed pops
-xyplot(`PE Cy55-A`~`FITC-A`
-		,getData(wf[[1]],5)
-		,filter=getGate(wf[[1]],6)
-		,overlay=getData(wf[[1]],8)
-#		,contour=T
-	)
-xyplot(`PE Cy55-A`~`FITC-A`,getData(wf[1:2],5),filter=getGate(wf[1:2],6)
-		,overlay=getData(wf[1:2],8))
-
-
-xyplot(`<G560-A>`~`<R660-A>`
-        ,data=getData(gs[[1]],"cd19&cd20")
-        ,filter=getGate(gs[[1]],"transitional")
-        ,stats=T
-        ,digits=2
+#fcs1 <- GvHD[[1]]
+#fcs2 <- GvHD[[1]]
+#colnames(fcs2)[1] <- "noname"
+fs <- GvHD[c(1,2,8,9)]
+#fs <- ncdfFlowSet(fs)
+g1 <- rectangleGate("SSC-H"=c(400,Inf))
+g2 <- rectangleGate("SSC-H"=c(900,950))
+overlay <- Subset(fs[1],g2)
+dev.off()
+x11()
+#grid.arrange(
+    xyplot(`FSC-H`~`SSC-H`,fs
+              ,xbin=64
+              ,smooth=F 
+#            ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
+              ,filter = g1
+    , overlay =overlay
+    ,stats=T
       )
+#  ,xyplot(`FSC-H`~`SSC-H`, fs[1]
+#      ,xbin=64
+#                ,smooth=F 
+#      , par.settings = list(overlay.symbol = list(fill = "black")
+#      )
+#      ,filter = g1, overlay =overlay
+#      )
+#  )
 
 
 
+
+aa <- trellis.par.get()
+bb <- flowViz.par.get()
+
+system.time(
+densityplot(~`SSC-H`
+                ,fs
+              ,stack = T
+#              ,filter = sapply(sampleNames(fs),function(x)filters(list(g1,g2)),simplify=F)
+              ,filter =g1
+              ,fitGate = F
+      ,stats =T
+          )
+
+)
+pData(GvHD)
 ## a wrapper that catches and reports errors
 wrap <- function(x)
 {

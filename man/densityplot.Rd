@@ -29,15 +29,6 @@
 \S4method{densityplot}{formula,flowSet}(
     x,
     data,
-    channels, 
-    xlab,
-    as.table=TRUE,
-    overlap=0.3,
-    prepanel=prepanel.densityplot.flowset,
-    panel = panel.densityplot.flowset,
-    filter=NULL,
-    scales=list(y=list(draw=F)),
-    groups,
     \dots)
 
 ## method for 'flowFrame' objects
@@ -78,6 +69,7 @@ panel.densityplot.flowset(
 	 ,digits=2
 	 ,abs=FALSE
 	 ,fitGate=TRUE
+	 ,checkName = TRUE
     ,gp,
     \dots)
 
@@ -119,37 +111,22 @@ panel.densityplot.flowset(
     \code{\link[flowCore:flowSet-class]{flowSet}}, or one of the several
     workflow objects. }
   
-  \item{xlab}{ Label for data x axis, with suitable defaults taken from
-    the formula }
-
-  \item{as.table, scales, darg}{ These arguments are passed unchanged to
-    the corresponding methods in lattice, and are listed here only
-    because they provide different defaults.  See documentation for the
-    original methods for details. \code{darg} gets passed on to
-    \code{\link[stats]{density}}. }
-  
-  \item{overlap}{ The amount of overlap between stacked density
-    plots. This argument is ignored for the \code{flowFrame} method. }
-  
-  \item{prepanel}{ The prepanel function.  See
-    \code{\link[lattice]{xyplot}} }
-  
-  \item{panel}{ the panel function.  See
-    \code{\link[lattice]{xyplot}} }
-  
-  \item{filter}{ A \code{\link[flowCore:filter-class]{filter}},
-    \code{\link[flowCore:filterResult-class]{filterResult}} or
-    \code{\link[flowCore:filterResult-class]{filterResultList}} object
-    or a list of such objects of the same length as the
-    \code{flowSet}. If applicable, the gate region will be superiposed
-    on the density curves using color shading. The software will figure
-    out whether the \code{filter} needs to be evaluated in order to be
-    plotted (in which case providing a \code{filterResult} can speed
-    things up considerably). }
-  
-  \item{channels}{ A character vector of parameters that are supposed to
-    be plotted when the formula in \code{x} is of structure \code{factor
-      ~ .}. }
+  	\item{overlap}{The amount of overlap between stacked density plots. This argument is ignored for the \code{flowFrame} method.}    
+	    
+	\item{filter}{A \code{\link[flowCore:filter-class]{filter}},
+	\code{\link[flowCore:filterResult-class]{filterResult}} or
+	\code{\link[flowCore:filterResult-class]{filterResultList}} object
+	or a list of such objects of the same length as the
+	\code{flowSet}. If applicable, the gate region will be superiposed
+	on the density curves using color shading. The software will figure
+	out whether the \code{filter} needs to be evaluated in order to be
+	plotted (in which case providing a \code{filterResult} can speed
+	things up considerably). }
+	
+	\item{groups}{Use identical colors for grouping. The value of the
+			    	argument is expected to be a phenotypic variable in the
+			    	\code{flowSet}, or a factor.}
+	\item{channels}{A character vector of parameters that are supposed to be plotted when the formula in \code{x} is of structure \code{factor ~ .}.}
 
   \item{subscripts, which.channel, channel.name, y}{ Internal indices
     necessary to map panels to parameters. }
@@ -157,6 +134,11 @@ panel.densityplot.flowset(
   \item{frames}{ An environment containing frame-specific data. }
 
   \item{channel}{ The name of the currently plotted flow parameter. }
+	\item{darg}{These arguments are passed unchanged to
+									     the corresponding methods in lattice, and are listed here only
+									    because they provide different defaults.  See documentation for the
+									    original methods for details. \code{darg} gets passed on to
+									    \code{\link[stats]{density}}.} 
 
   \item{col, fill, lty, lwd, alpha}{ Graphical parameters. These
     mostly exist for conveniance and much more control is available
@@ -167,10 +149,7 @@ panel.densityplot.flowset(
     \code{lty}. See
     \code{\link[flowViz:flowViz.par.get]{flowViz.par.set}} for details.} 
   
-  \item{groups}{Use identical colors for grouping. The value of the
-    argument is expected to be a phenotypic variable in the
-    \code{flowSet}, or a factor.}
-
+  
   \item{refline}{ Logical. Add one ore more vertical reference lines to
     the plot.  This argument is directly passed to
     \code{\link[lattice:panel.functions]{panel.abline}}. }
@@ -188,6 +167,8 @@ panel.densityplot.flowset(
 	\item{fitGate}{A \code{logical} scalar indicating whether to display the gate as fitted 1d density gate region 
 					or simply display the gate boundaries using vertical lines. The latter would be helpful to display the gate when the gated density region is too small to see. }
 	
+	\item{checkName}{ A \code{logical} scalar indicating whether to validity check the channel name. Default is TRUE, which consider '(' as invalid character in channel names}
+	
   \item{gp}{ A list of graphical parameters that are passed down to
     the low level panel functions. This is for internal use only. The
     public user interface to set graphical parameters is either
@@ -195,7 +176,26 @@ panel.densityplot.flowset(
     \code{flowViz.par.set} for customization of session-wide defaults. }
   
   \item{\dots}{ More arguments, usually passed on to the underlying
-    lattice methods. }
+    lattice methods. 
+    \itemize{
+    	  
+       
+		 \item xlab: Label for data x axis, with suitable defaults taken from the formula 
+
+ 		 
+  
+  		\item prepanel: The prepanel function.  See \code{\link[lattice]{xyplot}} 
+  
+  		\item panel: the panel function.  See \code{\link[lattice]{xyplot}} 
+		
+    	
+    	\item axis: axis function passed to lattice, default is \code{axis.grid}
+		
+		\item ... : other arguments passed to panel.densityplot.flowset
+		
+ 
+    	}
+    }
 }
 
 

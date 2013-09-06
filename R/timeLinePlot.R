@@ -32,7 +32,7 @@ timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
 
     ## Lets fix ourselves some nice colors
     if(missing(col) | is.null(col)){
-        require(RColorBrewer)
+#        require(RColorBrewer)
         colp <- brewer.pal(8, "Dark2")
         col <- colorRampPalette(colp)(length(x))
         set.seed(1000)

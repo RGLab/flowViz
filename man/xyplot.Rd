@@ -49,7 +49,7 @@ prepanel.xyplot.flowframe.time(
     x,
     y,
     frame,
-    time,
+    time, xlim, ylim,
     \dots)
 
 
@@ -70,10 +70,9 @@ panel.xyplot.flowframe.time(
 \S4method{xyplot}{formula,flowFrame}(
     x,
     data,
-    smooth=TRUE,
-    prepanel=prepanel.xyplot.flowframe,
-    panel=panel.xyplot.flowframe,
+	filter = NULL,    
     overlay=NULL,
+    stats = FALSE,
     \dots)
 
 
@@ -82,13 +81,12 @@ prepanel.xyplot.flowframe(
     frame,
     channel.x.name,
     channel.y.name,
+    x, y, xlim, ylim,
     \dots)
    
 
 ## panel function for generic xyplots of flowFrames
 panel.xyplot.flowframe(
-    x,
-    y,
     frame,
     filter=NULL,
     smooth=TRUE,
@@ -96,10 +94,10 @@ panel.xyplot.flowframe(
     outline=FALSE,
     channel.x.name,
     channel.y.name,
-    pch=gpar$flow.symbol$pch,
-    alpha=gpar$flow.symbol$alpha,
-    cex=gpar$flow.symbol$cex,
-    col=gpar$flow.symbol$col,
+    pch=gp$flow.symbol$pch,
+    alpha=gp$flow.symbol$alpha,
+    cex=gp$flow.symbol$cex,
+    col=gp$flow.symbol$col,
     gp
     ,xbins=0
     ,binTrans=sqrt
@@ -109,6 +107,7 @@ panel.xyplot.flowframe(
     ,abs=FALSE
     ,overlay.x=NULL
 	,overlay.y=NULL
+	,checkName = TRUE
     ,\dots)
 
 
@@ -117,14 +116,6 @@ panel.xyplot.flowframe(
 \S4method{xyplot}{formula,flowSet}(
     x,
     data,
-    smooth=TRUE,
-    filter = NULL,
-    as.table=TRUE,
-    prepanel=prepanel.xyplot.flowset,
-    panel=panel.xyplot.flowset,
-    xlab=channel.x.name,
-    ylab=channel.y.name,
-    par.settings=NULL,
     \dots)
 
 
@@ -134,6 +125,7 @@ prepanel.xyplot.flowset(
     frames,
     channel.x.name,
     channel.y.name,
+    xlim, ylim,
     \dots)
 
 
@@ -145,6 +137,7 @@ panel.xyplot.flowset(
     channel.x,
     channel.y,
     overlay=NULL,
+    stats = FALSE,
     \dots)
 
 
@@ -193,9 +186,10 @@ panel.xyplot.flowset(
   
   \item{xlab, ylab}{ Labels for data axes, with suitable defaults taken
     from the formula. }
-
+	
+   \item{xlim, ylim}{ limits for data axes. If not given, they are taken from the ranges stored in flowFrame }
   
-  \item{as.table, layout}{ These arguments are passed unchanged
+  \item{layout}{ These arguments are passed unchanged
     to the corresponding methods in lattice, and are listed here only
     because they provide different defaults.  See documentation for the
     original methods for details. }
@@ -221,7 +215,10 @@ panel.xyplot.flowset(
    \item{overlay}{The extra cell events plotted on top of the current cell population.
    				It is a \code{flowSet} for \code{panel.xyplot.flowset} function and a \code{flowFrame} for \code{xyplot(c("formula","flowFrame"))} method.
    	}
-  
+
+  \item{checkName}{ A \code{logical} scalar indicating whether to validity check the channel name. Default is TRUE, which consider '(' as invalid character in channel names}
+
+
   \item{channel.x.name, channel.y.name}{ Character strings giving
     corresponding names used to match filter parameters if applicable. }
 
