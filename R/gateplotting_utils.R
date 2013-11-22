@@ -25,7 +25,7 @@ flowViz.state <- new.env(hash = FALSE)
 ## lattice package, i.e., real device-specific themes that are set up once the device
 ## is first called.
 flowViz.state[["lattice.theme"]] <-
-    list(X11cairo=list(gate=list(alpha=1,
+    list(X11cairo= c(list(gate=list(alpha=1,
                                  cex=NULL,
                                  pch=NULL,
                                  col="#9E0142"#"red",
@@ -61,13 +61,12 @@ flowViz.state[["lattice.theme"]] <-
                                          lty="dotted")
 						
 						,argcolramp = .colRmpPlt()
-#						,argcolramp_bin = colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")),bias=1)
-#						,argcolramp_flowJo = colorRampPalette(IDPcolorRamp(21,t(col2hsv(c("blue","green","yellow","red"))),fr=c(0.7,0)),bias=1)
-		 			
-		 			
-		 ))
+		          )
+            , ggplot2like()
+            )
+          )
                                       
-
+         
 
 ## return the state information from the internal environment
 state <- function(x) flowViz.state[[x]]
@@ -355,7 +354,7 @@ flowViz.par.get <- function (name = NULL)
 {
     ## FIXME: We want this to be device-specific, needs to be set up in the same
     ## way as it is done in lattice.
-    lPars <- c(flowViz.state[["lattice.theme"]]$X11cairo, ggplot2like())
+    lPars <- flowViz.state[["lattice.theme"]]$X11cairo
     if (is.null(name)) 
         lPars
     else if (name %in% names(lPars)) 
@@ -387,7 +386,7 @@ flowViz.par.set <- function (name, value, ..., theme, warn = TRUE, strict = FALS
         }
     }
     fvPars <- names(theme) %in% names(flowViz.state[["lattice.theme"]]$X11cairo)
-    trellis.par.set(theme=theme[!fvPars], warn=warn, strict=strict)
+#    trellis.par.set(theme=theme[!fvPars], warn=warn, strict=strict)
     if (strict)
         flowViz.state[["lattice.theme"]]$X11cairo[names(theme[fvPars])] <- theme[fvPars]  
     else flowViz.state[["lattice.theme"]]$X11cairo <-

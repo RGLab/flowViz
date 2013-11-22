@@ -184,9 +184,23 @@ setMethod("xyplot",
                         , filter = NULL
                         , overlay= NULL#a flowset
                         , stats = FALSE
+                        , strip.text = NULL#remove strip by setting cond as NULL
                         , ...)
 {
-  data <- as(data,"flowSet")
+  
+  if(is.null(strip.text))   {
+    defaultCond <- NULL
+  }else
+  {
+    #try to use strip.text as the dummy sample name if it is given 
+    #in order to display the customized text in strip
+    defaultCond <- "name"
+    data <- list(data)
+    names(data) <- strip.text
+  }
+  
+  data <- as(data, "flowSet")
+  
   sn <- sampleNames(data)
   if(!is.null(filter)){
     filter <- list(filter)
@@ -202,7 +216,11 @@ setMethod("xyplot",
     stats <- list(stats)
     names(stats) <- sn
   }
-  xyplot(x, data, filter = filter, overlay = overlay, stats = stats, defaultCond = NULL, ...) #remove strip by setting cond as NULL 
+  
+    
+  xyplot(x, data, filter = filter
+          , overlay = overlay, stats = stats
+          , defaultCond = defaultCond , ...)  
 })
 ## Prepanel function to set up dimensions. We want to use the instrument measurement
 ## range instead of the absolute range of the data. We also record the data ranges
