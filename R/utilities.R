@@ -8,7 +8,7 @@
 expr2char <- function(x) paste(deparse(x), collapse = "")
 
 ##return a formatted stats for display
-.getStats <- function(curFilter,curStats,frame, digits, ...){
+.getStats <- function(curFilter,curStats,frame, digits, as.is = FALSE, ...){
   
   popNames<-identifier(curFilter)
   if(is.numeric(curStats)){
@@ -33,10 +33,14 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
         names<-FALSE
     }
   }
+  
   if(!is.logical(names))
   {
     if(is.numeric(names)){
-      names<-paste(format(names*100,digits=digits),"%",sep="")  
+      if(as.is)
+        names <- as.character(names)
+      else
+        names <- paste(format(names*100,digits=digits),"%",sep="")  
     }
     names(names)<-popNames
   }
