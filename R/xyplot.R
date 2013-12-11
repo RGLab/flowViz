@@ -907,9 +907,9 @@ prepanel.xyplot.flowset <-
 {
   if (length(nm <- as.character(x)) > 1)
     stop("must have only one flow frame per panel")
-    
+
     if (length(nm) == 1){
-        ranges <- range(frames[[nm]])
+        ranges <- range(frames[[nm, use.exprs = FALSE]])
         if(missing(xlim)){
           #use default calculation
           xlim <- if(!length(grep("`", channel.x.name, fixed=TRUE))){
