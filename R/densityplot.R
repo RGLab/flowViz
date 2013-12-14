@@ -11,7 +11,11 @@ prepanel.densityplot.flowset <-
 {
     channel.name <- unique(which.channel[subscripts])
     stopifnot(length(channel.name) == 1)
-    xl <- range(eapply(frames@frames, range, channel.name), finite=TRUE)
+    if(extends(class(frames),"flowSet"))
+      ranglist <- eapply(frames@frames, range, channel.name)
+    else
+      ranglist <- lapply(sampleNames(frames), function(sn)range(frames[[sn, channel.name, use.exprs = FALSE]]))
+    xl <- range(ranglist, finite=TRUE)
     list(xlim=xl + c(-1,1)*0.07*diff(xl))   
 }
 
