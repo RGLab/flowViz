@@ -807,7 +807,7 @@ setMethod("xyplot",
           signature=signature(x="formula",
                               data="flowSet"),
           definition= function(x,data, ...){
-            thisTrellisObj <- .xyplot.flowSet(x, data, ...)
+            thisTrellisObj <- .xyplot.flowSet(x, data, type = "xyplot", ...)
             thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
             thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData@frames
             thisTrellisObj
@@ -829,7 +829,8 @@ setMethod("xyplot",
                               , axis= axis.grid
                               ,defaultCond = "name" #to override the default conditional variable 'name'
                                             #mainly used for plotting single flowFrame
-                              , between = list(x=0.2,y=0.2)                              
+                              , between = list(x=0.2,y=0.2)
+                              , type = "xyplot"
                               , ...)
       {
        
@@ -885,15 +886,25 @@ setMethod("xyplot",
           channel.y.name <- expr2char(channel.y)
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
-          ## use densityplot method with dedicated panel and prepanel
+          ## use densityplot or bwplot method with dedicated panel and prepanel
           ## functions to do the actual plotting
-          densityplot(x, data=pd, prepanel=prepanel, panel=panel,
+          
+          if(type == "xyplot"){
+            densityplot(x, data=pd, prepanel=prepanel, panel=panel,
+                frames=data, channel.x=channel.x,
+                channel.y=channel.y, channel.x.name=channel.x.name,
+                channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
+                smooth=smooth, gp=this.par.settings, as.table=as.table, filter=filter,
+                par.settings=this.par.settings, axis = axis, between = between, ...)
+          }else if(type == "densityplot"){     #use bwplot instead due to the conflicts with the default darg argument of lattice::densityplot      
+            bwplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
                       smooth=smooth, gp=this.par.settings, as.table=as.table, filter=filter,
                       par.settings=this.par.settings, axis = axis, between = between, ...)
-          
+        }else
+          stop("unknown plot type: ", type)
       }
 
 
