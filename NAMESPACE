@@ -22,7 +22,7 @@ importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
            prepanel.default.parallel, qqmath, splom, trellis.par.get,
            trellis.par.set, which.packet, xyplot,standard.theme)
 importFrom(grDevices, rgb, colorRamp, colorRampPalette, col2rgb)
-importFrom(KernSmooth, bkde2D)
+importFrom(KernSmooth, bkde2D, dpik)
 
 importFrom(utils, modifyList)
 
