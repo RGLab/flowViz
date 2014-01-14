@@ -117,7 +117,7 @@ panel.densityplot.flowset <-
             ## we need a smaller bandwidth than the default and keep it constant
             if(length(xxt)){
                 if(!("bw" %in% names(darg)))
-                    darg$bw <- "SJ"
+                    darg$bw <- dpik(xxt)
                 h <- do.call(density, c(list(x=xxt), darg))
                 n <- length(h$x)
                 max.d <- max(h$y)
@@ -372,7 +372,7 @@ panel.densityplot.flowFrame <-
           
           if(length(xxt)){
             if(!("bw" %in% names(darg)))
-              darg$bw <- "SJ"
+              darg$bw <- dpik(xxt)
             h <- do.call(density, c(list(x=xxt), darg))
             n <- length(h$x)
             max.d <- max(h$y)
@@ -585,11 +585,12 @@ setMethod("densityplot",
           xTerm <- x[[2]][[2]]
         thisFormula <- eval(substitute(thisX~y, list(thisX = xTerm)))
         thisFormula[[3]] <- x[[2]]
-        
+#        browser()
         thisObj <- .xyplot.flowSet(thisFormula, data
             , panel = panel.densityplot.flowset.ex
             , prepanel = prepanel.densityplot.flowset.ex
             , ylab = ""
+            , type = "densityplot"
             ,...)
         #append channel.name to work ncdfFlow::densityplot
         thisObj$panel.args.common$channel.name <- thisObj$panel.args.common$channel.x.name
