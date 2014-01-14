@@ -117,7 +117,7 @@ panel.densityplot.flowset <-
             ## we need a smaller bandwidth than the default and keep it constant
             if(length(xxt)){
                 if(!("bw" %in% names(darg)))
-                    darg$bw <- "SJ"
+                    darg$bw <- dpik(xxt)
                 h <- do.call(density, c(list(x=xxt), darg))
                 n <- length(h$x)
                 max.d <- max(h$y)
@@ -372,7 +372,7 @@ panel.densityplot.flowFrame <-
           
           if(length(xxt)){
             if(!("bw" %in% names(darg)))
-              darg$bw <- "SJ"
+              darg$bw <- dpik(xxt)
             h <- do.call(density, c(list(x=xxt), darg))
             n <- length(h$x)
             max.d <- max(h$y)
