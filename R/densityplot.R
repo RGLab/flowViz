@@ -590,7 +590,7 @@ setMethod("densityplot",
             , panel = panel.densityplot.flowset.ex
             , prepanel = prepanel.densityplot.flowset.ex
             , ylab = ""
-            , type = "densityplot"
+            , plotType = "densityplot"
             ,...)
         #append channel.name to work ncdfFlow::densityplot
         thisObj$panel.args.common$channel.name <- thisObj$panel.args.common$channel.x.name
