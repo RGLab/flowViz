@@ -265,12 +265,19 @@ glrect <- function (xleft, ybottom, xright, ytop, ..., gp)
 }
 
 gltext <- function (x, y, labels, ..., gp) 
-{
+{   
+#    browser()
+#    gp_txt <- gp
+#    gp_txt$background <- NULL
+#    txtObj <- textGrob(label = labels, gp = gpar(gp_txt), default.units = "native")
+    cex <- gp$cex    
 	#add rectange as white background for the better visual effect when label is plotted against color 
 	grid.rect(x=unit(x,"native")
 			,y=unit(y,"native")
-			,width=unit(1,'strwidth',labels)
-			,height=unit(1,'strheight',labels)
+#			,width= unit(cex, "grobwidth", data = txtObj)#unit(1,'strwidth',labels)
+#			,height=unit(cex, "grobheight", data = txtObj) #unit(1,'strheight',labels)
+            ,width= unit(cex,'strwidth',labels)
+            ,height=unit(cex,'strheight',labels)
 			, gp=gpar(fill=gp$background$fill
 					,col=gp$background$col
 					,alpha=gp$background$alpha
