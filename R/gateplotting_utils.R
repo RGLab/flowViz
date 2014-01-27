@@ -24,49 +24,110 @@ flowViz.state <- new.env(hash = FALSE)
 ## used for all other devices as well. Later this should follow the example from the
 ## lattice package, i.e., real device-specific themes that are set up once the device
 ## is first called.
-flowViz.state[["lattice.theme"]] <-
-    list(X11cairo= c(list(gate=list(alpha=1,
-                                 cex=NULL,
-                                 pch=NULL,
-                                 col="#9E0142"#"red",
-                                 ,fill="transparent",
-                                 lwd=1,
-                                 lty="solid"),
-                       gate.text=list(font=1,
-                                      col="#000000",
-                                      alpha=1,#0.4,
-                                      cex=0.8,#1.2,
-                                      lineheight=0.8#1.2
-	  								  ,background=list(fill="white"
-											  				,col="transparent"
-											  				,alpha=1
-											  				)
-	  									),
-                       overlay.symbol = list(alpha = 0.5
-                                             ,bg.alpha = 0.3
-                                             ,col = "transparent"
-                                             ,fill = "red"
-                                             ,cex = 0.5
-                                             , pch = 19
-                                            ),                 
-                       flow.symbol=list(alpha=1,
-                                        cex=0.8,
-                                        pch=".",
-                                        col="black",
-                                        fill="transparent"),
-                       gate.density=list(alpha=1,
-                                         fill="#FFFFFFB3",
-                                         col="black",
-                                         lwd=1,
-                                         lty="dotted")
-						
-						,argcolramp = .colRmpPlt()
-		          )
-            , ggplot2like()
-            )
-          )
+.flowViz.par.init <- function(lattice.par){
+  gate.par <- list(gate=list(alpha=1,
+                              cex=NULL,
+                              pch=NULL,
+                              col="#9E0142"#"red",
+                              ,fill="transparent",
+                              lwd=1,
+                              lty="solid"),
+                        gate.text=list(font=1,
+                                        col="#000000",
+                                        alpha=1,#0.4,
+                                        cex=0.8,#1.2,
+                                        lineheight=0.8#1.2
+                                        ,background=list(fill="white"
+                                                        ,col="transparent"
+                                                        ,alpha=1
+                                                    )
+                                    ),
+                        overlay.symbol = list(alpha = 0.5
+                                              ,bg.alpha = 0.3
+                                              ,col = "transparent"
+                                              ,fill = "red"
+                                              ,cex = 0.5
+                                              , pch = 19
+                                          ),                 
+                        flow.symbol=list(alpha=1,
+                                            cex=0.8,
+                                            pch=".",
+                                            col="black",
+                                            fill="transparent"),
+                        gate.density=list(alpha=1,
+                                          fill="#FFFFFFB3",
+                                          col="black",
+                                          lwd=1,
+                                          lty="dotted")
                                       
-         
+                        ,argcolramp = .colRmpPlt()
+                    )
+  flowViz.state[["lattice.theme"]] <- list(X11cairo= c(gate.par, lattice.par))
+}
+# can't do it within Namespace events hooks (e.g. .onLoad) 
+# since it needs to load namespace (e.g. 'rgb' through 'brewer.pal' call
+# other than base namespace
+.flowViz.par.init(lattice.par = ggplot2like())
+
+## Get and set graphical defaults for plots in flowViz. To a great extend, this uses
+## the trellis.par.get and trellis.par.set infrastructure defined in the lattice package.
+## Currently it is not possible to directly register additional setting there, instead
+## we provide our own wrappers which look for available defaults in lattice first and
+## fetch or set additional defaults within the internal flowViz environment if they can't
+## be found in the lattice defaults.
+flowViz.par.get <- function (name = NULL) 
+{
+  ## FIXME: We want this to be device-specific, needs to be set up in the same
+  ## way as it is done in lattice.
+  lPars <- flowViz.state[["lattice.theme"]]$X11cairo
+  if (is.null(name)) 
+    lPars
+  else if (name %in% names(lPars)) 
+    lPars[[name]]
+  else NULL
+}
+
+
+flowViz.par.set <- function (name, value, ..., theme, warn = TRUE, strict = FALSE, reset = FALSE) 
+{
+  if (missing(theme)) {
+    if (!missing(value)) {
+      theme <- list(value)
+      names(theme) <- name
+    }
+    else if (!missing(name) && is.list(name)) {
+      theme <- name
+    }
+    else theme <- list(...)
+  }
+  else {
+    if (is.character(theme)) 
+      theme <- get(theme)
+    if (is.function(theme)) 
+      theme <- theme()
+    if (!is.list(theme)) {
+      warning("Invalid 'theme' specified")
+      theme <- NULL
+    }
+  }
+  
+  #reset by dropping all the existing lattic par
+  if(reset){
+    .flowViz.par.init(lattice.par = theme)  
+  }else{
+    fvPars <- names(theme) %in% names(flowViz.state[["lattice.theme"]]$X11cairo)
+    
+    if (strict)
+      flowViz.state[["lattice.theme"]]$X11cairo[names(theme[fvPars])] <- theme[fvPars]  
+    else flowViz.state[["lattice.theme"]]$X11cairo <-
+          lattice:::updateList(flowViz.state[["lattice.theme"]]$X11cairo, theme[fvPars])
+    
+  }
+  invisible()
+}
+
+
+
 
 ## return the state information from the internal environment
 state <- function(x) flowViz.state[[x]]
@@ -265,12 +326,19 @@ glrect <- function (xleft, ybottom, xright, ytop, ..., gp)
 }
 
 gltext <- function (x, y, labels, ..., gp) 
-{
+{   
+#    browser()
+#    gp_txt <- gp
+#    gp_txt$background <- NULL
+#    txtObj <- textGrob(label = labels, gp = gpar(gp_txt), default.units = "native")
+    cex <- gp$cex    
 	#add rectange as white background for the better visual effect when label is plotted against color 
 	grid.rect(x=unit(x,"native")
 			,y=unit(y,"native")
-			,width=unit(1,'strwidth',labels)
-			,height=unit(1,'strheight',labels)
+#			,width= unit(cex, "grobwidth", data = txtObj)#unit(1,'strwidth',labels)
+#			,height=unit(cex, "grobheight", data = txtObj) #unit(1,'strheight',labels)
+            ,width= unit(cex,'strwidth',labels)
+            ,height=unit(cex,'strheight',labels)
 			, gp=gpar(fill=gp$background$fill
 					,col=gp$background$col
 					,alpha=gp$background$alpha
@@ -343,55 +411,5 @@ multFiltPoints <-  function(x, data, channels, verbose=TRUE,
 
 
 
-
-## Get and set graphical defaults for plots in flowViz. To a great extend, this uses
-## the trellis.par.get and trellis.par.set infrastructure defined in the lattice package.
-## Currently it is not possible to directly register additional setting there, instead
-## we provide our own wrappers which look for available defaults in lattice first and
-## fetch or set additional defaults within the internal flowViz environment if they can't
-## be found in the lattice defaults.
-flowViz.par.get <- function (name = NULL) 
-{
-    ## FIXME: We want this to be device-specific, needs to be set up in the same
-    ## way as it is done in lattice.
-    lPars <- flowViz.state[["lattice.theme"]]$X11cairo
-    if (is.null(name)) 
-        lPars
-    else if (name %in% names(lPars)) 
-        lPars[[name]]
-    else NULL
-}
-
-
-flowViz.par.set <- function (name, value, ..., theme, warn = TRUE, strict = FALSE) 
-{
-    if (missing(theme)) {
-        if (!missing(value)) {
-            theme <- list(value)
-            names(theme) <- name
-        }
-        else if (!missing(name) && is.list(name)) {
-            theme <- name
-        }
-        else theme <- list(...)
-    }
-    else {
-        if (is.character(theme)) 
-            theme <- get(theme)
-        if (is.function(theme)) 
-            theme <- theme()
-        if (!is.list(theme)) {
-            warning("Invalid 'theme' specified")
-            theme <- NULL
-        }
-    }
-    fvPars <- names(theme) %in% names(flowViz.state[["lattice.theme"]]$X11cairo)
-#    trellis.par.set(theme=theme[!fvPars], warn=warn, strict=strict)
-    if (strict)
-        flowViz.state[["lattice.theme"]]$X11cairo[names(theme[fvPars])] <- theme[fvPars]  
-    else flowViz.state[["lattice.theme"]]$X11cairo <-
-        lattice:::updateList(flowViz.state[["lattice.theme"]]$X11cairo, theme[fvPars])
-    invisible()
-}
 
 

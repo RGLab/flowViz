@@ -21,7 +21,7 @@
 
 flowViz.par.get(name = NULL)
 
-flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
+flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE, reset = FALSE)
 
 }
 
@@ -40,6 +40,8 @@ flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE)
   \item{warn}{ This gets passed on directly to \code{trellis.par.set}. }
 
   \item{strict}{ This gets passed on directly to \code{trellis.par.set}. }
+  
+  \item{reset}{ \code{logical} scalar. When TRUE, drop the entire list of old graphical parameters and reset it with the supplied one. Default is FALSE, which updates the existing parameters. }
 }
 
 \details{
@@ -130,6 +132,18 @@ trellis.par.get("plot.symbol")
 
 ## undo all settings
 flowViz.par.set(list(plot.symbol=plot.symbol, gate.text=list(font=1)))
+
+data(GvHD)
+fs <- GvHD[1:2]
+
+# using default ggplot2like theme
+densityplot(~`FSC-H`, fs)
+xyplot(`SSC-H`~`FSC-H`, fs, smooth = FALSE)
+            
+# reset it with default lattice theme            
+flowViz.par.set(theme =  trellis.par.get(), reset = TRUE)
+densityplot(~`FSC-H`, fs)
+xyplot(`SSC-H`~`FSC-H`, fs, smooth = FALSE)
 
 }
 
