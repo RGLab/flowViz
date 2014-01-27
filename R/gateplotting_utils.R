@@ -60,14 +60,14 @@ flowViz.state <- new.env(hash = FALSE)
                                           lwd=1,
                                           lty="dotted")
                                       
-                                      ,argcolramp = .colRmpPlt()
+                        ,argcolramp = .colRmpPlt()
                     )
   flowViz.state[["lattice.theme"]] <- list(X11cairo= c(gate.par, lattice.par))
 }
-
-.onAttach<-function(libname,pkgname){
-  .flowViz.par.init(lattice.par = ggplot2like())
-}         
+# can't do it within Namespace events hooks (e.g. .onLoad) 
+# since it needs to load namespace (e.g. 'rgb' through 'brewer.pal' call
+# other than base namespace
+.flowViz.par.init(lattice.par = ggplot2like())
 
 ## Get and set graphical defaults for plots in flowViz. To a great extend, this uses
 ## the trellis.par.get and trellis.par.set infrastructure defined in the lattice package.
