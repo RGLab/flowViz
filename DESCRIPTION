@@ -5,7 +5,7 @@ Version: 1.27.16
 Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Description: Provides visualization tools for flow cytometry data. 
-Depends: R (>= 2.7.0), flowCore (>= 1.5.17), lattice
+Depends: R (>= 2.7.0), flowCore, lattice
 Imports: stats4, Biobase, flowCore, graphics, grDevices, grid,
          KernSmooth, lattice, latticeExtra, MASS, methods,
          RColorBrewer, stats, utils, hexbin,IDPmisc
