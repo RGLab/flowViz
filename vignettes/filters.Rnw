@@ -2,7 +2,7 @@
 % likely to be overwritten.
 %
 %\VignetteIndexEntry{Visualizing Gates with Flow Cytometry Data}
-%\VignetteDepends{flowViz}
+%\VignetteDepends{flowViz, flowStats}
 %\VignetteKeywords{}
 %\VignettePackage{flowViz}
 \documentclass[11pt]{article}
@@ -418,6 +418,7 @@ are a prominent example. In the next code chunk we use a
 
 
 <<curv2Filter>>=
+library(flowStats)
 c2f <- curv2Filter("FSC-H", "FL4-H", bwFac=1.8)
 c2f.results <- filter(GvHD, c2f)
 xyplot(`FL4-H` ~ `FSC-H` | Visit, data=GvHD, filter=c2f.results)
