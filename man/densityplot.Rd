@@ -232,7 +232,7 @@ panel.densityplot.flowset(
 
 
 \examples{
-
+library(flowStats)
 data(GvHD)
 GvHD <- GvHD[pData(GvHD)$Patient \%in\% 6:7]
 

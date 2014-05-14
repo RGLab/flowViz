@@ -1,21 +1,35 @@
 Package: flowViz
 Type: Package
 Title: Visualization for flow cytometry
-Version: 1.28.0
+Version: 1.29.20
 Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Description: Provides visualization tools for flow cytometry data.
 Depends: R (>= 2.7.0), flowCore, lattice
 Imports: stats4, Biobase, flowCore, graphics, grDevices, grid,
-        KernSmooth, lattice, latticeExtra, MASS, methods, RColorBrewer,
-        stats, utils, hexbin,IDPmisc
-Suggests: colorspace
+         KernSmooth, lattice, latticeExtra, MASS, methods,
+         RColorBrewer, stats, utils, hexbin,IDPmisc
+Suggests: colorspace, flowStats,knitr
 License: Artistic-2.0
-Collate: AllGenerics.R utilities.R addNames-methods.R flowPlot.R
-        lpoints-methods.R points-methods.R gateplotting_utils.R
-        lpolygon-methods.R polygon-methods.R xyplot.R contour.R
-        parallel.R splom.R densityplot.R latticeMethods.R
-        parallel.rgl.R timeLinePlot.R ecdfplot.R lines-methods.R
-        plot-methods.R
-biocViews: Infrastructure, FlowCytometry, CellBasedAssays,
-        Visualization
+Collate: AllGenerics.R
+	 utilities.R
+	 addNames-methods.R
+	 flowPlot.R            
+	 lpoints-methods.R  
+	 points-methods.R	
+	 gateplotting_utils.R  
+	 lpolygon-methods.R  
+	 polygon-methods.R  
+	 xyplot.R
+	 contour.R           
+	 parallel.R          
+	 splom.R            
+	 densityplot.R       
+	 latticeMethods.R      
+	 parallel.rgl.R      
+	 timeLinePlot.R
+	 ecdfplot.R          
+	 lines-methods.R       
+	 plot-methods.R    
+biocViews:  Infrastructure, Flowcytometry, CellBasedAssays, Visualization
+VignetteBuilder: knitr

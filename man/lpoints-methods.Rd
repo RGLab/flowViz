@@ -56,7 +56,7 @@
     \item{x = "curv1Filter", data = "ANY"}{ We either need a
       \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
       \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-      \code{\link[flowCore:curv1Filter-class]{curv1Filter}}s. }
+      \code{\link[flowStats:curv1Filter-class]{curv1Filter}}s. }
 
     \item{x = "curv1Filter", data = "flowFrame"}{ see above }
     
@@ -67,7 +67,7 @@
     \item{x = "curv2Filter", data = "ANY"}{ We either need a
       \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
       \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-      \code{\link[flowCore:curv2Filter-class]{curv2Filter}}s.}
+      \code{\link[flowStats:curv2Filter-class]{curv2Filter}}s.}
 
     \item{x = "curv1Filter", data = "flowFrame", channels =
       "character"}{ We evaluate the
