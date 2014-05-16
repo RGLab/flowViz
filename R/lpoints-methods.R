@@ -170,45 +170,6 @@ setMethod("glpoints",
 
 
 
-## ==========================================================================
-## for curv1Filters
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## This filter produces a multipleFilterResult, so we can't subset directly.
-## Instead, we split the original frame and plot each component separately
-setMethod("glpoints",
-          signature(x="curv1Filter", data="flowFrame", channels="character"), 
-          function(x, data, channels, verbose=TRUE,
-                   filterResult=NULL, gpar=flowViz.par.get(), names=FALSE,
-                   ...)  
-      {
-          if(is.null(filterResult))
-              filterResult <- filter(data, x)
-          multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
-                         filterResult=filterResult, gpar=gpar$gate, ...)
-          addName(x, name=names, data=filterResult, gp=gpar$gate.text,...)
-      })
-
-
-
-
-## ==========================================================================
-## for curv2Filters
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-## This filter produces a multipleFilterResult, so we can't subset directly.
-## Instead, we split the original frame and plot each component separately.
-setMethod("glpoints",
-          signature(x="curv2Filter", data="flowFrame", channels="character"), 
-          function(x, data, channels, verbose=TRUE,
-                   filterResult=NULL, gpar=flowViz.par.get(), names=FALSE,
-                   ...)
-      {
-          if(is.null(filterResult))
-              filterResult <- filter(data, x)
-          multFiltPoints(x=x, data=data, channels=channels, verbose=verbose,
-                         filterResult=filterResult, gpar=gpar$gate, ...)
-          addName(x, name=names, data=filterResult, gp=gpar$gate.text,...)
-      })
-
 
 
 
