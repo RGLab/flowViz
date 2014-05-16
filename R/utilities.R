@@ -21,9 +21,10 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
       if (!is(curFilter, "filterResult")) 
         curFilter <- filter(frame, curFilter)
       curFres<-curFilter
-      #                   browser()   
-      p.stats<-summary(curFres)@p
-      #                       popNames<-names(p.stats)
+      ind <- as(curFres, "logical")
+
+      count <- sum(ind)                         
+      p.stats <- count/length(ind)
       names<-p.stats
       
     }else
