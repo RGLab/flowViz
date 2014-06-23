@@ -539,13 +539,13 @@ panel.xyplot.flowframe <- function(frame,
 									,overlay.x=NULL
 									,overlay.y=NULL
                                     ,checkName = TRUE
+                                    ,sample.ratio = 1
 						   			,...)
 {
-  
-	x <-exprs(frame)[,channel.x.name]
-    y <-exprs(frame)[,channel.y.name]
     
-
+	
+    
+    
     ## graphical parameter defaults
 	limits<-prepanel.xyplot.flowframe(frame,channel.x.name,channel.y.name)
 	xlim<-limits$xlim
@@ -583,8 +583,19 @@ panel.xyplot.flowframe <- function(frame,
     ## We remove margin events before passing on the data to panel.smoothScatter
     ## and after plotting indicate those events by grayscale lines on the plot
     ## margins
-	l <- length(x)
-		
+    dat <- exprs(frame)
+    l <- nrow(dat)
+    if(sample.ratio < 1 && sample.ratio > 0){
+      ind <- sample.int(l, size = l * sample.ratio)
+      x <- dat[ind, channel.x.name]
+      y <- dat[ind, channel.y.name]  
+    }else
+    {
+      x <- dat[, channel.x.name]
+      y <- dat[, channel.y.name]
+    }
+      
+    
 		
 	    if (smooth){
 			if(margin){
