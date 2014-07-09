@@ -109,6 +109,7 @@ panel.xyplot.flowframe(
     ,overlay.x=NULL
 	,overlay.y=NULL
 	,checkName = TRUE
+	, sample.ratio = 1
     ,\dots)
 
 
@@ -314,7 +315,7 @@ panel.xyplot.flowset(
 									By default it is set as FALSE,which indicates the position is relative to gate. 
   						}
   	\item{overlay.x,overlay.y}{ The x,y coordinates of overlay cell points.}  	
-  	
+  	\item{sample.ratio}{\code{numeric} the ratio of sub-sampling of events to speed up plotting.}
   \item{strip.text}{A \code{character} that customizes the text in strip. Default is NULL, which does not display the strip box at all. It is only valid when plotting a \code{flowFrame}}
   \item{\dots}{ More arguments, usually passed on to the underlying
     lattice methods. }
