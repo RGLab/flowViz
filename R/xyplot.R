@@ -668,12 +668,17 @@ panel.xyplot.flowframe <- function(frame,
               
 			if(xbins > 0)
 			{
+              
 				#using hexbin package to do the hexagon plot	
 				bin <- hexbin(x,y,xbins=xbins)
-    
-				grid.hexagons(bin,colramp = argcolramp, trans=binTrans, border =0)		
-				
-				
+                
+				gridRes <- try(grid.hexagons(bin,colramp = argcolramp, trans=binTrans, border =0), silent = TRUE)		
+                
+                if(class(gridRes) == "try-error"){
+                  #if error then try without trans
+                  grid.hexagons(bin,colramp = argcolramp, border =0)
+                }				
+                
 			}else
 			{
 				
