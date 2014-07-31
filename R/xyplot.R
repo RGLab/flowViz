@@ -684,9 +684,21 @@ panel.xyplot.flowframe <- function(frame,
 				
 				if(gp$density)
 					col <- densCols(x, y, colramp=argcolramp)
-            
-				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-	
+#                browser()
+                dots <- list(...)
+                dots$darg <- NULL
+                dots$type <- NULL
+                do.call(panel.xyplot, args = c(list(x = x, y = y
+                                                , col = col
+                                                , cex = cex
+                                                , pch = pch
+                                                , alpha = alpha
+                                                )
+                                                , dots
+                                                )
+                                                
+                                            )
+                    	
 			}
             
 			ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
