@@ -90,26 +90,26 @@ prepanel.xyplot.flowframe(
 panel.xyplot.flowframe(
     frame,
     filter=NULL,
-    smooth=TRUE,
-    margin=TRUE,
-    outline=FALSE,
-    channel.x.name,
-    channel.y.name,
-    pch=gp$flow.symbol$pch,
-    alpha=gp$flow.symbol$alpha,
-    cex=gp$flow.symbol$cex,
-    col=gp$flow.symbol$col,
-    gp
-    ,xbins=0
-    ,binTrans=sqrt
-    ,stats=FALSE
-    ,pos=0.5
-    ,digits=2
-    ,abs=FALSE
-    ,overlay.x=NULL
-	,overlay.y=NULL
-	,checkName = TRUE
-	, sample.ratio = 1
+   smooth=TRUE,
+   margin=TRUE,
+   outline=FALSE,
+   channel.x.name,
+   channel.y.name,
+   pch=gp$flow.symbol$pch,
+   alpha=gp$flow.symbol$alpha,
+   cex=gp$flow.symbol$cex,
+   col=gp$flow.symbol$col,
+   gp
+   ,xbins=0
+   ,binTrans=sqrt
+	,stats = FALSE
+	,pos=0.5
+	,digits=2
+	,abs=FALSE
+	,overlay = NULL
+    ,checkName = TRUE
+    ,sample.ratio = 1
+    , overlay.symbol = NULL
     ,\dots)
 
 
@@ -314,7 +314,7 @@ panel.xyplot.flowset(
 						\code{abs} is a \code{logical} scalar indicating whether the \code{pos} is relative to the gate boundary or the entire xy-axis(absolute position).
 									By default it is set as FALSE,which indicates the position is relative to gate. 
   						}
-  	\item{overlay.x,overlay.y}{ The x,y coordinates of overlay cell points.}  	
+  	\item{overlay.symbol}{list of the lattice graphic parameters to format the overlay points.}
   	\item{sample.ratio}{\code{numeric} the ratio of sub-sampling of events to speed up plotting.}
   \item{strip.text}{A \code{character} that customizes the text in strip. Default is NULL, which does not display the strip box at all. It is only valid when plotting a \code{flowFrame}}
   \item{\dots}{ More arguments, usually passed on to the underlying
@@ -481,12 +481,12 @@ xyplot(GvHD[[1]])
 ## and for flowSets
 xyplot(`FSC-H` ~ Time | Visit, GvHD, 
        smooth = FALSE, type = "l", 
-       subset = (Patient == 5))
+       subset = (Patient == 5), xbin = 32)
 
 xyplot(`FSC-H` ~ Time | Patient+Visit, GvHD, 
        smooth = FALSE, type = "a",
        strip = FALSE, strip.left = TRUE,
-       aspect = "xy")
+       aspect = "xy", xbin = 32)
 
 
 ## combine plots for two channels
@@ -499,7 +499,7 @@ ssc.time <-
            par.strip.text = list(lines = 3),
            between = list(y = rep(c(0, 0.5), c(6, 1))),
            scales = list(x = list(axs = "i"), y = list(draw = FALSE)),
-           layout = c(1, 14))
+           layout = c(1, 14), xbin = 32)
 
 fsc.time <- 
     xyplot(`FSC-H` ~ Time | factor(Patient):factor(Visit), GvHD, 
@@ -509,7 +509,7 @@ fsc.time <-
            par.strip.text = list(lines = 3),
            between = list(y = rep(c(0, 0.5), c(6, 1))),
            scales = list(x = list(axs = "i"), y = list(draw = FALSE)),
-           layout = c(1, 14))
+           layout = c(1, 14), xbin = 32)
 
 plot(fsc.time, split = c(1, 1, 2, 1))
 plot(ssc.time, split = c(2, 1, 2, 1), newpage = FALSE)
@@ -531,7 +531,7 @@ xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD,
 
 xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit,
        data=transform("SSC-H"=asinh,"FSC-H"=asinh) \%on\% GvHD,
-       smooth=FALSE, filter=n2gate, subset=Patient == 5)
+       smooth=FALSE, filter=n2gate, subset=Patient == 5, xbin = 32)
 
 
 ## displaying filters with stats
@@ -539,7 +539,7 @@ n2gate.results <- filter(GvHD, n2gate)
 
 xyplot(`SSC-H` ~ `FSC-H` | Visit, data=GvHD,
        subset=Patient == "6",
-       filter=n2gate.results, smooth=FALSE
+       filter=n2gate.results, smooth=FALSE, xbin = 32
        ,stats=TRUE
        ,abs=TRUE
        ,digits=3 
@@ -551,22 +551,30 @@ recGate1<-rectangleGate("FL3-H"=c(2.3,4.1),"FL2-H"=c(6.8,9))
 recGate2<-rectangleGate("FL3-H"=c(1,3),"FL2-H"=c(4,6))
 filters1<-filters(list(recGate1,recGate2))
 trans<-transform("FL2-H"=asinh,"FL3-H"=asinh)
-trans_data<-transform(GvHD[[1]],trans)
+trans_data<-transform(GvHD[1:2],trans)
+#replicate filters object across samples
+flist <- list(filters1 , filters1)
+names(flist) <- sampleNames(trans_data)
 xyplot(`FL2-H` ~ `FL3-H`
 	   ,data=trans_data 
-       ,filter=filters1
+       ,filter= flist
        ,stats=TRUE
        ,margin=FALSE
+       , xbin = 32
+       , smooth = FALSE
        )
 
 #display recGate2 as a overlay 
-overlay<-Subset(trans_data,recGate2)
+overlay <- Subset(trans_data,recGate1)
 xyplot(`FL2-H` ~ `FL3-H`
 	   ,data=trans_data 
-       ,filter=recGate1
+       ,filter=recGate2
        ,stats=TRUE
        ,margin=FALSE
-       ,overlay=overlay
+       , smooth = FALSE
+       , xbin = 32
+       ,overlay= list(rect2 = overlay)
+       ,par.settings = list(overlay.symbol = list(cex = 0.1))
        )
 
 
