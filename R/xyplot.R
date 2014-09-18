@@ -516,7 +516,7 @@ panel.xyplot.flowframe.old <- function(x,y,frame,
 ## is done by either the panel.smoothScatter or the default lattice panel.xyplot
 ## function
 ##when xbins>0, we do the hexagon plot provided by hexbin package to improve the speed
-#overlay is a list(x=,y=), which is the extra points need to be plotted on top of the x,y
+#overlay is a list of flowFrames, which are the extra points need to be plotted on top of the x,y
 #' @param checkName \code{logical} indicating whether to skip checking the bracket '(' in channel name
 panel.xyplot.flowframe <- function(frame,
                                    filter=NULL,
@@ -536,10 +536,10 @@ panel.xyplot.flowframe <- function(frame,
 									,pos=0.5
 									,digits=2
 									,abs=FALSE
-									,overlay.x=NULL
-									,overlay.y=NULL
+									,overlay = NULL
                                     ,checkName = TRUE
                                     ,sample.ratio = 1
+                                    , overlay.symbol = NULL
 						   			,...)
 {
     
@@ -662,7 +662,7 @@ panel.xyplot.flowframe <- function(frame,
         
             if (is.null(argcolramp))
               argcolramp <- flowViz.par.get("argcolramp")
-            if(!is.null(overlay.x)){
+            if(!is.null(overlay)){
               argcolramp <- .colRmpPlt(alpha = gp$overlay.symbol$bg.alpha)
             }
               
@@ -684,9 +684,21 @@ panel.xyplot.flowframe <- function(frame,
 				
 				if(gp$density)
 					col <- densCols(x, y, colramp=argcolramp)
-            
-				panel.xyplot(x, y, col=col, cex=cex, pch=pch, alpha=alpha, ...)
-	
+#                browser()
+                dots <- list(...)
+                dots$darg <- NULL
+                dots$type <- NULL
+                do.call(panel.xyplot, args = c(list(x = x, y = y
+                                                , col = col
+                                                , cex = cex
+                                                , pch = pch
+                                                , alpha = alpha
+                                                )
+                                                , dots
+                                                )
+                                                
+                                            )
+                    	
 			}
             
 			ptList<-plotType("gpoints", c(channel.x.name, channel.y.name))
@@ -779,34 +791,46 @@ panel.xyplot.flowframe <- function(frame,
 		}
 	}
 #	browser()
-	if(!is.null(overlay.x)&&!is.null(overlay.y))
+	if(!is.null(overlay))
 	{
-        lpoints(overlay.x, overlay.y
-                  , col = gp$overlay.symbol$fill
-                  , alpha = gp$overlay.symbol$alpha
-                  , cex= gp$overlay.symbol$cex 
-                  , pch = gp$overlay.symbol$pch
-                  )
-		
-		#plot stats for bool gates
-		if(is.null(filter))
-		{
+        overlayNames <- names(overlay)
+        for(overLayName in overlayNames){
+          thisOverlay <- overlay[[overLayName]]
+          thisDat <- exprs(thisOverlay)
+          overlay.x <- thisDat[, channel.x.name]
+          overlay.y <- thisDat[, channel.y.name]
+          
+          this.overlay.symbol <- gp$overlay.symbol#default setting
+          user.overlay.symbol <- overlay.symbol[[overLayName]]#customized settings
+          #update the default with customized settings
+          if(!is.null(user.overlay.symbol))
+            this.overlay.symbol <- lattice:::updateList(this.overlay.symbol, overlay.symbol[[overLayName]])
+          lpoints(overlay.x, overlay.y
+                    , col = this.overlay.symbol[["fill"]]
+                    , alpha = this.overlay.symbol[["alpha"]]
+                    , cex= this.overlay.symbol[["cex"]] 
+                    , pch = this.overlay.symbol[["pch"]]
+                    )
+        }
+        #plot stats for bool gates
+        if(is.null(filter))
+        {
           if(is.logical(stats)&&stats)
           {
-			p.stats<-length(overlay.x)/l
-
+            p.stats<-length(overlay.x)/l
+            
             p.stats<-paste(format(p.stats*100,digits=digits),"%",sep="")
-#			browser()
-			xx<-xlim
-			yy<-ylim
-		
-			pos <- rep(pos, length=2)[1:2]
-			xx<-xx[1]+diff(xx)*pos[1]
-			yy<-yy[1]+diff(yy)*pos[2]
-			
-			gltext(xx, yy, labels=p.stats, adj=0.5, gp=gp$gate.text)
+            #			browser()
+            xx<-xlim
+            yy<-ylim
+            
+            pos <- rep(pos, length=2)[1:2]
+            xx<-xx[1]+diff(xx)*pos[1]
+            yy<-yy[1]+diff(yy)*pos[2]
+            
+            gltext(xx, yy, labels=p.stats, adj=0.5, gp=gp$gate.text)
           }
-		}
+        }
 	}
 		
 	
@@ -1021,7 +1045,7 @@ panel.xyplot.flowset <- function(x,
                                  filter = NULL,
                                  channel.x,
                                  channel.y,
-								 overlay= NULL#a flowset
+								 overlay= NULL#a list of flowSet
                                 ,stats = FALSE
 						 ,...)
 {
@@ -1030,25 +1054,17 @@ panel.xyplot.flowset <- function(x,
    
     filter <- .processFilter(filter, nm)
 
-	
-	if(!is.null(overlay))
-	{
-		overlay.x <- flowViz:::evalInFlowFrame(channel.x, overlay[[nm]])
-		overlay.y <- flowViz:::evalInFlowFrame(channel.y, overlay[[nm]])
-	}else
-	{
-		overlay.x <- NULL
-		overlay.y <-NULL
-	}
-	
     if(!is.list(stats)){
         stats <- lapply(seq_along(nm), function(x) stats)
         names(stats) <- nm
       
     }
-#    browser()
+    if(!is.null(overlay)){
+      overlay <- sapply(overlay, function(thisOverlay)thisOverlay[[nm]])
+    }
+    
     panel.xyplot.flowframe(frame=frames[[nm]], filter=filter[[nm]]
-                              , overlay.x=overlay.x,overlay.y=overlay.y
+                              , overlay = overlay
                               , stats = stats[[nm]]
                                , ...)
 }

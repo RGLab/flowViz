@@ -50,8 +50,8 @@ flowViz.state <- new.env(hash = FALSE)
                                               , pch = 19
                                           ),                 
                         flow.symbol=list(alpha=1,
-                                            cex=0.8,
-                                            pch=".",
+                                            cex = 0.1,
+                                            pch = 19,
                                             col="black",
                                             fill="transparent"),
                         gate.density=list(alpha=1,
