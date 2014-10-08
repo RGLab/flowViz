@@ -9,4 +9,10 @@ CHANGES IN VERSION 1.21.1
 5.add binTrans argument to xyplot that gets passed to hexin to transform the raw counts. sqrt is the default,NULL value means no transformation.  
 6.add new classes "filters", "filtersList" to allow flowViz to plot multiple filters/gates for one flowFrame
  
-
+CHANGES IN VERSION 1.29.30
+bug fixes
++ fix the error when xyplot on rare cells
++ error when xyplot on rare cell
+enhancements
++ speed up xyplot by subsampling the data
++ support multiple overlays in xyplot
