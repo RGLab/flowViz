@@ -863,10 +863,10 @@ setMethod("xyplot",
                               filter=NULL,
                               as.table=TRUE,
                               prepanel=prepanel.xyplot.flowset,
-                              panel=panel.xyplot.flowset,
-                              xlab=channel.x.name,
-                              ylab=channel.y.name,
-                              par.settings=NULL
+                              panel=panel.xyplot.flowset
+                              , xlab= NULL 
+                              , ylab= NULL 
+                              , par.settings=NULL
                               , axis= axis.grid
                               ,defaultCond = "name" #to override the default conditional variable 'name'
                                             #mainly used for plotting single flowFrame
@@ -935,14 +935,32 @@ setMethod("xyplot",
           channel.x.name <- xObj[["name"]]
           channel.y.name <- yObj[["name"]]
           if(marker.only){
-            xlab <- as.character(ifelse(is.na(xObj[,"desc"]), channel.x.name, xObj[,"desc"]))
-            ylab <- as.character(ifelse(is.na(yObj[,"desc"]), channel.y.name, yObj[,"desc"]))
+            default_xlab <- as.character(ifelse(is.na(xObj[,"desc"]), channel.x.name, xObj[,"desc"]))
+            default_ylab <- as.character(ifelse(is.na(yObj[,"desc"]), channel.y.name, yObj[,"desc"]))
             
           }else
           {
-            xlab <- sub("NA","",paste(unlist(xObj),collapse=" "))
-            ylab <- sub("NA","",paste(unlist(yObj),collapse=" "))
+            default_xlab <- sub("NA","",paste(unlist(xObj),collapse=" "))
+            default_ylab <- sub("NA","",paste(unlist(yObj),collapse=" "))
           }
+         
+#          browser()
+          if(is.null(xlab)){
+            xlab <- default_xlab
+          }else
+          {
+            if(is.list(xlab))
+              xlab <- lattice:::updateList(list(label = default_xlab), xlab) #update default scales if non-null scales are specified
+          }
+          
+          if(is.null(ylab)){
+            ylab <- default_ylab
+          }else
+          {
+            if(is.list(ylab))
+              ylab <- lattice:::updateList(list(label = default_ylab), ylab) #update default scales if non-null scales are specified
+          }
+          
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
           ## use densityplot or bwplot method with dedicated panel and prepanel
