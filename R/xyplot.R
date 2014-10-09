@@ -856,6 +856,7 @@ setMethod("xyplot",
 ## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
 ## within flowViz::xyplot method that changes it back to data@frames
 ## however ncdfFlow::xyplot keeps data as it is
+#'  \item{marker.only}{ \code{ligcal} specifies whether to show both channel and marker names }
 .xyplot.flowSet <- function(x,
                               data,
                               smooth=TRUE,
@@ -871,6 +872,7 @@ setMethod("xyplot",
                                             #mainly used for plotting single flowFrame
                               , between = list(x=0.2,y=0.2)
                               , plotType = "xyplot"
+                              , marker.only = FALSE
                               , ...)
       {
        
@@ -908,6 +910,7 @@ setMethod("xyplot",
           pd <- pData(data)
           uniq.name <- createUniqueColumnName(pd)
           pd[[uniq.name]] <- factor(sampleNames(data))
+          
           ## deparse the formula structure
           channel.y <- x[[2]]
           channel.x <- x[[3]]
@@ -924,6 +927,22 @@ setMethod("xyplot",
           }
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
+          
+          
+          frm <- data[[1, use.exprs = FALSE]]
+          xObj <- getChannelMarker(frm, channel.x.name)
+          yObj <- getChannelMarker(frm, channel.y.name)
+          channel.x.name <- xObj[["name"]]
+          channel.y.name <- yObj[["name"]]
+          if(marker.only){
+            xlab <- as.character(ifelse(is.na(xObj[,"desc"]), channel.x.name, xObj[,"desc"]))
+            ylab <- as.character(ifelse(is.na(yObj[,"desc"]), channel.y.name, yObj[,"desc"]))
+            
+          }else
+          {
+            xlab <- sub("NA","",paste(unlist(xObj),collapse=" "))
+            ylab <- sub("NA","",paste(unlist(yObj),collapse=" "))
+          }
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
           ## use densityplot or bwplot method with dedicated panel and prepanel
@@ -957,7 +976,7 @@ prepanel.xyplot.flowset <-
       , xlim , ylim, ...)
 {
   if (length(nm <- as.character(x)) > 1)
-    stop("must have only one flow frame per panel")
+    stop("must have only one flow frame per panel!Please ensure the conditional variable is not set properly so that each group just has one sample. ")
 
     if (length(nm) == 1){
         ranges <- range(frames[[nm, use.exprs = FALSE]])

@@ -603,7 +603,9 @@ setMethod("densityplot",
                    prepanel = prepanel.densityplot.flowset,
                    panel = panel.densityplot.flowset,
                    filter=NULL, scales=list(y=list(draw=F)),
-                   groups, axis= axis.grid, ...)
+                   groups, axis= axis.grid
+#                    , marker.only = FALSE
+                    , ...)
       {
           ocall <- sys.call(sys.parent())
           ccall <- match.call(expand.dots = TRUE)
@@ -623,6 +625,7 @@ setMethod("densityplot",
               channels <-
                   setdiff(colnames(data),
                           flowCore:::findTimeChannel(data))
+
           formula.struct <- analyzeDensityFormula(x, dot.names = channels)
           ## we want to add a column to pd for each channel, repeating
           ## pd as necessary.  We might want to skip this if there is
@@ -631,7 +634,21 @@ setMethod("densityplot",
 
           channel.name <-
               sapply(formula.struct$right.comps, expr2char)
+          
+          frm <- data[[1, use.exprs = FALSE]]
+          xObjs <- sapply(channel.name,  getChannelMarker, frm = frm, simplify = FALSE)
+          channel.name <- sapply(xObjs, "[[", "name")
+          formula.struct$right.comps <- lapply(channel.name, function(i)as.symbol(i))
+          
+          
           pd <- rep(list(pd), length(channel.name))
+#          browser()
+#          if(marker.only){
+#            names(pd) <-  sapply(xObjs, function(xObj)as.character(ifelse(is.na(xObj[,"desc"]), xObj[,"name"], xObj[,"desc"])))
+#               
+#          }else{
+#            names(pd) <-  sapply(xObjs, function(xObj)sub("NA","",paste(unlist(xObj),collapse=" "))) 
+#          }
           names(pd) <- channel.name
           pd <- do.call(lattice::make.groups, pd)
           ## FIXME: this won't work if pd already has a column named
@@ -664,6 +681,7 @@ setMethod("densityplot",
               else as.name("which")
           if (missing(xlab))
               xlab <- ""
+            
           gp <- list(...)[["par.settings"]]
           gpar <- flowViz.par.get()
           if(!is.null(gp))
