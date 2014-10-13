@@ -1,0 +1,18 @@
+
+CHANGES IN VERSION 1.21.1
+-------------------------
+1.add modified lattice theme to flowViz and change the default color scheme for non-smoothed xyplot
+2.add stat=TRUE to display population % in xyplot
+  and add abs=FALSE and pos=0.5 to control the position of gate labels
+3.made change to prepanel.xyplot.flowset so that it return an empty list instead of NULL value for empty panels.This was causing the error thrown by lattice:::limits.and.aspect which calculates the scales for each panel and expects non-null return value from prepanel function  
+4.remove the old src and R code for hexbin and add hexbin package based hexagon plot support within panel.xyplot.flowframe
+5.add binTrans argument to xyplot that gets passed to hexin to transform the raw counts. sqrt is the default,NULL value means no transformation.  
+6.add new classes "filters", "filtersList" to allow flowViz to plot multiple filters/gates for one flowFrame
+ 
+CHANGES IN VERSION 1.29.30
+bug fixes
++ fix the error when xyplot on rare cells
++ error when xyplot on rare cell
+enhancements
++ speed up xyplot by subsampling the data
++ support multiple overlays in xyplot
