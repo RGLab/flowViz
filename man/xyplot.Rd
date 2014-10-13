@@ -317,8 +317,11 @@ panel.xyplot.flowset(
   	\item{overlay.symbol}{list of the lattice graphic parameters to format the overlay points.}
   	\item{sample.ratio}{\code{numeric} the ratio of sub-sampling of events to speed up plotting.}
   \item{strip.text}{A \code{character} that customizes the text in strip. Default is NULL, which does not display the strip box at all. It is only valid when plotting a \code{flowFrame}}
-  \item{\dots}{ More arguments, usually passed on to the underlying
-    lattice methods. }
+  \item{\dots}{ 
+   
+    marker.only  \code{logical} specifies whether to show both channel and marker names 
+   
+    More arguments, usually passed on to the underlying lattice methods. }
     
   
 }

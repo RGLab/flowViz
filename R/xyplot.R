@@ -856,21 +856,23 @@ setMethod("xyplot",
 ## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
 ## within flowViz::xyplot method that changes it back to data@frames
 ## however ncdfFlow::xyplot keeps data as it is
+#'  \item{marker.only}{ \code{ligcal} specifies whether to show both channel and marker names }
 .xyplot.flowSet <- function(x,
                               data,
                               smooth=TRUE,
                               filter=NULL,
                               as.table=TRUE,
                               prepanel=prepanel.xyplot.flowset,
-                              panel=panel.xyplot.flowset,
-                              xlab=channel.x.name,
-                              ylab=channel.y.name,
-                              par.settings=NULL
+                              panel=panel.xyplot.flowset
+                              , xlab= NULL 
+                              , ylab= NULL 
+                              , par.settings=NULL
                               , axis= axis.grid
                               ,defaultCond = "name" #to override the default conditional variable 'name'
                                             #mainly used for plotting single flowFrame
                               , between = list(x=0.2,y=0.2)
                               , plotType = "xyplot"
+                              , marker.only = FALSE
                               , ...)
       {
        
@@ -908,6 +910,7 @@ setMethod("xyplot",
           pd <- pData(data)
           uniq.name <- createUniqueColumnName(pd)
           pd[[uniq.name]] <- factor(sampleNames(data))
+          
           ## deparse the formula structure
           channel.y <- x[[2]]
           channel.x <- x[[3]]
@@ -924,6 +927,40 @@ setMethod("xyplot",
           }
           channel.x.name <- expr2char(channel.x)
           channel.y.name <- expr2char(channel.y)
+          
+          
+          frm <- data[[1, use.exprs = FALSE]]
+          xObj <- getChannelMarker(frm, channel.x.name)
+          yObj <- getChannelMarker(frm, channel.y.name)
+          channel.x.name <- xObj[["name"]]
+          channel.y.name <- yObj[["name"]]
+          if(marker.only){
+            default_xlab <- as.character(ifelse(is.na(xObj[,"desc"]), channel.x.name, xObj[,"desc"]))
+            default_ylab <- as.character(ifelse(is.na(yObj[,"desc"]), channel.y.name, yObj[,"desc"]))
+            
+          }else
+          {
+            default_xlab <- sub("NA","",paste(unlist(xObj),collapse=" "))
+            default_ylab <- sub("NA","",paste(unlist(yObj),collapse=" "))
+          }
+         
+#          browser()
+          if(is.null(xlab)){
+            xlab <- default_xlab
+          }else
+          {
+            if(is.list(xlab))
+              xlab <- lattice:::updateList(list(label = default_xlab), xlab) #update default scales if non-null scales are specified
+          }
+          
+          if(is.null(ylab)){
+            ylab <- default_ylab
+          }else
+          {
+            if(is.list(ylab))
+              ylab <- lattice:::updateList(list(label = default_ylab), ylab) #update default scales if non-null scales are specified
+          }
+          
           channel.x <- as.expression(channel.x)
           channel.y <- as.expression(channel.y)
           ## use densityplot or bwplot method with dedicated panel and prepanel
@@ -957,7 +994,7 @@ prepanel.xyplot.flowset <-
       , xlim , ylim, ...)
 {
   if (length(nm <- as.character(x)) > 1)
-    stop("must have only one flow frame per panel")
+    stop("must have only one flow frame per panel!Please ensure the conditional variable is not set properly so that each group just has one sample. ")
 
     if (length(nm) == 1){
         ranges <- range(frames[[nm, use.exprs = FALSE]])
