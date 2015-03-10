@@ -279,14 +279,14 @@ setMethod("timeLinePlot",
           signature(x="flowSet", channel="character"),
           function(x, channel, type=c("stacked", "scaled", "native",
                                "frequency"),
-                   col=NULL, ylab=names(x), binSize, varCut=1, ...)
+                   col=NULL, ylab=sampleNames(x), binSize, varCut=1, ...)
       {
           ## a reasonable default for the bin size
           if(missing(binSize))
               binSize <- min(max(1, floor(median(fsApply(x, nrow)/100))), 500)
           type <- match.arg(type)
           timelineplot(x, channel, binSize=binSize, col=col,
-                       varCut=varCut, type=type, ...)
+                       varCut=varCut, type=type, ylab = ylab, ...)
       })
 
 
