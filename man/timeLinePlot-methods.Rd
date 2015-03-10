@@ -16,7 +16,7 @@
   General usage:
      
   \code{timeLinePlot(x, channel, type=c("stacked", "scaled",
-    "native"), col, ylab=names(x), binSize, varCut=1, ...)}
+    "native"), col, ylab=sampleNames(x), binSize, varCut=1, ...)}
   
   \describe{
     
