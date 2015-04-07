@@ -116,8 +116,11 @@ panel.densityplot.flowset <-
                 mbar(xx, list(pl, pr), r, i, col[i], margin)
             ## we need a smaller bandwidth than the default and keep it constant
             if(length(xxt)){
-                if(!("bw" %in% names(darg)))
-                    darg$bw <- dpik(xxt)
+#                if(!("bw" %in% names(darg)))
+#                    darg$bw <- dpik(xxt)
+                if(!("adjust" %in% names(darg)))
+                  darg[["adjust"]] <- 2
+                  
                 h <- do.call(density, c(list(x=xxt), darg))
                 n <- length(h$x)
                 max.d <- max(h$y)
@@ -371,8 +374,10 @@ panel.densityplot.flowFrame <-
             mbar(xx, list(pl, pr), r, 1, col, margin)
           
           if(length(xxt)){
-            if(!("bw" %in% names(darg)))
-              darg$bw <- dpik(xxt)
+#            if(!("bw" %in% names(darg)))
+#              darg$bw <- dpik(xxt)
+            if(!("adjust" %in% names(darg)))
+              darg[["adjust"]] <- 2
             h <- do.call(density, c(list(x=xxt), darg))
             n <- length(h$x)
             max.d <- max(h$y)
