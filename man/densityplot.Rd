@@ -153,7 +153,9 @@ panel.densityplot.flowset(
     the plot.  This argument is directly passed to
     \code{\link[lattice:panel.functions]{panel.abline}}. }
 
-  \item{margin}{ Numeric in \code{[0,1]}. Indicate margin events by
+  \item{margin}{ Either Logical value 'FALSE' or Numeric valuein \code{[0,1]}. 
+  				When 'FALSE', it doesn't do anything to the margin events.
+  				When Numeric value, it indicates margin events by
     horizontal bars. The value of \code{margin} is interpreted as the
     proportion of events on the margin over which the bars are
     added. E.g., a value of \code{0,5} means to indicate margin events
