@@ -64,7 +64,7 @@ panel.densityplot.flowset <-
              ,gp, ...)
 {
 	
-    margin <- min(1, max(0, margin))
+    
     which.channel <- tail(which.packet(), 1)
     
     lc <- length(channel)
@@ -107,13 +107,19 @@ panel.densityplot.flowset <-
             r <- unlist(range(frames[[nm]], channel.name))
             ## we ignore data that has piled up on the margins
             rl <- r + c(-1,1)*min(100, 0.06*diff(r))
-            pl <- xx<=r[1]
-            pr <- xx>=r[2]
-            xxt <- xx[!(pl | pr)]
-            ## we indicate piled up data by vertical lines (if > 1%) unless
-            ## margin=FALSE
-            if(margin<1)
-                mbar(xx, list(pl, pr), r, i, col[i], margin)
+            
+            if(!is.logical(margin)||isTRUE(margin))#when margin is logical FALSE we skip marginal events filtering
+            {
+              margin <- min(1, max(0, margin))
+              pl <- xx<=r[1]
+              pr <- xx>=r[2]
+              xxt <- xx[!(pl | pr)]
+              ## we indicate piled up data by vertical lines (if > 1%) unless
+              ## margin=FALSE
+              if(margin<1)
+                  mbar(xx, list(pl, pr), r, i, col[i], margin)
+              }else
+                xxt <- xx
             ## we need a smaller bandwidth than the default and keep it constant
             if(length(xxt)){
 #                if(!("bw" %in% names(darg)))
@@ -347,7 +353,7 @@ panel.densityplot.flowFrame <-
 {
           
   
-          margin <- min(1, max(0, margin))
+          
           validName <- !length(grep("\\(", channel.x.name))
           if(checkName)
             validName <- !(length(grep("\\(", channel.x.name)) ||
@@ -363,16 +369,21 @@ panel.densityplot.flowFrame <-
          
           xx <- exprs(frame)[,channel.x.name]
           r <- unlist(range(frame, channel.x.name))
+          
           ## we ignore data that has piled up on the margins
           rl <- r + c(-1,1)*min(100, 0.06*diff(r))
-          pl <- xx<=r[1]
-          pr <- xx>=r[2]
-          xxt <- xx[!(pl | pr)]
-          ## we indicate piled up data by vertical lines (if > 1%) unless
-          ## margin=FALSE
-          if(margin<1)
-            mbar(xx, list(pl, pr), r, 1, col, margin)
-          
+          if(!is.logical(margin)||isTRUE(margin))#when margin is logical FALSE we skip marginal events filtering
+          {
+            margin <- min(1, max(0, margin))
+            pl <- xx<=r[1]
+            pr <- xx>=r[2]
+            xxt <- xx[!(pl | pr)]
+            ## we indicate piled up data by vertical lines (if > 1%) unless
+            ## margin=FALSE
+            if(margin<1)
+              mbar(xx, list(pl, pr), r, 1, col, margin)
+          }else
+            xxt <- xx
           if(length(xxt)){
 #            if(!("bw" %in% names(darg)))
 #              darg$bw <- dpik(xxt)
