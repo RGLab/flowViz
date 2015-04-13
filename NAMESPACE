@@ -78,4 +78,5 @@ export("addName",
        "prepanel.xyplot.flowframe",
        "prepanel.xyplot.flowframe.time",
        "prepanel.xyplot.flowset",
+       "panel.histogram.flowset",
        "timeLinePlot")
