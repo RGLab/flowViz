@@ -1,7 +1,7 @@
 Package: flowViz
 Type: Package
 Title: Visualization for flow cytometry
-Version: 1.31.3
+Version: 1.31.4
 Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar
 Maintainer: Mike Jiang <wjiang2@fhcrc.org>
 Description: Provides visualization tools for flow cytometry data. 
@@ -25,6 +25,7 @@ Collate: AllGenerics.R
 	 parallel.R          
 	 splom.R            
 	 densityplot.R       
+	 histogram.R
 	 latticeMethods.R      
 	 parallel.rgl.R      
 	 timeLinePlot.R

@@ -1127,6 +1127,8 @@ panel.xyplot.flowset <- function(x,
 #' @param nm sample name
 .process_overlay_flowSet <- function(overlay, nm){
   if(!is.null(overlay)){
+    if(!is.list(overlay))
+      stop("overlay must be a list of flowSet!")
     overlay <- sapply(overlay, function(thisOverlay){
           if(class(thisOverlay) != "flowSet")
             stop("overlay must be a list of 'flowSet'")
