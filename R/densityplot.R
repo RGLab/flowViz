@@ -312,6 +312,7 @@ panel.densityplot.flowset.ex <- function(x,
     channel.x,
     channel.y
     ,stats = FALSE
+    , overlay= NULL#a list of flowSet
     ,...)
 {
   
@@ -325,7 +326,10 @@ panel.densityplot.flowset.ex <- function(x,
     names(stats) <- nm
     
   }
-  panel.densityplot.flowFrame(frame=frames[[nm]], filter=filter[[nm]], stats = stats[[nm]], ...)
+  
+  overlay <- .process_overlay_flowSet(overlay, nm)
+  
+  panel.densityplot.flowFrame(frame=frames[[nm]], filter=filter[[nm]], stats = stats[[nm]], overlay = overlay, ...)
 }
 panel.densityplot.flowFrame <-
     function(frame,
@@ -348,6 +352,8 @@ panel.densityplot.flowFrame <-
         ,fitGate=TRUE
         ,refline=NULL
         ,checkName = TRUE
+        , overlay = NULL
+        , overlay.symbol = NULL
         ,...
         )
 {
@@ -397,7 +403,41 @@ panel.densityplot.flowFrame <-
 
             panel.polygon(x=xl,y=yl, col=fill, border=NA, alpha=alpha)
             
-#                        browser()
+#             browser()           
+            if(!is.null(overlay))
+            {
+              overlayNames <- names(overlay)
+              for(overLayName in overlayNames){
+                thisOverlay <- overlay[[overLayName]]
+                if(!is.null(thisOverlay)){
+                  thisDat <- exprs(thisOverlay)
+                  overlay.x <- thisDat[, channel.x.name]
+                  
+                  
+                  this.overlay.symbol <- gp$overlay.symbol#default setting
+                  user.overlay.symbol <- overlay.symbol[[overLayName]]#customized settings
+                  #update the default with customized settings
+                  if(!is.null(user.overlay.symbol))
+                    this.overlay.symbol <- lattice:::updateList(this.overlay.symbol, overlay.symbol[[overLayName]])
+#                browser()                
+                  h <- do.call(density, c(list(x=overlay.x), darg))
+                  n <- length(h$x)
+                  
+                  xl_overlay <- h$x[c(1, 1:n, n)]
+                  yl_overlay <- c(0, h$y, 0) / max(h$y) 
+                  
+                  
+                  panel.polygon(x=xl_overlay,y=yl_overlay 
+                      ,  border=NA
+                      , col = this.overlay.symbol[["fill"]]
+                      , alpha = this.overlay.symbol[["alpha"]]
+                  
+                  )  
+                }
+                
+              }
+              
+            }                        
             ## add the filterResult if possible, we get them from the output of
             ## glpolygon (with plot=FALSE)
             if(!is.null(filter) && validName){    
@@ -742,19 +782,15 @@ setMethod("densityplot",
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 setMethod("densityplot",
           signature(x="formula", data="flowFrame"),
-          function(x, data, ...){
-              ocall <- sys.call(sys.parent())
-              ccall <- match.call(expand.dots = TRUE)
-              ccall$overlap <- 0
-              ccall$scales <- list(y=list(draw=FALSE))
-              ccall$data <- as(data, "flowSet")
-              sampleNames(ccall$data) <- identifier(data)
-              ans <- eval.parent(ccall)
-              ans$call <- ocall
-              ans
+          function(x, data, overlay = NULL, ...){
+            sn <- identifier(data)
+            data <- as(data, "flowSet")
+            sampleNames(data) <- sn
+            
+            overlay <- .process_flowFrame_overlay(overlay, sn)
+                        
+            densityplot(x, data, overlap = 0, scales = list(y=list(draw=FALSE)), overlay = overlay, ...)              
           })
-                 
-
 
 
 ## ==========================================================================

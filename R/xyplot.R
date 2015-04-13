@@ -182,7 +182,7 @@ setMethod("xyplot",
     definition=function(x,
                         data
                         , filter = NULL
-                        , overlay= NULL#a flowset
+                        , overlay= NULL#a list of flowFrames
                         , stats = FALSE
                         , strip.text = NULL#remove strip by setting cond as NULL
                         , ...)
@@ -207,10 +207,7 @@ setMethod("xyplot",
     names(filter) <- sn
   }
   
-  if(!is.null(overlay)){
-    overlay <- list(overlay)
-    names(overlay) <- sn
-  }
+  overlay <- .process_flowFrame_overlay(overlay, sn)
   
   if(!is.null(stats)){
     stats <- list(stats)
@@ -222,6 +219,26 @@ setMethod("xyplot",
           , overlay = overlay, stats = stats
           , defaultCond = defaultCond , ...)  
 })
+
+#' convert a single flowFrame or a list of flowFrames to a list of flowSet
+#' @param overlay flowFrame or a list of flowFrame objects
+#' @param sn sample name
+.process_flowFrame_overlay <- function(overlay, sn){
+  if(!is.null(overlay)){
+    # convert single flowFrame to a list
+    if(!is.list(overlay))
+      overlay <- list(dummy = overlay) #panel.xyplot.flowFrame expect a named list
+    # convert a list of flowFrames to a list of flowSets
+    overlay <- lapply(overlay, function(thisOverlay){
+          thisOverlay <- as(list(thisOverlay), "flowSet")
+          sampleNames(thisOverlay) <- sn
+          thisOverlay
+        })
+    
+  }
+  overlay
+}
+
 ## Prepanel function to set up dimensions. We want to use the instrument measurement
 ## range instead of the absolute range of the data. We also record the data ranges
 ## in the internal state environment for further use.
@@ -1096,9 +1113,8 @@ panel.xyplot.flowset <- function(x,
         names(stats) <- nm
       
     }
-    if(!is.null(overlay)){
-      overlay <- sapply(overlay, function(thisOverlay)thisOverlay[[nm]])
-    }
+    overlay <- .process_overlay_flowSet(overlay, nm)
+    
     
     panel.xyplot.flowframe(frame=frames[[nm]], filter=filter[[nm]]
                               , overlay = overlay
@@ -1106,7 +1122,20 @@ panel.xyplot.flowset <- function(x,
                                , ...)
 }
 
-
+#' extract the respective flowFrame from each flowSet based on the given sampleName
+#' @param overlay a list of flowSet
+#' @param nm sample name
+.process_overlay_flowSet <- function(overlay, nm){
+  if(!is.null(overlay)){
+    overlay <- sapply(overlay, function(thisOverlay){
+          if(class(thisOverlay) != "flowSet")
+            stop("overlay must be a list of 'flowSet'")
+          thisOverlay[[nm]]
+          
+        })
+  }
+  overlay
+}
 
 addMargin <- function(x, y, r, total, nb, len=200, b=FALSE)
 {
