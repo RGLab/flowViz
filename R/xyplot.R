@@ -1130,7 +1130,8 @@ panel.xyplot.flowset <- function(x,
     if(!is.list(overlay))
       stop("overlay must be a list of flowSet!")
     overlay <- sapply(overlay, function(thisOverlay){
-          if(class(thisOverlay) != "flowSet")
+          thisClass <- class(thisOverlay)
+          if(!(extends(thisClass, "flowSet")||extends(thisClass, "ncdfFlowList")))
             stop("overlay must be a list of 'flowSet'")
           thisOverlay[[nm]]
           
