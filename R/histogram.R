@@ -4,7 +4,7 @@
 
 
 ## Dedicated prepanel function to set up dimensions
-prepanel.densityplot.flowset <- 
+prepanel.histogram.flowset <- 
     function(x, y, frames, 
              overlap=0.3, subscripts, ...,
              which.channel)
@@ -20,32 +20,9 @@ prepanel.densityplot.flowset <-
 }
 
 
-## add a barchart indicating the margin events
-mbar <- function(dat, p, r, i, col, m)
-{
-    rl <- r + c(-1,1)*min(100, 0.06*diff(r))
-    off <- min(5, 0.005*diff(r))
-    lx <- length(dat)
-    des <- -20
-    fac <- 0.7
-    for(j in seq_along(p)){
-        sp <- sum(p[[j]], na.rm=TRUE)
-        if(sp > lx*m)
-        {
-            panel.segments(rl[j], i, rl[j], i+fac, col="gray")
-            panel.lines(rep(rl[j],2), c(i, i+(sp/lx*fac)),
-                        col=desat(col, des), lwd=4)
-            panel.segments(rl[j]-off, i, rl[j]+off, i, col="gray")
-            panel.segments(rl[j]-off, i+fac, rl[j]+off, i+fac, col="gray")
-
-        }
-    }
-}
-
-
     
 ## Dedicated panel function to do the plotting and add gate boundaries
-panel.densityplot.flowset <-
+panel.histogram.flowset <-
     function(x, y, darg=list(n=50, na.rm=TRUE), frames, channel,
              overlap = 0.3, channel.name, filter=NULL,
              fill=superpose.polygon$col,
@@ -283,10 +260,10 @@ panel.densityplot.flowset <-
 }
 
 
-prepanel.densityplot.flowset.ex <- 
-    function(x, frames, channel.x.name, xlim , ...)
+prepanel.histogram.flowset.ex <- 
+    function(x, frames, channel.x.name, xlim, type = "density" , margin = TRUE, breaks = 100, ...)
 {
-  
+
   if (length(nm <- as.character(x)) > 1)
     stop("must have only one flow frame per panel")
   
@@ -300,13 +277,28 @@ prepanel.densityplot.flowset.ex <-
             tmp + c(-1,1)*xd
           }else NULL
     }
-    
-    return(list(xlim=xlim,ylim = c(0,1)))
+#    browser()
+    if(type == "count"){
+     #run hist to estimate the max count
+     data <- as.vector(exprs(frames[[nm, channel.x.name]]))
+     
+     if(margin){
+       r <- ranges[, channel.x.name]
+       pl <- data<=r[1]
+       pr <- data>=r[2]
+       data <- data[!(pl | pr)]  
+     }
+     h <- hist(data, plot = FALSE, breaks = breaks)
+     count.max <- max(h$counts)
+     ylim = c(0, count.max)
+    }else
+        ylim = c(0,1)
+    return(list(xlim=xlim, ylim = ylim))
   }else
     return(list())
 }
 
-panel.densityplot.flowset.ex <- function(x,
+panel.histogram.flowset.ex <- function(x,
     frames,
     filter = NULL,
     channel.x,
@@ -329,9 +321,9 @@ panel.densityplot.flowset.ex <- function(x,
   
   overlay <- .process_overlay_flowSet(overlay, nm)
   
-  panel.densityplot.flowFrame(frame=frames[[nm]], filter=filter[[nm]], stats = stats[[nm]], overlay = overlay, ...)
+  panel.histogram.flowFrame(frame=frames[[nm]], filter=filter[[nm]], stats = stats[[nm]], overlay = overlay, ...)
 }
-panel.densityplot.flowFrame <-
+panel.histogram.flowFrame <-
     function(frame,
         darg=list(n=50, na.rm=TRUE),
         filter=NULL,
@@ -354,12 +346,14 @@ panel.densityplot.flowFrame <-
         ,checkName = TRUE
         , overlay = NULL
         , overlay.symbol = NULL
+        , breaks = 100
         ,...
         )
 {
           
   
-          
+          limits <- current.panel.limits()
+          ylim <- limits[["ylim"]]
           validName <- !length(grep("\\(", channel.x.name))
           if(checkName)
             validName <- !(length(grep("\\(", channel.x.name)) ||
@@ -377,37 +371,28 @@ panel.densityplot.flowFrame <-
           r <- unlist(range(frame, channel.x.name))
           
           ## we ignore data that has piled up on the margins
-          rl <- r + c(-1,1)*min(100, 0.06*diff(r))
-          if(!is.logical(margin)||isTRUE(margin))#when margin is logical FALSE we skip marginal events filtering
+          
+          if(margin)#when margin is logical FALSE we skip marginal events filtering
           {
-            margin <- min(1, max(0, margin))
+            
             pl <- xx<=r[1]
             pr <- xx>=r[2]
             xxt <- xx[!(pl | pr)]
-            ## we indicate piled up data by vertical lines (if > 1%) unless
-            ## margin=FALSE
-            if(margin<1)
-              mbar(xx, list(pl, pr), r, 1, col, margin)
+            
+            mbar(xx, list(pl, pr), r, 1, col, margin)
           }else
             xxt <- xx
           if(length(xxt)){
-#            if(!("bw" %in% names(darg)))
-#              darg$bw <- dpik(xxt)
-            if(!("adjust" %in% names(darg)))
-              darg[["adjust"]] <- 2
-            h <- do.call(density, c(list(x=xxt), darg))
-            n <- length(h$x)
-            max.d <- max(h$y)
-            xl <- h$x[c(1, 1:n, n)]
-            yl <- c(0, h$y, 0) / max.d
 
-            panel.polygon(x=xl,y=yl, col=fill, border=NA, alpha=alpha)
             
-#             browser()           
+            panel.histogram(x=xxt, col=fill, border=NA, alpha=alpha, breaks = breaks, ...)
+            
+           
             if(!is.null(overlay))
             {
               overlayNames <- names(overlay)
               for(overLayName in overlayNames){
+#                browser()
                 thisOverlay <- overlay[[overLayName]]
                 if(!is.null(thisOverlay)){
                   thisDat <- exprs(thisOverlay)
@@ -419,19 +404,13 @@ panel.densityplot.flowFrame <-
                   #update the default with customized settings
                   if(!is.null(user.overlay.symbol))
                     this.overlay.symbol <- lattice:::updateList(this.overlay.symbol, overlay.symbol[[overLayName]])
-#                browser()                
-                  h <- do.call(density, c(list(x=overlay.x), darg))
-                  n <- length(h$x)
                   
-                  xl_overlay <- h$x[c(1, 1:n, n)]
-                  yl_overlay <- c(0, h$y, 0) / max(h$y) 
-                  
-                  
-                  panel.polygon(x=xl_overlay,y=yl_overlay 
+                  panel.histogram(overlay.x 
                       ,  border=NA
                       , col = this.overlay.symbol[["fill"]]
                       , alpha = this.overlay.symbol[["alpha"]]
-                  
+                      , breaks = breaks
+                      , ...
                   )  
                 }
                 
@@ -472,9 +451,9 @@ panel.densityplot.flowFrame <-
                           
                           
                             gpg<-gp$gate
-                            panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
+                            panel.lines(x=c(tb[1],tb[1]),y=ylim
                                 ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-                            panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
+                            panel.lines(x=c(tb[2],tb[2]),y=ylim
                                 ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
                           }
                           
@@ -506,38 +485,13 @@ panel.densityplot.flowFrame <-
                     for(j in seq_along(bounds)){
                       tb <- bounds[[j]]
                       
-                      if(fitGate)
-                      {
-                        tb_min <- min(tb)
-                        tb_max <- max(tb)
-                        
-                        tb_min <- max(min(xl),tb_min)
-                        tb_max <- min(max(xl),tb_max)
-                        if(ncol(tb) == 1 && colnames(tb) == parm){
-                          sel <- xl >= tb_min & xl <= tb_max
-                          if(any(sel)){
-                            afun <- approxfun(xl, yl)
-                            xr <- c(tb_min, seq(tb_min, tb_max, len=100), tb_max)
-    #                        browser()
-                            yr <- c(0,afun(xr[-c(1, length(xr))]),0)
-                            gpd<-gp$gate.density
-                            panel.polygon(xr, yr
-                                          , border=gpd$col
-                                          , col=gpd$fill,
-                                          alpha=gpd$alpha, lwd=gpd$lwd,
-                                          lty=gpd$lty
-                                       )
-                          }
-                        }	
-                      }else
-                      {
-        #								browser()
-                        gpg<-gp$gate
-                        panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
-                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-                        panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
-                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-                      }
+                      gpg<-gp$gate
+                      
+                      panel.lines(x=c(tb[1],tb[1]),y= ylim
+                          ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                      panel.lines(x=c(tb[2],tb[2]),y= ylim
+                          ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                      
                       
                     }
                   }
@@ -547,8 +501,7 @@ panel.densityplot.flowFrame <-
                   options(oo)
               }
             }
-
-            panel.lines(x=xl,y=yl, col=border, lty=lty,lwd=lwd)
+            
     
           }else{
             panel.lines(rl, rep(0,2), col="black")
@@ -557,67 +510,12 @@ panel.densityplot.flowFrame <-
         panel.abline(v=refline)
 }
 
-analyzeDensityFormula <- function(x, dot.names)
-{
-    ans <- list()
-    if (length(x) == 2) {
-        ans$left <- FALSE
-        x <- x[[2]]
-    }
-    else if (length(x) == 3) {
-        ans$left <- TRUE
-        ans$left.symbol <- x[[2]]
-        x <- x[[3]]
-    }
-    else stop("unexpected formula structure")
-    if (length(x) == 1) {
-        ans$conditioned <- FALSE
-        ans$multiple.right <- FALSE
-        ans$right.symbol <- x
-    }
-    else if (length(x) == 3) {
-        switch(as.character(x[[1]]),
-               "+" = {
-                   ans$conditioned <- FALSE
-                   ans$multiple.right <- TRUE
-                   ans$right.symbol <- x
-               },
-               "|" = {
-                   ans$conditioned <- TRUE
-                   ans$cond.symbol <- x[[3]]
-                   ans$right.symbol <- x[[2]]
-                   ans$multiple.right <-
-                       (length(x[[2]]) > 1 &&
-                        as.character(x[[2]][[1]]) == "+")
-               })
-    }
-    else stop("unexpected formula structure")
-    if (ans$multiple.right) {
-        x <- ans$right.symbol
-        right.comps <- list()
-        while ((length(x) > 1) && (as.character(x[[1]]) == "+")) {
-            right.comps <- c(list(x[[3]]), right.comps)
-            x <- x[[2]]
-        }
-        ans$right.comps <- c(list(x), right.comps)
-    }
-    else if (length(ans$right.symbol) == 1 && as.character(ans$right.symbol) == ".") {
-        ans$multiple.right <- TRUE
-        ans$right.comps <- lapply(dot.names, as.symbol)
-    }
-    else ans$right.comps <- list(ans$right.symbol)
-    ans
-}
-
-
-
-
-setMethod("densityplot",
+setMethod("histogram",
           signature(x = "formula", data = "flowSet"),
           function(x, data, ...){
             
             #construct lattice object
-            thisTrellisObj <- .densityplot.adapor(x, data, ...) 
+            thisTrellisObj <- .histogram.adapor(x, data, ...) 
               
             #pass frames slot
             thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
@@ -627,11 +525,12 @@ setMethod("densityplot",
 
 #' dispatch to different trellis object contructing function based on stack argument
 #' @param stack \code{logical} indicating whether to stack `name` on y axis
-.densityplot.adapor <- function(x, data, stack = TRUE, ...){
+.histogram.adapor <- function(x, data, stack = TRUE, ...){
   
-      if(stack)
-        thisObj <- .densityplot.flowSet(x, data, ...)
-      else
+      if(stack){
+        stop("stacked histogram is not supported yet!")
+        thisObj <- .histogram.flowSet(x, data, ...) 
+      }else
       {
     
         #add dummy y term in order to use .xyplot.flowSet to construct lattice object
@@ -643,8 +542,8 @@ setMethod("densityplot",
         thisFormula[[3]] <- x[[2]]
 #        browser()
         thisObj <- .xyplot.flowSet(thisFormula, data
-            , panel = panel.densityplot.flowset.ex
-            , prepanel = prepanel.densityplot.flowset.ex
+            , panel = panel.histogram.flowset.ex
+            , prepanel = prepanel.histogram.flowset.ex
             , ylab = ""
             , plotType = "densityplot"
             ,...)
@@ -654,10 +553,10 @@ setMethod("densityplot",
       thisObj
 }
 
-.densityplot.flowSet <- function(x, data, channels, xlab,
+.histogram.flowSet <- function(x, data, channels, xlab,
                    as.table = TRUE, overlap = 0.3,
                    prepanel = prepanel.densityplot.flowset,
-                   panel = panel.densityplot.flowset,
+                   panel = panel.histogram.flowset,
                    filter=NULL, scales=list(y=list(draw=F)),
                    groups, axis= axis.grid
 #                    , marker.only = FALSE
@@ -780,7 +679,7 @@ setMethod("densityplot",
 ## For the flowFrame method, we simply coerce to a flowSet and remove the
 ## axis annotation
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-setMethod("densityplot",
+setMethod("histogram",
           signature(x="formula", data="flowFrame"),
           function(x, data, overlay = NULL, ...){
             sn <- identifier(data)
@@ -789,19 +688,6 @@ setMethod("densityplot",
             
             overlay <- .process_flowFrame_overlay(overlay, sn)
                         
-            densityplot(x, data, overlap = 0, scales = list(y=list(draw=FALSE)), overlay = overlay, ...)              
+            histogram(x, data, overlap = 0, scales = list(y=list(draw=FALSE)), overlay = overlay, ...)              
           })
-
-
-## ==========================================================================
-## Plot a view object. For everything but gates we have the modified data
-## available, hence we can plot directly
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-setMethod("densityplot",
-          signature(x="formula", data="view"),
-          function(x, data, ...) densityplot(x, Data(data), ...))
-
-
-
-
 

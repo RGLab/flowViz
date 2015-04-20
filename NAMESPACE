@@ -15,7 +15,7 @@ importFrom(graphics, abline, axis, barplot, contour, hist, layout,
 importFrom(grid, gpar, get.gpar, grid.points, grid.polygon, grid.rect,
            current.viewport, unit)
 
-importFrom(lattice, densityplot, levelplot, make.groups, panel.abline,
+importFrom(lattice, densityplot, histogram, levelplot, make.groups, panel.abline,
            panel.grid, panel.lines, panel.parallel, panel.points,
            panel.polygon, panel.rect, panel.segments,
            panel.smoothScatter, panel.text, panel.xyplot, parallel,
@@ -56,7 +56,8 @@ exportMethods("addName",
               "qqmath",
               "splom",
               "timeLinePlot",
-              "xyplot")
+              "xyplot",
+              "histogram")
 
 
 export("addName",
@@ -77,4 +78,5 @@ export("addName",
        "prepanel.xyplot.flowframe",
        "prepanel.xyplot.flowframe.time",
        "prepanel.xyplot.flowset",
+       "panel.histogram.flowset",
        "timeLinePlot")
