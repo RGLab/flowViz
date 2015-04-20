@@ -2,14 +2,17 @@
 
 \docType{methods}
 \alias{densityplot}
+\alias{histogram}
 \alias{densityplot,formula,flowSet-method}
 \alias{densityplot,formula,flowFrame-method}
 \alias{densityplot,formula,view-method}
 \alias{densityplot,view,missing-method}
 \alias{panel.densityplot.flowset}
 \alias{prepanel.densityplot.flowset}
+\alias{histogram,formula,flowSet-method}
+\alias{histogram,formula,flowFrame-method}
 
-\title{ One-dimensional density plots for flow data }
+\title{ One-dimensional density/histogram plots for flow data }
 
 
 
@@ -19,7 +22,7 @@
   horizontally stack plots of density estimates for all frames in the
   \code{flowSet} for one or several flow parameters. In the latter case,
   each parameter will be plotted in a separate panel, i.e., we
-  implicitely condition on parameters.
+  implicitly condition on parameters.
   
 }
 
@@ -30,12 +33,22 @@
     x,
     data,
     \dots)
+\S4method{histogram}{formula,flowSet}(
+    x,
+    data,
+    \dots)
 
 ## method for 'flowFrame' objects
 \S4method{densityplot}{formula,flowFrame}(
     x,
-    data, 
-    \dots)
+    data 
+    , overlay = NULL
+    , \dots)
+\S4method{histogram}{formula,flowFrame}(
+    x,
+    data
+    , overlay = NULL 
+    , \dots)
 
 prepanel.densityplot.flowset(
     x,
@@ -71,21 +84,19 @@ panel.densityplot.flowset(
 	 ,checkName = TRUE
     ,gp,
     \dots)
-
-
-
-## methods for various workflow objects
-\S4method{densityplot}{formula,view}(
-    x,
-    data,
-    \dots)
-
-
-\S4method{densityplot}{view,missing}(
-    x,
-    data,
-    channels,
-    \dots)
+    
+    ## methods for various workflow objects
+	\S4method{densityplot}{formula,view}(
+	    x,
+	    data,
+	    \dots)
+	
+	
+	\S4method{densityplot}{view,missing}(
+	    x,
+	    data,
+	    channels,
+	    \dots)
 
 }
 
@@ -109,6 +120,8 @@ panel.densityplot.flowset(
     either a \code{\link[flowCore:flowFrame-class]{flowFrame}} or
     \code{\link[flowCore:flowSet-class]{flowSet}}, or one of the several
     workflow objects. }
+  
+  \item{overlay}{see help(xyplot).}
   
   	\item{overlap}{The amount of overlap between stacked density plots. This argument is ignored for the \code{flowFrame} method.}    
 	    
@@ -176,6 +189,7 @@ panel.densityplot.flowset(
     \code{par.settings} for customization of a single call or
     \code{flowViz.par.set} for customization of session-wide defaults. }
   
+    
   \item{\dots}{ More arguments, usually passed on to the underlying
     lattice methods. 
     \itemize{
@@ -192,7 +206,7 @@ panel.densityplot.flowset(
     	
     	\item axis: axis function passed to lattice, default is \code{axis.grid}
 		
-		\item ... : other arguments passed to panel.densityplot.flowset
+		\item ... : other arguments passed to panel.densityplot.flowset or panel.histogram.flowframe
 		
  
     	}
@@ -209,16 +223,21 @@ panel.densityplot.flowset(
       Colors are used to indicate common values of this covariate
       across panels. Filters can be added as the optional
       \code{filter} arguments. See \code{\link{xyplot}} for details. }
-    
+   
+	  \item{densityplot}{\code{signature(x = "formula", data = "view")}: A
+	  method to create density plots for workspace
+	  \code{\link[flowCore:view-class]{view}} objects. This still allows
+	  for some level of customization, but most defaults will be set depending
+	  on the input object. }
 
-    \item{densityplot}{\code{signature(x = "formula", data = "view")}: A
-      method to create density plots for workspace
-      \code{\link[flowCore:view-class]{view}} objects. This still allows
-      for some level of customization, but most defaults will be set depending
-      on the input object. }
-
-    \item{densityplot}{\code{signature(x = "view", data = "missing")}:
+	 \item{densityplot}{\code{signature(x = "view", data = "missing")}:
       The default method for view objects. All defaults will be set. }
+    
+	\item{histogram}{\code{signature(x = "formula", data =
+	"flowSet")}: Creates histogram plots for one channel. Filters can be added as the optional
+      \code{filter} arguments. See \code{\link{xyplot}} for details. }
+
+    
     
   }
 }
@@ -252,6 +271,11 @@ densityplot(~ `FSC-H`, GvHD[1:2], filter=curv1Filter("FSC-H"),fitGate=FALSE,stat
 
 ## plot a single flowFrame
 densityplot(~ `SSC-H`, GvHD[[1]], margin=FALSE)
+
+## plot histogram
+histogram(~ `SSC-H`, GvHD[[1]]) #default type is 'density'
+#change the type to 'count' and adjust breaks
+histogram(~ `SSC-H`, GvHD[[1]], margin=FALSE, type = "count", breaks = 50)
 
 }
 
