@@ -990,13 +990,13 @@ setMethod("xyplot",
                 channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
                 smooth=smooth, gp=this.par.settings, as.table=as.table, filter=filter,
                 par.settings=this.par.settings, axis = axis, between = between, ...)
-          }else if(plotType == "densityplot"){     #use bwplot instead due to the conflicts with the default darg argument of lattice::densityplot      
+          }else if(plotType %in% c("densityplot", "histogram")){     #use bwplot instead due to the conflicts with the default darg argument of lattice::densityplot      
             bwplot(x, data=pd, prepanel=prepanel, panel=panel,
                       frames=data, channel.x=channel.x,
                       channel.y=channel.y, channel.x.name=channel.x.name,
                       channel.y.name=channel.y.name, xlab=xlab, ylab=ylab,
                       smooth=smooth, gp=this.par.settings, as.table=as.table, filter=filter,
-                      par.settings=this.par.settings, axis = axis, between = between, ...)
+                      par.settings=this.par.settings, axis = axis, between = between, plotType = plotType, ...)
         }else
           stop("unknown plot type: ", plotType)
       }

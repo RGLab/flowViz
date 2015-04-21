@@ -4,7 +4,7 @@
 
 
 ## Dedicated prepanel function to set up dimensions
-prepanel.densityplot.flowset <- 
+prepanel.densityplot.flowset.stack <- 
     function(x, y, frames, 
              overlap=0.3, subscripts, ...,
              which.channel)
@@ -45,7 +45,7 @@ mbar <- function(dat, p, r, i, col, m)
 
     
 ## Dedicated panel function to do the plotting and add gate boundaries
-panel.densityplot.flowset <-
+panel.densityplot.flowset.stack <-
     function(x, y, darg=list(n=50, na.rm=TRUE), frames, channel,
              overlap = 0.3, channel.name, filter=NULL,
              fill=superpose.polygon$col,
@@ -61,6 +61,9 @@ panel.densityplot.flowset <-
 			 ,abs=FALSE
 			 ,fitGate=TRUE
              ,checkName = TRUE
+             , plotType = "densityplot"
+             , hist.type = "density"
+             , breaks = "Sturges"
              ,gp, ...)
 {
 	
@@ -105,8 +108,6 @@ panel.densityplot.flowset <-
             nm <- x[match(i, ycode)]
             xx <- evalInFlowFrame(channel, frames[[nm]])
             r <- unlist(range(frames[[nm]], channel.name))
-            ## we ignore data that has piled up on the margins
-            rl <- r + c(-1,1)*min(100, 0.06*diff(r))
             
             if(!is.logical(margin)||isTRUE(margin))#when margin is logical FALSE we skip marginal events filtering
             {
@@ -122,17 +123,37 @@ panel.densityplot.flowset <-
                 xxt <- xx
             ## we need a smaller bandwidth than the default and keep it constant
             if(length(xxt)){
-#                if(!("bw" %in% names(darg)))
-#                    darg$bw <- dpik(xxt)
-                if(!("adjust" %in% names(darg)))
-                  darg[["adjust"]] <- 2
+                
+                if(plotType == "densityplot"){
+                  #densityplot
+                  if(!("adjust" %in% names(darg)))
+                    darg[["adjust"]] <- 2
                   
-                h <- do.call(density, c(list(x=xxt), darg))
-                n <- length(h$x)
-                max.d <- max(h$y)
-                xl <- h$x[c(1, 1:n, n)]
-                yl <- i + height * c(0, h$y, 0) / max.d
-                panel.polygon(x=xl,y=yl, col=col[i], border=NA, alpha=alpha[i])
+                  h <- do.call(density, c(list(x=xxt), darg))
+                  x.val <- h$x
+                  y.val <- h$y
+                  n <- length(x.val)
+                }else{
+                  fitGate <- FALSE
+                  #histogram
+                  h <- lattice:::hist.constructor(xxt, breaks = breaks, ...)
+                  y.val <- switch(hist.type, count = h$counts, percent = 100 * h$counts/length(x), density = h$density)
+                  x.val <- h$breaks
+                  n <- length(x.val)
+                  if (length(y.val) != n - 1) 
+                    warning("problem with 'hist' computations")
+                }
+
+                max.d <- max(y.val)
+                xl <- x.val[c(1, 1:n, n)]
+                yl <- i + height * c(0, y.val, 0) / max.d
+                
+                if(plotType == "densityplot")
+                  panel.polygon(x=xl,y=yl, col=col[i], border=NA, alpha=alpha[i])
+                else
+                  panel.rect(x = xl[-n], y = 0, height = yl, width = diff(xl), 
+                      col = col[i], alpha = alpha[i], border = border[i], just = c("left", "bottom"), identifier = "histogram")
+                
                 ## add the filterResult if possible, we get them from the output of
                 ## glpolygon (with plot=FALSE)
 				
@@ -271,7 +292,7 @@ panel.densityplot.flowset <-
                }
 #				browser()
                 panel.lines(x=xl,y=yl, col=border[i], lty=lty[i],lwd=lwd[i])
-#                panel.lines(rl, rep(i,2), col="black")
+
             }else{
                 panel.lines(rl, rep(i,2), col="black")
             }
@@ -283,8 +304,8 @@ panel.densityplot.flowset <-
 }
 
 
-prepanel.densityplot.flowset.ex <- 
-    function(x, frames, channel.x.name, xlim , ...)
+prepanel.densityplot.flowset <- 
+    function(x, frames, channel.x.name, xlim ,margin = TRUE, hist.type = "density", breaks = "sturges", ...)
 {
   
   if (length(nm <- as.character(x)) > 1)
@@ -301,12 +322,27 @@ prepanel.densityplot.flowset.ex <-
           }else NULL
     }
     
-    return(list(xlim=xlim,ylim = c(0,1)))
+    if(hist.type %in% c("count", "percent")){
+      #run hist to estimate the max count
+      data <- as.vector(exprs(frames[[nm, channel.x.name]]))
+      
+      if(margin){
+        r <- ranges[, channel.x.name]
+        pl <- data<=r[1]
+        pr <- data>=r[2]
+        data <- data[!(pl | pr)]  
+      }
+      h <- lattice:::hist.constructor(data, breaks = breaks, ...)
+      y.val <- switch(hist.type, count = h$counts, percent = 100 * h$counts/length(data), density = h$density)
+      ylim = c(0, max(y.val))
+    }else
+      ylim = c(0,1)#when hist.type = density, y will be normalized to c(0,1), thus no need to compute ylim  
+    return(list(xlim=xlim, ylim = ylim))
   }else
     return(list())
 }
 
-panel.densityplot.flowset.ex <- function(x,
+panel.densityplot.flowset <- function(x,
     frames,
     filter = NULL,
     channel.x,
@@ -354,6 +390,9 @@ panel.densityplot.flowFrame <-
         ,checkName = TRUE
         , overlay = NULL
         , overlay.symbol = NULL
+        , plotType = "densityplot"
+        , hist.type = "density"
+        , breaks = "Sturges"
         ,...
         )
 {
@@ -391,18 +430,38 @@ panel.densityplot.flowFrame <-
           }else
             xxt <- xx
           if(length(xxt)){
-#            if(!("bw" %in% names(darg)))
-#              darg$bw <- dpik(xxt)
-            if(!("adjust" %in% names(darg)))
-              darg[["adjust"]] <- 2
-            h <- do.call(density, c(list(x=xxt), darg))
-            n <- length(h$x)
-            max.d <- max(h$y)
-            xl <- h$x[c(1, 1:n, n)]
-            yl <- c(0, h$y, 0) / max.d
-
-            panel.polygon(x=xl,y=yl, col=fill, border=NA, alpha=alpha)
+            if(plotType == "densityplot"){
+              #densityplot
+              if(!("adjust" %in% names(darg)))
+                darg[["adjust"]] <- 2
+              
+              h <- do.call(density, c(list(x=xxt), darg))
+              x.val <- h$x
+              y.val <- h$y
+              n <- length(x.val)
+            }else{
+              fitGate <- FALSE
+              #histogram
+              h <- lattice:::hist.constructor(xxt, breaks = breaks, ...)
+              y.val <- switch(hist.type, count = h$counts, percent = 100 * h$counts/length(xxt), density = h$density)
+              x.val <- h$breaks
+              n <- length(x.val)
+              if (length(y.val) != n - 1) 
+                warning("problem with 'hist' computations")
+            }
             
+            max.d <- max(y.val)
+            xl <- x.val[c(1, 1:n, n)]
+            yl <- c(0, y.val, 0)
+            if(hist.type == "density")
+              yl <- yl / max.d
+            
+            if(plotType == "densityplot")
+              panel.polygon(x=xl,y=yl, col=fill, border=NA, alpha=alpha)
+            else
+              panel.rect(x = xl[-n], y = 0, height = yl, width = diff(xl), 
+                  col = fill, alpha = alpha, border = col, just = c("left", "bottom"), identifier = "histogram")
+                        
 #             browser()           
             if(!is.null(overlay))
             {
@@ -627,10 +686,11 @@ setMethod("densityplot",
 
 #' dispatch to different trellis object contructing function based on stack argument
 #' @param stack \code{logical} indicating whether to stack `name` on y axis
-.densityplot.adapor <- function(x, data, stack = TRUE, ...){
+.densityplot.adapor <- function(x, data, stack = TRUE, plotType = "densityplot", ...){
   
+      plotType <- match.arg(plotType, c("densityplot", "histogram"))
       if(stack)
-        thisObj <- .densityplot.flowSet(x, data, ...)
+        thisObj <- .densityplot.flowSet.stack(x, data, plotType = plotType, ...)
       else
       {
     
@@ -643,10 +703,10 @@ setMethod("densityplot",
         thisFormula[[3]] <- x[[2]]
 #        browser()
         thisObj <- .xyplot.flowSet(thisFormula, data
-            , panel = panel.densityplot.flowset.ex
-            , prepanel = prepanel.densityplot.flowset.ex
+            , panel = panel.densityplot.flowset
+            , prepanel = prepanel.densityplot.flowset
             , ylab = ""
-            , plotType = "densityplot"
+            , plotType = plotType
             ,...)
         #append channel.name to work ncdfFlow::densityplot
         thisObj$panel.args.common$channel.name <- thisObj$panel.args.common$channel.x.name
@@ -654,10 +714,10 @@ setMethod("densityplot",
       thisObj
 }
 
-.densityplot.flowSet <- function(x, data, channels, xlab,
+.densityplot.flowSet.stack <- function(x, data, channels, xlab,
                    as.table = TRUE, overlap = 0.3,
-                   prepanel = prepanel.densityplot.flowset,
-                   panel = panel.densityplot.flowset,
+                   prepanel = prepanel.densityplot.flowset.stack,
+                   panel = panel.densityplot.flowset.stack,
                    filter=NULL, scales=list(y=list(draw=F)),
                    groups, axis= axis.grid
 #                    , marker.only = FALSE
