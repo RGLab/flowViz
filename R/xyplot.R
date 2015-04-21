@@ -1171,6 +1171,7 @@ panel.xyplot.flowframe <- function(frame,
 ## xyplot method for flowSets with formula.
 #' @export 
 #' @rdname xyplot
+#' @param par.settings A list of lists of graphical parameters.  See \code{\link{flowViz.par.set}} for details.
 setMethod("xyplot",
           signature=signature(x="formula",
                               data="flowSet"),
@@ -1184,8 +1185,6 @@ setMethod("xyplot",
 ## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
 ## within flowViz::xyplot method that changes it back to data@frames
 ## however ncdfFlow::xyplot keeps data as it is
-#' @param par.settings A list of lists of graphical parameters.  See
-#' \code{\link{flowViz.par.set}} for details.
 #'  \item{marker.only}{ \code{ligcal} specifies whether to show both channel and marker names }
 .xyplot.flowSet <- function(x,
                               data,
@@ -1494,11 +1493,14 @@ addMargin <- function(x, y, r, total, nb, len=200, b=FALSE)
 ## Plot a view object. For everything but gates we have the modified data
 ## available, hence we can plot directly
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#' @rdname xyplot
+#' @aliases xyplot,formula,view-method
 setMethod("xyplot",
           signature(x="formula", data="view"),
           function(x, data, ...) xyplot(x, Data(data), ...))
 
-
+#' @rdname xyplot
+#' @aliases xyplot,view,missing-method
 setMethod("xyplot",
           signature(x="view", data="missing"),
           function(x, data, ...) xyplot(Data(x), ...))
@@ -1509,6 +1511,8 @@ setMethod("xyplot",
 ## Plot a gateView object. Essentially, this is calling the plot
 ## method on the parent data of the view, adding gates if appropriate.
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#' @rdname xyplot
+#' @aliases xyplot,formula,gateView-method
 setMethod("xyplot",
           signature(x="formula", data="gateView"),
           function(x, data, filter=NULL, par.settings, ...)

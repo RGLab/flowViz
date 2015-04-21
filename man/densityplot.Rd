@@ -6,6 +6,7 @@
 \alias{densityplot,formula,flowFrame-method}
 \alias{densityplot,formula,flowSet-method}
 \alias{densityplot,formula,view-method}
+\alias{histogram,formula,flowFrame-method}
 \alias{histogram,formula,flowSet-method}
 \alias{panel.densityplot.flowset.stack}
 \alias{prepanel.densityplot.flowset.stack}
@@ -30,6 +31,8 @@ panel.densityplot.flowset.stack(x, y, darg = list(n = 50, na.rm = TRUE),
 \S4method{densityplot}{formula,view}(x, data, ...)
 
 \S4method{histogram}{formula,flowSet}(x, data, plotType, ...)
+
+\S4method{histogram}{formula,flowFrame}(x, data, ...)
 }
 \arguments{
 \item{x}{A formula describing the structure of the plot and the variables to

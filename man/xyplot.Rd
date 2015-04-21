@@ -12,6 +12,9 @@
 \alias{xyplot,flowFrame,missing-method}
 \alias{xyplot,formula,flowFrame-method}
 \alias{xyplot,formula,flowSet-method}
+\alias{xyplot,formula,gateView-method}
+\alias{xyplot,formula,view-method}
+\alias{xyplot,view,missing-method}
 \title{Methods implementing Lattice xyplots for flow data.}
 \usage{
 \S4method{xyplot}{flowFrame,missing}(x, data, time, xlab, ylab = "", layout,
@@ -43,6 +46,12 @@ prepanel.xyplot.flowset(x, frames, channel.x.name, channel.y.name, xlim, ylim,
 
 panel.xyplot.flowset(x, frames, filter = NULL, channel.x, channel.y,
   overlay = NULL, stats = FALSE, ...)
+
+\S4method{xyplot}{formula,view}(x, data, ...)
+
+\S4method{xyplot}{view,missing}(x, data, ...)
+
+\S4method{xyplot}{formula,gateView}(x, data, filter = NULL, par.settings, ...)
 }
 \arguments{
 \item{x}{A formula describing the structure of the plot and the variables to
@@ -179,6 +188,8 @@ overlay points.}
 \item{channel.x,channel.y}{Expressions defining the x and y variables in
 terms of columns in the data.  Can involve functions or multiple columns
 from the data, however this usage is discouraged.}
+
+\item{par.settings}{A list of lists of graphical parameters.  See \code{\link{flowViz.par.set}} for details.}
 
 \item{\dots}{marker.only \code{logical} specifies whether to show both channel and marker
 names

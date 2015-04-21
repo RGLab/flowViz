@@ -3,6 +3,70 @@
 ## the population identifiers or as provided by the user. These methods are
 ## ment for internal use and are usually not called directly by the user.
 ## 
+#' Add gate names to a flowViz plot.
+#' 
+#' 
+#' These methods add gate names to a \code{flowViz} plot, either derived from
+#' the population identifiers or as provided by the user. These methods are
+#' ment for internal use and are usually not called directly by the user.
+#' 
+#' 
+#' @name addName-methods
+#' @aliases addName addName-methods addName,curv1Filter,character-method
+#' addName,curv1Filter,logical-method addName,curv2Filter,character-method
+#' addName,curv2Filter,logical-method addName,ellipsoidGate,character-method
+#' addName,ellipsoidGate,logical-method addName,kmeansFilter,character-method
+#' addName,kmeansFilter,logical-method addName,polygonGate,character-method
+#' addName,polygonGate,logical-method addName,quadGate,character-method
+#' addName,quadGate,logical-method addName,quadGate,matrix-method
+#' addName,rectangleGate,character-method addName,rectangleGate,logical-method
+#' @docType methods
+#' @return The methods are called for their side effects. No value is returned.
+#' @section Methods: \describe{
+#' 
+#' \item{x = "curv1Filter", name = "character"}{ User-provided names. }
+#' 
+#' \item{x = "curv1Filter", name = "logical"}{ Get names from the
+#' \code{\link[flowCore:filter-class]{filter}} or
+#' \code{\link[flowCore:filterResult-class]{filterResult}} object}
+#' 
+#' \item{x = "curv2Filter", name = "character"}{ see above }
+#' 
+#' \item{x = "curv2Filter", name = "logical"}{ see above }
+#' 
+#' \item{x = "ellipsoidGate", name = "character"}{ see above }
+#' 
+#' \item{x = "ellipsoidGate", name = "logical"}{ see above }
+#' 
+#' \item{x = "kmeansFilter", name = "character"}{ see above }
+#' 
+#' \item{x = "kmeansFilter", name = "logical"}{ see above }
+#' 
+#' \item{x = "polygonGate", name = "character"}{ see above }
+#' 
+#' \item{x = "polygonGate", name = "logical"}{ see above }
+#' 
+#' \item{x = "quadGate", name = "character"}{ see above }
+#' 
+#' \item{x = "quadGate", name = "logical"}{ see above }
+#' 
+#' \item{x = "quadGate", name = "matrix"}{ see above }
+#' 
+#' \item{x = "rectangleGate", name = "character"}{ see above }
+#' 
+#' \item{x = "rectangleGate", name = "logical"}{ see above }
+#' 
+#' }
+#' @author F. Hahne
+#' @keywords methods
+#' @export 
+#' @param x rectangleGate, ellipsoidGate, quadGate, polygonGate or kmeansFilter
+#' @param name character or logical or matrix
+#' @param data flowFrame
+#' @param gp a list of graphical parameters
+#' @param pos,abs specifying location of the name. see 'help(xyplot)' for more details
+#' @param xlim,ylim limits of axis
+#' @param ... other arguments
 setMethod("addName",
           signature(x="rectangleGate", name="character"), 
           function(x, name, data, gp,pos=0.5,abs=FALSE,xlim,ylim,...)

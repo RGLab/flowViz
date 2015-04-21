@@ -11,26 +11,5 @@ Imports: stats4, Biobase, flowCore, graphics, grDevices, grid,
          RColorBrewer, stats, utils, hexbin,IDPmisc
 Suggests: colorspace, flowStats,knitr
 License: Artistic-2.0
-Collate: AllGenerics.R
-	 utilities.R
-	 addNames-methods.R
-	 flowPlot.R            
-	 lpoints-methods.R  
-	 points-methods.R	
-	 gateplotting_utils.R  
-	 lpolygon-methods.R  
-	 polygon-methods.R  
-	 xyplot.R
-	 contour.R           
-	 parallel.R          
-	 splom.R            
-	 densityplot.R       
-	 histogram.R
-	 latticeMethods.R      
-	 parallel.rgl.R      
-	 timeLinePlot.R
-	 ecdfplot.R          
-	 lines-methods.R       
-	 plot-methods.R    
 biocViews:  Infrastructure, FlowCytometry, CellBasedAssays, Visualization
 VignetteBuilder: knitr
