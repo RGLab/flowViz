@@ -38,6 +38,23 @@ addPoints <- function(x, data, channels, verbose=TRUE,
 ## plotted parameters, or guess if there are only two in the gate.
 ## If the first argument is a filterResult, we extract the filter definiton
 ## and pass that on to the next method as a separate argument
+# Adding points within a gate to a plot
+# 
+# These methods extend the basic graphics \code{\link{points}} methods for
+# drawing of points contained within a
+# \code{\link[flowCore:filter-class]{filter}}. They allow for multiple
+# dispatch, since not all \code{\link[flowCore:filter-class]{filter}} types
+# need to be evaluated for plotting, but this decision should be made
+# internally. In any case, we need the raw data in the form of a
+# \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+# 
+# When plotting \code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
+# \code{plot} method provided by \code{flowViz}, the plotted parameters are
+# recorded, which makes it possible to correctly overlay the points within
+# \code{\link[flowCore:filter-class]{filter}}s assuming that they are defined
+# for the respective parameters. Warnings and error will be cast for the cases
+# where the parameters are non-distinct or ambigious.
+#' @importFrom graphics abline axis barplot contour hist layout lines pairs par points polygon rect smoothScatter
 setMethod("gpoints",
           signature(x="filter", data="flowFrame", channels="missing"), 
           function(x, data, channels, verbose=TRUE,

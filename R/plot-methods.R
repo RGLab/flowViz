@@ -52,7 +52,39 @@ fplot <- function(x, smooth, pch, xlim, ylim = NULL, ...)
 }
 
 
-## only one argument: the flowFrame
+#' Very basic plotting of flowFrames
+#' 
+#' A basic method to plot \code{\link[flowCore:flowFrame-class]{flowFrame}}
+#' objects. Depending on the number of dimensions, different types of plots are
+#' generates. See below for details.
+#' 
+#' 
+#' Basic plots for \code{flowFrame} objects. If the object has only a single
+#' parameter this produces a \code{\link[graphics:hist]{histogram}}. For
+#' exactly two parameters we plot a bivariate density map (see
+#' \code{\link[graphics]{smoothScatter}}) and for more than two parameters we
+#' produce a simple \code{\link[lattice]{splom}} plot. To select specific
+#' parameters from a \code{flowFrame} for plotting, either subset the object or
+#' specify the parameters as a character vector in the second argument to
+#' \code{plot}. The \code{smooth} parameters lets you toggle between
+#' density-type \code{\link[graphics]{smoothScatter}} plots and regular scatter
+#' or pairs plots.  For far more sophisticated plotting of flow cytometry data,
+#' see the lattice-style plot methods provided by this package.
+#' 
+#' @param ... other arguments 
+#' 
+#' @name plot
+#' 
+#' @author F. Hahne
+#' @seealso
+#' 
+#' \code{\link[flowViz]{xyplot}},
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{\link[flowViz]{densityplot}}
+#' @keywords methods
+#' @importFrom stats4 plot
+#' @export 
+#' @aliases plot,flowFrame,missing-method
 setMethod("plot", signature(x="flowFrame", y="missing"),
           function(x, y, smooth=TRUE, ...)
       {
@@ -60,7 +92,12 @@ setMethod("plot", signature(x="flowFrame", y="missing"),
           return(invisible(NULL))
       })
 
-## second argument contains the parameters(s) to plot
+#' @export 
+#' @rdname plot
+#' @param x flowFrame
+#' @param y (optional) channel names
+#' @param smooth logical
+#' @param pch point type
 setMethod("plot",signature(x="flowFrame", y="character"),
           function(x, y, smooth=TRUE, pch, ...)
       {

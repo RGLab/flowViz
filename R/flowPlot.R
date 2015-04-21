@@ -1,7 +1,60 @@
-#
-## ==========================================================================
-## Basic plot for fcsFrame object
-## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#' Standard Plots for Flow Cytometry Data
+#' 
+#' A method that makes standard plots from a \code{flowFrame}. The user may
+#' also provide various \code{filter} or \code{filterResult} arguments to
+#' customize the plot.
+#' 
+#' The plot that is most commonly used in flow cytometry data analysis is
+#' usuall called a "dot plot". In common statistical language, we would call
+#' this a scatter plot. The basic idea is a 2-dimensional plot that shows the
+#' location of every cell in regard to the measurements made on it, for
+#' example, forward scatter vs side scatter. Most applications will, in
+#' addition to the data, want to show information about one or more filters
+#' (gates). Since there can be a very large number of cells in a sample, it is
+#' common to show a smoothed version of the data that doesn't involve
+#' registering every point on the graph.
+#' 
+#' @name flowPlot
+#' @aliases flowPlot flowPlot,flowFrame-method
+#' @docType methods
+#' @param x An object of class \code{flowFrame} that contains the data to be
+#' plotted.
+#' @param child An optional argument of class \code{filterResult} that
+#' specifies a subset of the data that are included in the \code{filterResult}
+#' @param filter A \code{filter}, \code{filterResult} or
+#' \code{filterResultList} object.
+#' @param plotParameters A vector of charactors defining the x and y variables
+#' in terms of columns in the data.
+#' @param logx,logy Logical controlling wheterh the corresponding variables
+#' will be log transfromed before passing to the panel function. Default to
+#' \code{FALSE}.
+#' @param parent An optional argument of class \code{filterResult} that
+#' specifies a subset of the data that are inclueed in the \code{filterResult}.
+#' @param colParent Specifying the color for \code{parent}. See \code{parent}
+#' above.
+#' @param colChild Specifies the color for \code{child}. See \code{chile}
+#' above.
+#' @param showFilter Logical, specifying whether to show the \code{filter}.
+#' @param gate.fill Specifies the fill color of the gate. Default to
+#' \code{transparent}.
+#' @param gate.border Character or specifying the color of the gate border.
+#' Default to \code{black}.
+#' @param xlab,ylab Labels for data axes.
+#' @param xlim,ylim Numeric vectors of length 2 specifying axis limits.
+#' @param \dots More arguments, usually passed on to the underlying lattice
+#' methods.
+#' @author P. Haaland
+#' @seealso \code{\link[flowCore:flowCore-package]{flowCore}}
+#' @keywords methods
+#' @examples
+#' 
+#' 
+#' data(GvHD)
+#' flowPlot(GvHD[["s5a01"]])
+#' flowPlot(transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD[["s5a01"]])
+#' 
+#' 
+#' @export 
 setMethod("flowPlot",
           ## basic plot without a gate specified
           signature(x="flowFrame"),

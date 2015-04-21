@@ -27,6 +27,23 @@
 ## contains exactly two dimensions, and even then we need to guess that
 ## they match the plotted data, hence we warn unless the plotted parameters
 ## are explicitely provided by the channels argument.
+# Drawing filter regions
+# 
+# These methods extend the lattice \code{\link[lattice:llines]{lpolygon}}
+# methods for drawing of \code{\link[flowCore:filter-class]{filter}} regions.
+# They allow for multiple dispatch, since not all
+# \code{\link[flowCore:filter-class]{filter}} types need to be evaluated for
+# plotting, but this decision should be made internally.
+# 
+# When plotting \code{\link[flowCore:flowFrame-class]{flowFrames}} using the
+# any of the lattice-type \code{plot} method provided by \code{flowViz}, the
+# plotted parameters are recorded, which makes it possible to correctly
+# overlay the outlines of \code{\link[flowCore:filter-class]{filter}} assuming
+# that they are defined for the respective parameters. Warnings and error will
+# be cast for the cases where the parameters are non-distinct or ambigious.
+# These methods are meant to be used within lattice panel functions and are
+# probably not of much use outside of those.
+# 
 setMethod("glpolygon",
           signature(x="filter", data="missing"), 
           function(x, data, verbose=TRUE, gpar=flowViz.par.get(),

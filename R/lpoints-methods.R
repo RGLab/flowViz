@@ -18,6 +18,25 @@
 ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ## We only know how to add points within the gate if the definiton of that
 ## gate fits the parameters of the data provided.
+# Adding points within a gate to a plot
+# 
+# These methods extend the lattice \code{\link[lattice:llines]{lpoints}}
+# methods for drawing of points contained within a
+# \code{\link[flowCore:filter-class]{filter}}. They allow for multiple
+# dispatch, since not all \code{\link[flowCore:filter-class]{filter}} types
+# need to be evaluated for plotting, but this decision should be made
+# internally. In any case, we need the raw data in the form of a
+# \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+# 
+# When plotting \code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
+# \code{plot} method provided by \code{flowViz}, the plotted parameters are
+# recorded, which makes it possible to correctly overlay the points within
+# \code{\link[flowCore:filter-class]{filter}}s assuming that they are defined
+# for the respective parameters. Warnings and error will be cast for the cases
+# where the parameters are non-distinct or ambigious. These methods are meant
+# to be used within lattice panel functions and are probably not of much use
+# outside of those.
+# 
 setMethod("glpoints",
           signature(x="filter", data="flowFrame", channels="missing"), 
           function(x, data, channels, verbose=TRUE,

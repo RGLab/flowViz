@@ -22,6 +22,28 @@
 ## plotted channels via the "channels" argument always gets precendence.
 ## All downstream methods will eventually run across this method, so we only
 ## need to check once.
+
+# Drawing filter boundaries
+# 
+# These methods extend the basic graphics \code{\link{lines}} methods for
+# drawing of \code{\link[flowCore:filter-class]{filter}} boundaries. They
+# allow for multiple dispatch, since not all
+# \code{\link[flowCore:filter-class]{filter}} types need to be evaluated for
+# plotting, but this decision should be made internally.
+# 
+# When plotting \code{\link[flowCore:flowFrame-class]{flowFrames}} using the
+# \code{plot} or \code{xyplot} methods provided by \code{flowViz}, the plotted
+# parameters are recorded, which makes it possible to correctly overlay the
+# outlines of \code{\link[flowCore:filter-class]{filter}} assuming that they
+# are defined for the respective parameters. Warnings and error will be cast
+# for the cases where the parameters are non-distinct or ambigious.
+# 
+# The flow parameters plotted can be passed on to any of the methods through
+# the optional \code{channels} argument, which always gets precedence over
+# automatically detected parameters.
+# 
+# The methods support all plotting parameters that are available for the
+# \code{base} \code{lines} functions.
 setMethod("glines",
           signature(x="filter", data="missing"), 
           function(x, data, verbose=TRUE, ...)

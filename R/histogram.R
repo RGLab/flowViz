@@ -1,4 +1,5 @@
-
+#' @export 
+#' @rdname densityplot
 setMethod("histogram",
     signature(x = "formula", data = "flowSet"),
     function(x, data, plotType, ...){

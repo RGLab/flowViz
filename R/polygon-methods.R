@@ -26,7 +26,28 @@
 ## they match the plotted data, hence we warn. Supplying the names of the
 ## plotted channels via the "channels" argument always gets precendence.
 ## All downstream methods will eventually run across this method, so we only
-## need to check once. 
+## need to check once.
+# Drawing filter regions
+# 
+# These methods extend the basic graphics \code{\link{polygon}} methods for
+# drawing of \code{\link[flowCore:filter-class]{filter}} regions. They allow
+# for multiple dispatch, since not all
+# \code{\link[flowCore:filter-class]{filter}} types need to be evaluated for
+# plotting, but this decision should be made internally.
+# 
+# When plotting \code{\link[flowCore:flowFrame-class]{flowFrame}}s using the
+# \code{plot} method provided by \code{flowViz}, the plotted parameters are
+# recorded, which makes it possible to correctly overlay the outlines of
+# \code{\link[flowCore:filter-class]{filter}}s assuming that they are defined
+# for the respective parameters. Warnings and error will be cast for the cases
+# where the parameters are non-distinct or ambigious.
+# 
+# The flow parameters plotted can be passed on to any of the methods through
+# the optional \code{channels} argument, which always gets precedence over
+# automatically detected parameters.
+# 
+# The methods support all plotting parameters that are available for the
+# \code{base} \code{polygon} functions.
 setMethod("gpolygon",
           signature(x="filter", data="missing"), 
           function(x, data, verbose=TRUE, ...)
