@@ -1,0 +1,96 @@
+---
+title: "histogram_vs_densityplot"
+author: "Mike Jiang"
+date: "04/13/2015"
+output: html_document
+---
+
+```{r, echo=FALSE}
+library(knitr)
+opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+
+```{r}
+library(flowViz)
+data(GvHD)
+fs <- GvHD[1:5]
+fs <- transform(fs, estimateLogicle(fs[[1]], colnames(fs)[-c(1:2)]))
+
+```
+
+
+## One sample(`flowFrame`) vs one channel 
+```{r}
+fr <- fs[[1]]
+densityplot(~`FL1-H`, fr)
+histogram(~`FL1-H`, fr)
+histogram(~`FL1-H`, fr, breaks = 50) ##change the breaks
+
+# change the border colors for hist
+flowViz.par.set("superpose.polygon", list(border = "white"))
+histogram(~`FL1-H`, fr, breaks = 50)
+```
+
+## One sample vs multi-channels
+```{r}
+densityplot(~., fr, channels = c("FL1-H", "FL2-H"))
+histogram(~., fr, channels = c("FL1-H", "FL2-H"), breaks = 50)
+densityplot(~., fr) #default will plot all channels
+histogram(~., fr)
+densityplot(~., fr, margin = F) #disable margin filtering
+histogram(~., fr, margin = F)
+```
+
+## Multi-samples (`flowSet`) vs one channel
+```{r}
+densityplot(~`FL1-H`, fs)
+histogram(~`FL1-H`, fs, breaks = 50)
+
+#non-stacked version
+densityplot(~`FL1-H`, fs, stack = F)
+histogram(~`FL1-H`, fs, stack = F, breaks = 50, col = "white")
+
+# change histogram type
+histogram(~`FL1-H`, fs, stack = F, breaks = 50, col = "white", hist.type = "count")
+histogram(~`FL1-H`, fs, stack = F, breaks = 50, col = "white", hist.type = "percent")
+# Independent scales
+histogram(~`FL1-H`, fs, stack = F, breaks = 50, col = "white", hist.type = "count"
+          , scale = list(y=list(relation = "free")))
+```
+
+## Multi-samples (`flowSet`) vs multi-channels
+```{r}
+densityplot(~., fs, channels = c("FL1-H", "FL2-H"))
+histogram(~., fs, channels = c("FL1-H", "FL2-H"), breaks = 50)
+
+densityplot(~., fs)
+histogram(~., fs, breaks = 50)
+```
+
+
+## display gate
+```{r}
+g <- rectangleGate(`FL1-H` =  c(3, 5))
+densityplot(~`FL1`, fs, filter = g, stats = T)
+densityplot(~`FL1`, fs, filter = g, stats = T, fitGate = F)#disable fitGate
+
+histogram(~`FL1`, fs, stack = T, breaks = 1e2, type = "count", filter = g, stats = T)
+histogram(~`FL1`, fs, stack = F, breaks = 1e2, type = "count", filter = g, stats = T)
+```
+
+## `densityplot` + `overlay`
+```{r}
+pos <- Subset(fs, g)
+pos #gated population
+#dispaly pos as overlay
+xyplot(`FSC-H`~`FL1`, fs,overlay = list(pos = pos), xbin = 32, smooth = F)
+# Not sure how to make y scale of the overlay to be compariable to the original density since its density is estimated indenpendenly.
+densityplot(~`FL1`, fs, margin = F, overlay = list(pos =  pos), stack = F, filter = g, fitGate = F) 
+
+# add overlay + independent y scaling
+histogram(~`FL1`, fs, stack = F, breaks = 1e2, type = "count", filter = g, stats = T,overlay = list(pos =pos), scale = list(y=list(relation = "free")))
+```
+
+
+

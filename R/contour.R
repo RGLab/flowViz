@@ -1,3 +1,78 @@
+#' Contour plots for flow data
+#' 
+#' Basic contour plots for both
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}}s and
+#' \code{\link[flowCore:flowFrame-class]{flowSet}}s. The densities for the
+#' contours are estimated using the fast kernel density estimation algorithm
+#' \code{\link[KernSmooth]{bkde2D}}.
+#' 
+#' 
+#' @name contour-methods
+#' @aliases contour contour-methods contour,ANY-method contour,flowFrame-method
+#' contour,flowSet-method
+#' @docType methods
+#' @param x An object of class
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+#' \code{\link[flowCore:flowFrame-class]{flowSet}}.
+#' @param y Numeric or character vector of length 2 indicating the channels to
+#' plot.
+#' @param nlevels The approximate number of contour line levels, see
+#' \code{\link[graphics]{contour}} for details.
+#' @param bw The bandwidth factor used for the kernel density estimation, see
+#' \code{\link[KernSmooth]{bkde2D}} for details.
+#' @param grid.size The grid size used for the kernel density estimation, see
+#' \code{\link[KernSmooth]{bkde2D}} for details.
+#' @param add Logical, indicating whether contour lines should be superimposed
+#' on an existing plot.
+#' @param xlab,ylab The axis annotation.
+#' @param xlim,ylim The plotting ranges.
+#' @param lwd,lty,col,fill The usual plotting parameters, i.e. the line width,
+#' line type, line color and fill color. When using a fill color you should
+#' consider alpha blending to improve the results.
+#' @param \dots Parameters that are passed on to the plotting functions.
+#' @section Methods: \describe{
+#' 
+#' \item{x = "flowFrame"}{ A regular contour plot of the flow data in the
+#' frame. It can be added on top of an existing plot using the \code{add}
+#' argument.}
+#' 
+#' \item{x = "flowSet"}{ Overlay of contours of densities for each individual
+#' frame in the set. You should consider using differnt colors and alpha
+#' blending to improve the result. This is only useful for a very limited
+#' number of frames in a set (~5), for larger sets you should consider a
+#' panelled lattice-type plot. Not that \code{bw}, \code{gridSize} and
+#' \code{nlevels} are passed on via the \dots{} argument.}
+#' 
+#' }
+#' @author F. Hahne
+#' @seealso
+#' 
+#' \code{\link[KernSmooth]{bkde2D}}, \code{\link[graphics]{contour}},
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{\link[flowCore:flowFrame-class]{flowSet}}
+#' @keywords methods
+#' @examples
+#' 
+#' 
+#' data(GvHD)
+#' 
+#' ## simple contour plot
+#' contour(GvHD[[1]])
+#' 
+#' ## overlay with existing plot
+#' plot(GvHD[[1]], c("FSC-H", "SSC-H"))
+#' contour(GvHD[[1]], add=TRUE, col="lightgray", lty=3)
+#' 
+#' ## colored contours
+#' contour(GvHD[[1]], fill="red")
+#' cols <- rainbow(3, alpha=0.1)
+#' contour(GvHD[[1]], fill=cols, col=cols)
+#' 
+#' ## overlay of multiple flowFrames in a flowSet
+#' contour(GvHD[1:3], col=cols, fill=cols)
+#' 
+#' @importFrom KernSmooth bkde2D dpik
+#' @export 
 setMethod("contour",
           signature("flowFrame"),
           function(x, y=1:2, nlevels=10, bw, grid.size=c(65,65), add=FALSE,

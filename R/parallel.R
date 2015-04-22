@@ -4,7 +4,8 @@
 ## parallel coordinate plots.
 
 
-
+#' @export 
+#' @rdname lattice-methods
 setMethod("parallel",
           signature(x = "flowFrame", data = "missing"),
           function(x, data, 
@@ -46,7 +47,9 @@ setMethod("parallel",
 
 
 ## Formula is like  ~ . | a + b. The '.' part is currently ignored.
-
+#' @param filter flowCore filter
+#' @export 
+#' @rdname lattice-methods
 setMethod("parallel",
           signature(x = "formula", data = "flowSet"),
           function(x, data,

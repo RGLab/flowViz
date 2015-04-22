@@ -15,6 +15,82 @@
 ## bins where the total number of events is > 2 times the expected average
 ## number
 ## A spearman rank correlation coefficient is return as an attribute.
+#' Plot channel values against time
+#' 
+#' Plots values of one parameter for each flowFrame in a flowSet against time.
+#' 
+#' 
+#' Plotting flow cytometry data against the time domain can help to identify
+#' problems with the fluidics or drifts in the instrument setting during
+#' measurement runs.
+#' 
+#' This function creates plots for all flowFrames in a flowSet for a given
+#' parameter against time. A barplot legend indicates the deviation from the
+#' median for each sample. There is also a flowFrame method, which will create
+#' a plot for a single flowFrame only.
+#' 
+#' In addition, the function computes a quality score for each frame, which
+#' essentially is the sum of the positive distances of each bin mean from a
+#' frame-specific confidence interval, divided by the number of bins. Values
+#' larger than zero indicate a problem.
+#' 
+#' @name timeLinePlot
+#' @return A numeric vector of quality scores.
+#' @section Methods:
+#' 
+#' 
+#' @param x An object of class
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}} or
+#' \code{\link[flowCore:flowSet-class]{flowSet}} containing the data to be
+#' plotted.
+#' 
+#' @param channel The parameter for which the data is to be plotted
+#' 
+#' @param type  One in 'stacked', 'scaled' or 'native'. 'stacked' will plot the
+#' measurements for the frames on top of each other. 'scaled' will align the
+#' median values around zero and 'native' will plot the values in the original
+#' dimensions of the measurement range.
+#' 
+#' @param col Optional color parameter.
+#' 
+#' @param ylab The axis annotation to add on the y-axis for stacked plots.
+#' 
+#' @param binSize The number of events per bin. If not set, a reasonable
+#' default is computed.
+#' 
+#' @param varCut The cutoff in the adjusted variance to which the quality score
+#' is computed. Basically, all values that are outside of the confidence
+#' interval defined by \code{\[my - signma * varCut, my + sigma * varCut\]}
+#' will contribute to a positive quality score value.
+#' 
+#' @param ... Further arguments that are passed on to the base plotting
+#' functions.
+#' 
+#' @author F. Hahne
+#' @seealso
+#' 
+#' \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{\link[flowCore:flowSet-class]{flowSet}}
+#' @keywords dplot methods
+#' @examples
+#' 
+#' 
+#' data(GvHD)
+#' opar <- par(ask=TRUE)
+#' 
+#' res <- timeLinePlot(GvHD[[1]], "SSC-H")
+#' res
+#' 
+#' res <- timeLinePlot(GvHD, "SSC-H")
+#' 
+#' res <- timeLinePlot(GvHD, "SSC-H", type="scaled", varCut=4)
+#' 
+#' res <- timeLinePlot(GvHD[1:4], "SSC-H", type="native", binSize=50)
+#' 
+#' par(opar)
+#' 
+#' 
+#' @export 
 timelineplot <- function(x, channel, type=c("stacked", "scaled", "native",
                                      "frequency"),
                          col, ylab=names(x), binSize, varCut=1, ...)
@@ -274,7 +350,8 @@ freqPlot <- function(y, p, main="time line frequencies",
         lines(stX[[j]], stYY[[j]], col=col[j], lwd=lwd)
 }
 
-## A method for flowSets
+#' @export 
+#' @rdname timeLinePlot
 setMethod("timeLinePlot",
           signature(x="flowSet", channel="character"),
           function(x, channel, type=c("stacked", "scaled", "native",
@@ -290,7 +367,8 @@ setMethod("timeLinePlot",
       })
 
 
-## A method for flowFrames. We coerce into a flowSet and use that method
+#' @export 
+#' @rdname timeLinePlot
 setMethod("timeLinePlot",
           signature(x="flowFrame", channel="character"),
           function(x, channel, ...)
@@ -298,7 +376,8 @@ setMethod("timeLinePlot",
           timeLinePlot(as(x, "flowSet"), channel=channel, ...)
       })
 
-## An error if no channel is specified
+#' @export 
+#' @rdname timeLinePlot
 setMethod("timeLinePlot",
           signature(x="ANY", channel="missing"),
           function(x, channel, ...)

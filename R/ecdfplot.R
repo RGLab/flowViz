@@ -1,6 +1,5 @@
-
-
-
+#' @export 
+#' @rdname ecdfplot
 prepanel.ecdfplot.flowset <- 
     function(x, frames, channel,
              f.value,
@@ -42,6 +41,8 @@ prepanel.ecdfplot.flowset <-
 
 
 
+#' @export 
+#' @rdname ecdfplot
 panel.ecdfplot.flowset <-
     function(x, 
              frames, channel,
@@ -129,7 +130,63 @@ panel.ecdfplot.flowset <-
 
 
 
-
+#' Method implementing Lattice ECDF plots for flow data
+#' 
+#' 
+#' This function creates Trellis displays of Empirical Cumulative Distribution
+#' Functions from flow cytometry data using a formula interface.
+#' 
+#' 
+#' @name ecdfplot
+#' @aliases ecdfplot ecdfplot,formula,flowSet-method panel.ecdfplot.flowset
+#' prepanel.ecdfplot.flowset
+#' @docType methods
+#' @param x a formula describing the structure of the plot and the variables to
+#' be used in the display.  For the prepanel and panel functions, a vector of
+#' names for the flow frames to be used in the panel.
+#' @param data a \code{flowSet} object that serves as a source of data
+#' @param xlab Labels for data axes, with suitable defaults taken from the
+#' formula
+#' @param f.value determines the number of points used in the plot
+#' \code{\link[latticeExtra:ecdfplot]{ecdfplot}} for details.
+#' @param panel,prepanel the panel and prepanel functions.
+#' @param type type of rendering; by default lines are drawn
+#' @param as.table logical; whether to draw panels from top left
+#' @param ref logical; whether to add reference lines at 0 and 1
+#' @param frames environment containing frame-specific data
+#' @param channel expression involving names of columns in the data
+#' @param groups,subscripts grouping variable, if specified, and subscripts
+#' indexing which frames are being used in the panel.  See
+#' \code{\link[lattice:xyplot]{xyplot}} for details.
+#' @param col,col.points,pch,cex,alpha,col.line,lty,lwd vector of graphical
+#' parameters that are replicated for each group
+#' @param \dots more arguments, usually passed on to the underlying lattice
+#' methods and the panel function.
+#' @section Methods: \describe{
+#' 
+#' \item{ecdfplot}{\code{signature(x = "formula", data = "flowSet")}: plote
+#' empirical CDF for a given channel, with one or more samples per panel } }
+#' @seealso Not all standard lattice arguments will have the intended effect,
+#' but many should.  For a fuller description of possible arguments and their
+#' effects, consult documentation on lattice.
+#' @keywords methods dplot
+#' @examples
+#' 
+#' 
+#' data(GvHD)
+#' 
+#' ecdfplot(~ `FSC-H` | Patient, GvHD, f.value = ppoints(100))
+#' 
+#' ecdfplot(~ asinh(`FSC-H`) | Patient, GvHD,
+#'          strip = strip.custom(strip.names = TRUE),
+#'          ref = FALSE)
+#' 
+#' ecdfplot(~ asinh(`FSC-H`) | Patient, GvHD, groups = Visit,
+#'          strip = strip.custom(strip.names = TRUE),
+#'          ref = FALSE, auto.key = list(columns = 4))
+#' 
+#' 
+#' @export 
 setMethod("ecdfplot",
           signature(x = "formula", data = "flowSet"),
           function(x, data, xlab,
