@@ -198,7 +198,7 @@ setMethod("glpoints",
           function(x, data, channels, verbose=TRUE, filterResult=NULL,
                    gpar=flowViz.par.get(), names=FALSE, ...)
       {
-          xe <- ell2Polygon(x, parameters(x))
+          xe <- as(x, "polygonGate")
           if(!is.null(filterResult))
               dropWarn("filterResult", "ellipsoidGates", verbose=verbose)
           addLpoints(x=xe, data=data, channels=channels, verbose=verbose,

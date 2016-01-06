@@ -290,7 +290,7 @@ setMethod("glpolygon",
               data <- channels
           parms <- parameters(x)
 	  ## We coerce to a polygon gate and plot that
-          res <- ell2Polygon(x, parameters(x))
+          res <- as(x, "polygonGate")
           glpolygon(res, verbose=verbose, gpar=gpar, plot=plot, ...)
           addName(x, names, data, gp = gpar$gate.text,...)
           return(invisible(res@boundaries))

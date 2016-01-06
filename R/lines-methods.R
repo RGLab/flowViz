@@ -365,7 +365,7 @@ setMethod("glines",
               data <- channels
           parms <- parameters(x)
 	  ## We coerce to a polygon gate and plot that
-          glines(ell2Polygon(x, parameters(x)), verbose=verbose, ...)      
+          glines(as(x, "polygonGate"), verbose=verbose, ...)      
       })
 
 
