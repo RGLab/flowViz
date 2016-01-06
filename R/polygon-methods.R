@@ -263,7 +263,7 @@ setMethod("gpolygon",
               data <- channels
           parms <- parameters(x)
 	  ## We coerce to a polygon gate and plot that
-          gpolygon(ell2Polygon(fd, parameters(x)), verbose=verbose, ...)      
+          gpolygon(as(fd, "polygonGate"), verbose=verbose, ...)      
       })
 
 

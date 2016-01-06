@@ -414,6 +414,7 @@ norm2Ell <- function(fd, parms=fd$parameters)
 ## convert an ellipseoidalFilter into a polygonGate
 ell2Polygon <- function(fd, parms=parameters(fd))
 {
+  .Deprecated("as")
     ## get the ellipse lines
     center <- fd@mean[parms]
     if(is.null(rownames(fd@cov)))
