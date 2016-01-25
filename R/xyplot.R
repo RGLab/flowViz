@@ -31,7 +31,7 @@ setMethod("xyplot",
           ## guess the time parameter
           expr <- exprs(x)
           if(missing(time))
-              time <- flowCore:::findTimeChannel(expr)
+              time <- flowCore:::findTimeChannel(expr, strict = TRUE)
           if(!(time %in% colnames(expr)))
               stop("Invalid name of variable (", time, ") recording the ",
                    "\ntime domain specified as 'time' argument.", call.=FALSE)
