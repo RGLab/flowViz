@@ -164,7 +164,7 @@ setMethod("levelplot",
 #' 
 #' }
 #' 
-#' @importFrom lattice densityplot histogram levelplot make.groups panel.abline panel.grid panel.lines panel.parallel panel.points panel.smoothScatter panel.text panel.xyplot parallel prepanel.default.parallel qqmath splom trellis.par.get trellis.par.set which.packet xyplot standard.theme
+#' @import lattice
 #' @export 
 #' @rdname lattice-methods
 #' @aliases qqmath,formula,flowSet-method
