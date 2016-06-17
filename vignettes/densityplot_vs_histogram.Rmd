@@ -3,6 +3,10 @@ title: "histogram_vs_densityplot"
 author: "Mike Jiang"
 date: "04/13/2015"
 output: html_document
+vignette: >    
+  %\VignetteKeywords{flow cytometry, visualization}
+  %\VignettePackage{flowViz}  
+  %\VignetteIndexEntry{histogram_vs_densityplot}
 ---
 
 ```{r, echo=FALSE}
