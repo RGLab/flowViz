@@ -11,9 +11,10 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
 .getStats <- function(curFilter,curStats,frame, digits, as.is = FALSE, ...){
   
   popNames<-identifier(curFilter)
-  if(is.numeric(curStats)){
-    names <- curStats
-  }else if(is.logical(curStats))
+  if(is.numeric(curStats)){#stats is explicitly provided
+    show.stats <- TRUE
+    stats <- curStats
+  }else if(is.logical(curStats))#stats needs to be computed on the fly
   {
     
     if(curStats)
@@ -25,27 +26,36 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
 
       count <- sum(ind)                         
       p.stats <- count/length(ind)
-      names<-p.stats
-      
+      stats <-p.stats
+      show.stats <- TRUE 
     }else
-    {
-      names<-list(...)$names
-      if(is.null(names))
-        names<-FALSE
-    }
+      show.stats <- FALSE
   }
   
-  if(!is.logical(names))
+  #parse names argument (gate name)
+  names<-list(...)$names
+  if(is.null(names))
+    names<-FALSE
+
+  #format stats when applicable
+  if(show.stats)
   {
-    if(is.numeric(names)){
+    if(is.numeric(stats)){
       if(as.is)
-        names <- as.character(names)
+        stats <- as.character(stats)
       else
-        names <- paste(format(names*100,digits=digits),"%",sep="")  
+        stats <- paste(format(stats*100,digits=digits),"%",sep="")  
     }
-    names(names)<-popNames
-  }
-  names
+    #cat gate name if asked
+    if(names)
+    {
+      
+      stats <- paste(basename(popNames), stats, sep = "\n")
+    }
+    names(stats)<-popNames
+  }else
+    stats <- names
+  stats
 }
 evalInFlowFrame <- function(expr, envir, enclos = baseenv())
 {
