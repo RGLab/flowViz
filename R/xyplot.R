@@ -70,7 +70,7 @@ prepanel.xyplot.flowframe.time <-
     if(missing(ylim)){
       #use default calculation
       yy <- expr[, yc]
-      ylim <- unlist(range(frame, yc))
+      ylim <- unlist(range(frame)[, yc])
     }
 
 
@@ -555,7 +555,7 @@ panel.xyplot.flowframe.old <- function(x,y,frame,
   
   if (smooth){
     if(margin){
-      r <- range(frame, c(channel.x.name, channel.y.name))
+      r <- range(frame)[, c(channel.x.name, channel.y.name)]
 #               l <- length(x)
       inc <- apply(r, 2, diff)/1e5
       dots <- list(...)
@@ -591,7 +591,7 @@ panel.xyplot.flowframe.old <- function(x,y,frame,
     #we then keep the boundary events 
     if(margin){
       
-      r <- range(frame, c(channel.x.name, channel.y.name))
+      r <- range(frame)[, c(channel.x.name, channel.y.name)]
 #               l <- length(x)
       inc <- apply(r, 2, diff)/1e5
       dots <- list(...)
@@ -925,7 +925,7 @@ panel.xyplot.flowframe <- function(frame,
 		
 	    if (smooth){
 			if(margin){
-				r <- range(frame, c(channel.x.name, channel.y.name))
+				r <- range(frame)[, c(channel.x.name, channel.y.name)]
 #				l <- length(x)
 				inc <- apply(r, 2, diff)/1e5
 				dots <- list(...)
@@ -961,7 +961,7 @@ panel.xyplot.flowframe <- function(frame,
 			#we then keep the boundary events 
 			if(margin){
 				
-				r <- range(frame, c(channel.x.name, channel.y.name))
+				r <- range(frame)[, c(channel.x.name, channel.y.name)]
 #				l <- length(x)
 				inc <- apply(r, 2, diff)/1e5
 				dots <- list(...)
