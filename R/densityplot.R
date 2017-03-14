@@ -104,9 +104,9 @@ prepanel.densityplot.flowset.stack <-
     channel.name <- unique(which.channel[subscripts])
     stopifnot(length(channel.name) == 1)
     if(extends(class(frames),"flowSet"))
-      ranglist <- eapply(frames@frames, range, channel.name)
+      ranglist <- eapply(frames@frames, function(fr)range(fr)[, channel.name])
     else
-      ranglist <- lapply(sampleNames(frames), function(sn)range(frames[[sn, channel.name, use.exprs = FALSE]]))
+      ranglist <- lapply(sampleNames(frames), function(sn)range(frames[[sn, use.exprs = FALSE]])[, channel.name])
     xl <- range(ranglist, finite=TRUE)
     list(xlim=xl + c(-1,1)*0.07*diff(xl))   
 }
@@ -265,7 +265,7 @@ panel.densityplot.flowset.stack <-
         {
             nm <- x[match(i, ycode)]
             xx <- evalInFlowFrame(channel, frames[[nm]])
-            r <- unlist(range(frames[[nm]], channel.name))
+            r <- unlist(range(frames[[nm]])[, channel.name])
             
             if(!is.logical(margin)||isTRUE(margin))#when margin is logical FALSE we skip marginal events filtering
             {
@@ -571,7 +571,7 @@ panel.densityplot.flowFrame <-
           ptList<-plotType("gdensity", parm)
          
           xx <- exprs(frame)[,channel.x.name]
-          r <- unlist(range(frame, channel.x.name))
+          r <- unlist(range(frame)[, channel.x.name])
           
           ## we ignore data that has piled up on the margins
           rl <- r + c(-1,1)*min(100, 0.06*diff(r))
