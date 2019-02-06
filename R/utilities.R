@@ -22,11 +22,18 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
       if (!is(curFilter, "filterResult")) 
         curFilter <- filter(frame, curFilter)
       curFres<-curFilter
-      ind <- as(curFres, "logical")
-
-      count <- sum(ind)                         
-      p.stats <- count/length(ind)
-      stats <-p.stats
+      if(is(curFres, "multipleFilterResult")){
+        ind <- lapply(seq_along(curFres), function(x) as(curFres[[x]], "logical"))
+        count <- lapply(ind, sum)                         
+        p.stats <- lapply(seq_along(ind), function(x) count[[x]]/length(ind[[x]]))
+        stats <-p.stats
+        names(stats) <- names(curFres)
+      }else{
+        ind <- as(curFres, "logical")
+        count <- sum(ind)                         
+        p.stats <- count/length(ind)
+        stats <-p.stats
+      }
       show.stats <- TRUE 
     }else
       show.stats <- FALSE
@@ -40,19 +47,29 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
   #format stats when applicable
   if(show.stats)
   {
-    if(is.numeric(stats)){
+    if(is.numeric(stats) || is.numeric(unlist(stats))){
       if(as.is)
         stats <- as.character(stats)
-      else
-        stats <- paste(format(stats*100,digits=digits),"%",sep="")  
+      else{
+        ##
+        if(is.list(stats)){
+          # stats <- paste(unlist(lapply(names(stats), function(x) 
+          #   paste(x,": ", format(stats[[x]]*100,digits=digits),"%",sep=""))), collapse = "\n")
+          stats <- lapply(names(stats), function(x)
+            paste(x,": ", format(stats[[x]]*100,digits=digits),"%",sep=""))
+        }else{
+          stats <- paste(format(stats*100,digits=digits),"%",sep="")   
+        }
+        ##
+      }
     }
     #cat gate name if asked
     if(names)
     {
-      
       stats <- paste(basename(popNames), stats, sep = "\n")
     }
-    names(stats)<-popNames
+    # names(stats)<-popNames
+    names(stats)<-rep(popNames, length(stats))
   }else
     stats <- names
   stats
