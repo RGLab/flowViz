@@ -9,7 +9,6 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
 
 ##return a formatted stats for display
 .getStats <- function(curFilter,curStats,frame, digits, as.is = FALSE, ...){
-  
   popNames<-identifier(curFilter)
   if(is.numeric(curStats)){#stats is explicitly provided
     show.stats <- TRUE
@@ -47,20 +46,16 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
   #format stats when applicable
   if(show.stats)
   {
-    if(is.numeric(stats) || is.numeric(unlist(stats))){
+    if(is.numeric(unlist(stats))){
       if(as.is)
         stats <- as.character(stats)
       else{
-        ##
         if(is.list(stats)){
-          # stats <- paste(unlist(lapply(names(stats), function(x) 
-          #   paste(x,": ", format(stats[[x]]*100,digits=digits),"%",sep=""))), collapse = "\n")
           stats <- lapply(names(stats), function(x)
             paste(x,": ", format(stats[[x]]*100,digits=digits),"%",sep=""))
         }else{
           stats <- paste(format(stats*100,digits=digits),"%",sep="")   
         }
-        ##
       }
     }
     #cat gate name if asked
@@ -68,7 +63,6 @@ expr2char <- function(x) paste(deparse(x), collapse = "")
     {
       stats <- paste(basename(popNames), stats, sep = "\n")
     }
-    # names(stats)<-popNames
     names(stats)<-rep(popNames, length(stats))
   }else
     stats <- names

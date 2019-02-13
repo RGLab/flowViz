@@ -83,7 +83,6 @@
 setMethod("densityplot",
     signature(x = "formula", data = "flowSet"),
     function(x, data, ...){
-      
       #construct lattice object
       thisTrellisObj <- .densityplot.adapor(x, data, ...) 
       
@@ -224,8 +223,6 @@ panel.densityplot.flowset.stack <-
              , breaks = "Sturges"
              ,gp, ...)
 {
-	
-    
     which.channel <- tail(which.packet(), 1)
     
     lc <- length(channel)
@@ -286,7 +283,6 @@ panel.densityplot.flowset.stack <-
                   #densityplot
                   if(!("adjust" %in% names(darg)))
                     darg[["adjust"]] <- 2
-                  
                   h <- do.call(density, c(list(x=xxt), darg))
                   x.val <- h$x
                   y.val <- h$y
@@ -344,7 +340,7 @@ panel.densityplot.flowset.stack <-
                             ,strict=FALSE)
                         oo <- options(warn=-1)
                         on.exit(options(oo))
-                        if(!is.na(bounds)){
+                        if(any(!is.na(bounds))){
                           ## iterate over gate regions
                           for(j in seq_along(bounds)){
                             tb <- bounds[[j]]
@@ -408,7 +404,7 @@ panel.densityplot.flowset.stack <-
 										,strict=FALSE)
                     oo <- options(warn=-1)
                     on.exit(options(oo))
-                    if(!is.na(bounds)){
+                    if(any(!is.na(bounds))){
                         ## iterate over gate regions
                         for(j in seq_along(bounds)){
                             tb <- bounds[[j]]
@@ -465,7 +461,6 @@ panel.densityplot.flowset.stack <-
 prepanel.densityplot.flowset <- 
     function(x, frames, channel.x.name, xlim ,margin = TRUE, hist.type = "density", breaks = "sturges", ...)
 {
-  
   if (length(nm <- as.character(x)) > 1)
     stop("must have only one flow frame per panel")
   
@@ -682,7 +677,7 @@ panel.densityplot.flowFrame <-
                           ,strict=FALSE)
                       oo <- options(warn=-1)
                       on.exit(options(oo))
-                      if(!is.na(bounds)){
+                      if(any(!is.na(bounds))){
                         ## iterate over gate regions
                         for(j in seq_along(bounds)){
                           tb <- bounds[[j]]
@@ -718,7 +713,7 @@ panel.densityplot.flowFrame <-
                       ,strict=FALSE)
                   oo <- options(warn=-1)
                   on.exit(options(oo))
-                  if(!is.na(bounds)){
+                  if(any(!is.na(bounds))){
                     ## iterate over gate regions
                     for(j in seq_along(bounds)){
                       tb <- bounds[[j]]
