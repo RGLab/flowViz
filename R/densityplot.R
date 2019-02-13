@@ -343,35 +343,34 @@ panel.densityplot.flowset.stack <-
                         if(any(!is.na(bounds))){
                           ## iterate over gate regions
                           for(j in seq_along(bounds)){
-                            tb <- bounds[[j]]
-#							browser()
-                            if(fitGate)
-                            {
-                              if(ncol(tb) == 1 && colnames(tb) == parm){
-                                sel <- xl >= min(tb) & xl <= max(tb)
-                                if(any(sel)){
-                                  afun <- approxfun(xl, yl)
-                                  xr <- c(min(tb), seq(min(tb), max(tb), len=100),
-                                      max(tb))
-                                  yr <- c(i, afun(xr[-c(1, length(xr))]), i)
-                                  gpd<-gp$gate.density
-                                  panel.polygon(xr, yr
-                                      , border=gpd$col, col=gpd$fill,
-                                      alpha=gpd$alpha, lwd=gpd$lwd,
-                                      lty=gpd$lty
-                                  )
-                                }
-                              }	
-                            }else
-                            {
-#								browser()
-                              gpg<-gp$gate
-                              panel.lines(x=c(tb[1],tb[1]),y=c(i,i+height)
-                                  ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-                              panel.lines(x=c(tb[2],tb[2]),y=c(i,i+height)
-                                  ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                            if(!is.na(bounds[[j]])){
+                              tb <- bounds[[j]]
+                              if(fitGate)
+                              {
+                                if(ncol(tb) == 1 && colnames(tb) == parm){
+                                  sel <- xl >= min(tb) & xl <= max(tb)
+                                  if(any(sel)){
+                                    afun <- approxfun(xl, yl)
+                                    xr <- c(min(tb), seq(min(tb), max(tb), len=100),
+                                            max(tb))
+                                    yr <- c(i, afun(xr[-c(1, length(xr))]), i)
+                                    gpd<-gp$gate.density
+                                    panel.polygon(xr, yr
+                                                  , border=gpd$col, col=gpd$fill,
+                                                  alpha=gpd$alpha, lwd=gpd$lwd,
+                                                  lty=gpd$lty
+                                    )
+                                  }
+                                }	
+                              }else
+                              {
+                                gpg<-gp$gate
+                                panel.lines(x=c(tb[1],tb[1]),y=c(i,i+height)
+                                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                                panel.lines(x=c(tb[2],tb[2]),y=c(i,i+height)
+                                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                              }
                             }
-                            
                           }
                         }
                         
@@ -407,35 +406,34 @@ panel.densityplot.flowset.stack <-
                     if(any(!is.na(bounds))){
                         ## iterate over gate regions
                         for(j in seq_along(bounds)){
+                          if(!is.na(bounds[[j]])){
                             tb <- bounds[[j]]
-#							browser()
-							if(fitGate)
-							{
-								if(ncol(tb) == 1 && colnames(tb) == parm){
-									sel <- xl >= min(tb) & xl <= max(tb)
-									if(any(sel)){
-										afun <- approxfun(xl, yl)
-										xr <- c(min(tb), seq(min(tb), max(tb), len=100),
-												max(tb))
-										yr <- c(i, afun(xr[-c(1, length(xr))]), i)
-										gpd<-gp$gate.density
-										panel.polygon(xr, yr
-												, border=gpd$col, col=gpd$fill,
-												alpha=gpd$alpha, lwd=gpd$lwd,
-												lty=gpd$lty
-												)
-									}
-								}	
-							}else
-							{
-#								browser()
-								gpg<-gp$gate
-								panel.lines(x=c(tb[1],tb[1]),y=c(i,i+height)
-										,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-								panel.lines(x=c(tb[2],tb[2]),y=c(i,i+height)
-										,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-							}
-                            
+                            if(fitGate)
+                            {
+                              if(ncol(tb) == 1 && colnames(tb) == parm){
+                                sel <- xl >= min(tb) & xl <= max(tb)
+                                if(any(sel)){
+                                  afun <- approxfun(xl, yl)
+                                  xr <- c(min(tb), seq(min(tb), max(tb), len=100),
+                                          max(tb))
+                                  yr <- c(i, afun(xr[-c(1, length(xr))]), i)
+                                  gpd<-gp$gate.density
+                                  panel.polygon(xr, yr
+                                                , border=gpd$col, col=gpd$fill,
+                                                alpha=gpd$alpha, lwd=gpd$lwd,
+                                                lty=gpd$lty
+                                  )
+                                }
+                              }	
+                            }else
+                            {
+                              gpg<-gp$gate
+                              panel.lines(x=c(tb[1],tb[1]),y=c(i,i+height)
+                                          ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                              panel.lines(x=c(tb[2],tb[2]),y=c(i,i+height)
+                                          ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                            }
+                          }
                         }
                     }
 					
@@ -680,16 +678,15 @@ panel.densityplot.flowFrame <-
                       if(any(!is.na(bounds))){
                         ## iterate over gate regions
                         for(j in seq_along(bounds)){
-                          tb <- bounds[[j]]
-                          
-                          
+                          if(!is.na(bounds[[j]])){
+                            tb <- bounds[[j]]
                             gpg<-gp$gate
                             panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
-                                ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                                        ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
                             panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
-                                ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                                        ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
                           }
-                          
+                        }
                       }
                       
                       options(oo)
@@ -716,41 +713,40 @@ panel.densityplot.flowFrame <-
                   if(any(!is.na(bounds))){
                     ## iterate over gate regions
                     for(j in seq_along(bounds)){
-                      tb <- bounds[[j]]
-                      
-                      if(fitGate)
-                      {
-                        tb_min <- min(tb)
-                        tb_max <- max(tb)
-                        
-                        tb_min <- max(min(xl),tb_min)
-                        tb_max <- min(max(xl),tb_max)
-                        if(ncol(tb) == 1 && colnames(tb) == parm){
-                          sel <- xl >= tb_min & xl <= tb_max
-                          if(any(sel)){
-                            afun <- approxfun(xl, yl)
-                            xr <- c(tb_min, seq(tb_min, tb_max, len=100), tb_max)
-    #                        browser()
-                            yr <- c(0,afun(xr[-c(1, length(xr))]),0)
-                            gpd<-gp$gate.density
-                            panel.polygon(xr, yr
-                                          , border=gpd$col
-                                          , col=gpd$fill,
-                                          alpha=gpd$alpha, lwd=gpd$lwd,
-                                          lty=gpd$lty
-                                       )
-                          }
-                        }	
-                      }else
-                      {
-        #								browser()
-                        gpg<-gp$gate
-                        panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
-                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
-                        panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
-                            ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                      if(!is.na(bounds[[j]])){
+                        tb <- bounds[[j]]
+                        if(fitGate)
+                        {
+                          tb_min <- min(tb)
+                          tb_max <- max(tb)
+                          
+                          tb_min <- max(min(xl),tb_min)
+                          tb_max <- min(max(xl),tb_max)
+                          if(ncol(tb) == 1 && colnames(tb) == parm){
+                            sel <- xl >= tb_min & xl <= tb_max
+                            if(any(sel)){
+                              afun <- approxfun(xl, yl)
+                              xr <- c(tb_min, seq(tb_min, tb_max, len=100), tb_max)
+                              #                        browser()
+                              yr <- c(0,afun(xr[-c(1, length(xr))]),0)
+                              gpd<-gp$gate.density
+                              panel.polygon(xr, yr
+                                            , border=gpd$col
+                                            , col=gpd$fill,
+                                            alpha=gpd$alpha, lwd=gpd$lwd,
+                                            lty=gpd$lty
+                              )
+                            }
+                          }	
+                        }else
+                        {
+                          gpg<-gp$gate
+                          panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
+                                      ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                          panel.lines(x=c(tb[2],tb[2]),y=c(0,1)
+                                      ,col=gpg$col,alpha=gpg$alpha, lwd=gpg$lwd,lty=gpg$lty)
+                        }
                       }
-                      
                     }
                   }
                   
