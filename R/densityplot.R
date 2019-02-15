@@ -322,7 +322,6 @@ panel.densityplot.flowset.stack <-
                 if(is(curFilter,"filters"))
                 {
                   mapply(curFilter,curStats,FUN=function(thisFilter,thisStats){
-#                        browser()              
                          names <- .getStats(thisFilter,thisStats, frames[[nm]], digits, ...)
                         
 
@@ -343,7 +342,7 @@ panel.densityplot.flowset.stack <-
                         if(any(!is.na(bounds))){
                           ## iterate over gate regions
                           for(j in seq_along(bounds)){
-                            if(!is.na(bounds[[j]])){
+                            if(any(!is.na(bounds[[j]]))){
                               tb <- bounds[[j]]
                               if(fitGate)
                               {
@@ -406,7 +405,7 @@ panel.densityplot.flowset.stack <-
                     if(any(!is.na(bounds))){
                         ## iterate over gate regions
                         for(j in seq_along(bounds)){
-                          if(!is.na(bounds[[j]])){
+                          if(any(!is.na(bounds[[j]]))){
                             tb <- bounds[[j]]
                             if(fitGate)
                             {
@@ -678,7 +677,7 @@ panel.densityplot.flowFrame <-
                       if(any(!is.na(bounds))){
                         ## iterate over gate regions
                         for(j in seq_along(bounds)){
-                          if(!is.na(bounds[[j]])){
+                          if(any(!is.na(bounds[[j]]))){
                             tb <- bounds[[j]]
                             gpg<-gp$gate
                             panel.lines(x=c(tb[1],tb[1]),y=c(0,1)
@@ -713,7 +712,7 @@ panel.densityplot.flowFrame <-
                   if(any(!is.na(bounds))){
                     ## iterate over gate regions
                     for(j in seq_along(bounds)){
-                      if(!is.na(bounds[[j]])){
+                      if(any(!is.na(bounds[[j]]))){
                         tb <- bounds[[j]]
                         if(fitGate)
                         {
@@ -837,7 +836,6 @@ analyzeDensityFormula <- function(x, dot.names)
           xTerm <- x[[2]][[2]]
         thisFormula <- eval(substitute(thisX~y, list(thisX = xTerm)))
         thisFormula[[3]] <- x[[2]]
-#        browser()
         thisObj <- .xyplot.flowSet(thisFormula, data
             , panel = panel.densityplot.flowset
             , prepanel = prepanel.densityplot.flowset
