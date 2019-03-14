@@ -563,7 +563,7 @@ panel.densityplot.flowFrame <-
           ptList<-plotType("gdensity", parm)
          
           xx <- exprs(frame)[,channel.x.name]
-          r <- unlist(range(frame)[, channel.x.name])
+          r <- unlist(range(frame[, channel.x.name]))
           
           ## we ignore data that has piled up on the margins
           rl <- r + c(-1,1)*min(100, 0.06*diff(r))
