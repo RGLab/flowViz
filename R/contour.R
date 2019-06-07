@@ -53,7 +53,7 @@
 #' @keywords methods
 #' @examples
 #' 
-#' 
+#' library(flowCore)
 #' data(GvHD)
 #' 
 #' ## simple contour plot

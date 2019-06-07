@@ -69,8 +69,9 @@ panel.splom.flowframe <- function(x,
 #' @keywords methods dplot
 #' @examples
 #' 
-#' 
+#' library(flowCore)
 #' data(GvHD)
+#' library(flowStats)
 #' 
 #' tf <- transformList(colnames(GvHD)[3:7], asinh)
 #' dat <- tf %on% GvHD[[3]]

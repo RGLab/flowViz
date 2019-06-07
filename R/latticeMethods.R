@@ -135,7 +135,7 @@ setMethod("levelplot",
 #' @keywords methods dplot
 #' @examples
 #' 
-#' 
+#' library(flowCore)
 #' data(GvHD)
 #' 
 #' qqmath( ~ `FSC-H` | factor(Patient), GvHD,
