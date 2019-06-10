@@ -13,3 +13,4 @@ Suggests: colorspace, flowStats,knitr
 License: Artistic-2.0
 biocViews: ImmunoOncology, Infrastructure, FlowCytometry, CellBasedAssays, Visualization
 VignetteBuilder: knitr
+RoxygenNote: 6.1.1

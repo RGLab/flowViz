@@ -53,6 +53,7 @@
 #' }
 #' @examples
 #' 
+#' library(flowCore)
 #' library(flowStats)
 #' data(GvHD)
 #' GvHD <- GvHD[pData(GvHD)$Patient %in% 6:7]

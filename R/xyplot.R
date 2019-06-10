@@ -247,7 +247,7 @@ panel.xyplot.flowframe.time <-
 #' @keywords methods dplot
 #' @examples
 #' 
-#' 
+#' library(flowCore)
 #' data(GvHD)
 #' GvHD <- GvHD[pData(GvHD)$Patient %in% 5:6]
 #' 
@@ -337,6 +337,7 @@ panel.xyplot.flowframe.time <-
 #' 
 #' 
 #' ## displaying filters
+#' library(flowStats)
 #' n2gate <- norm2Filter("SSC-H", "FSC-H")
 #' 
 #' xyplot(`SSC-H` ~ `FSC-H` | Patient:Visit, data = GvHD,

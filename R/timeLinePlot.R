@@ -74,7 +74,7 @@
 #' @keywords dplot methods
 #' @examples
 #' 
-#' 
+#' library(flowCore)
 #' data(GvHD)
 #' opar <- par(ask=TRUE)
 #' 

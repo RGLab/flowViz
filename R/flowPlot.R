@@ -48,7 +48,7 @@
 #' @keywords methods
 #' @examples
 #' 
-#' 
+#' library(flowCore)
 #' data(GvHD)
 #' flowPlot(GvHD[["s5a01"]])
 #' flowPlot(transform("SSC-H"=asinh,"FSC-H"=asinh) %on% GvHD[["s5a01"]])

@@ -173,7 +173,7 @@ flowViz.state <- new.env(hash = FALSE)
 #' 
 #' ## undo all settings
 #' flowViz.par.set(list(plot.symbol=plot.symbol, gate.text=list(font=1)))
-#' 
+#' library(flowCore)
 #' data(GvHD)
 #' fs <- GvHD[1:2]
 #' 

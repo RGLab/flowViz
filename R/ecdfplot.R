@@ -172,7 +172,7 @@ panel.ecdfplot.flowset <-
 #' @keywords methods dplot
 #' @examples
 #' 
-#' 
+#' library(flowCore)
 #' data(GvHD)
 #' 
 #' ecdfplot(~ `FSC-H` | Patient, GvHD, f.value = ppoints(100))
