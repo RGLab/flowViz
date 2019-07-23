@@ -1186,7 +1186,8 @@ setMethod("xyplot",
 ## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
 ## within flowViz::xyplot method that changes it back to data@frames
 ## however ncdfFlow::xyplot keeps data as it is
-#'  \item{marker.only}{ \code{ligcal} specifies whether to show both channel and marker names }
+#' @param marker.only Specifies whether to show both channel and marker names.
+#' @rdname xyplot
 .xyplot.flowSet <- function(x,
                               data,
                               smooth=TRUE,
