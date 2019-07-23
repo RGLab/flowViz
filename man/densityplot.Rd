@@ -8,8 +8,12 @@
 \alias{panel.densityplot.flowset.stack}
 \alias{densityplot,formula,flowFrame-method}
 \alias{densityplot,formula,view-method}
+\alias{densityplot,formula,ncdfFlowSet-method}
+\alias{densityplot,formula,ncdfFlowList-method}
 \alias{histogram,formula,flowSet-method}
 \alias{histogram,formula,flowFrame-method}
+\alias{histogram,formula,ncdfFlowSet-method}
+\alias{histogram,formula,ncdfFlowList-method}
 \title{One-dimensional density/histogram plots for flow data}
 \usage{
 \S4method{densityplot}{formula,flowSet}(x, data, ...)
@@ -31,9 +35,17 @@ panel.densityplot.flowset.stack(x, y, darg = list(n = 50, na.rm = TRUE),
 
 \S4method{densityplot}{formula,view}(x, data, ...)
 
+\S4method{densityplot}{formula,ncdfFlowSet}(x, data, ...)
+
+\S4method{densityplot}{formula,ncdfFlowList}(x, data, ...)
+
 \S4method{histogram}{formula,flowSet}(x, data, plotType, ...)
 
 \S4method{histogram}{formula,flowFrame}(x, data, ...)
+
+\S4method{histogram}{formula,ncdfFlowSet}(x, data, ...)
+
+\S4method{histogram}{formula,ncdfFlowList}(x, data, ...)
 }
 \arguments{
 \item{x}{A formula describing the structure of the plot and the variables to

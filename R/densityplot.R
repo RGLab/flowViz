@@ -993,6 +993,32 @@ setMethod("densityplot",
           function(x, data, ...) densityplot(x, Data(data), ...))
 
 
+#override flowSet-version methods to pass data instead of data@frames
+#' @aliases densityplot,formula,ncdfFlowSet-method
+#' @rdname densityplot
+#' @export 
+setMethod("densityplot",
+          signature(x = "formula", data = "ncdfFlowSet"),
+          function(x, data, ...)
+          {
+            #construct lattice object
+            thisTrellisObj <- .densityplot.adapor(x, data, ...)
+            #subset data on channel
+            chnl <- thisTrellisObj[["panel.args.common"]][["channel.name"]]
+            thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
+            thisData <- thisData[,chnl]
+            #update frames
+            thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData
+            thisTrellisObj
+          })
 
 
 
+#' @aliases densityplot,formula,ncdfFlowList-method
+#' @rdname densityplot
+setMethod("densityplot",
+          signature(x = "formula", data = "ncdfFlowList"),
+          function(x, data, ...)
+          {
+            selectMethod("densityplot", signature = c("formula", "ncdfFlowSet"))(x, data, ...)
+          })

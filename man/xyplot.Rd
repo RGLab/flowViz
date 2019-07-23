@@ -16,6 +16,8 @@
 \alias{xyplot,formula,view-method}
 \alias{xyplot,view,missing-method}
 \alias{xyplot,formula,gateView-method}
+\alias{xyplot,formula,ncdfFlowSet-method}
+\alias{xyplot,formula,ncdfFlowList-method}
 \title{Methods implementing Lattice xyplots for flow data.}
 \usage{
 \S4method{xyplot}{flowFrame,missing}(x, data, time, xlab, ylab = "",
@@ -62,6 +64,10 @@ panel.xyplot.flowset(x, frames, filter = NULL, channel.x, channel.y,
 
 \S4method{xyplot}{formula,gateView}(x, data, filter = NULL, par.settings,
   ...)
+
+\S4method{xyplot}{formula,ncdfFlowSet}(x, data, ...)
+
+\S4method{xyplot}{formula,ncdfFlowList}(x, data, ...)
 }
 \arguments{
 \item{x}{A formula describing the structure of the plot and the variables to
@@ -207,6 +213,12 @@ overlay points.}
 \item{channel.x, channel.y}{Expressions defining the x and y variables in
 terms of columns in the data.  Can involve functions or multiple columns
 from the data, however this usage is discouraged.}
+
+\item{x}{\code{formula}}
+
+\item{data}{\code{ncdfFlowSet} or \code{ncdfFlowList}}
+
+\item{...}{other arguments passed to \code{flowViz}}
 }
 \description{
 These functions create Trellis scatter plots (a.k.a. dot plots in the Flow
