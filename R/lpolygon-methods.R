@@ -116,7 +116,7 @@
 #' \item{x = "norm2Filter", data = "ANY"}{ We either need a
 #' \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
 #' \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-#' \code{\link[flowCore:norm2Filter-class]{norm2Filter}}.}
+#' \code{\link[flowStats:norm2Filter-class]{norm2Filter}}.}
 #' 
 #' \item{x = "norm2Filter", data = "flowFrame"}{ see above }
 #' 

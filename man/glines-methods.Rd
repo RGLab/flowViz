@@ -16,8 +16,9 @@
 \alias{glines,filterResult,ANY-method}
 \alias{glines,kmeansFilter,ANY-method}
 \alias{glines,norm2Filter,ANY-method}
-\alias{glines,norm2Filter,flowFrame-method}
+\alias{glines,norm2Filter,flowStats-method}
 \alias{glines,norm2Filter,logicalFilterResult-method}
+\alias{glines,norm2Filter,flowFrame-method}
 \alias{glines,polygonGate,character-method}
 \alias{glines,polygonGate,filterResult-method}
 \alias{glines,polygonGate,flowFrame-method}
@@ -88,7 +89,7 @@ of a \code{\link[flowCore]{kmeansFilter}}, hence we warn. }
 \item{x = "norm2Filter", data = "ANY"}{ We either need a
 \code{\link[flowCore:filterResult-class]{filterResult}} or the raw data as a
 \code{\link[flowCore:flowFrame-class]{flowFrame}} for
-\code{\link[flowCore:norm2Filter-class]{norm2Filter}}.}
+\code{\link[flowStats:norm2Filter-class]{norm2Filter}}.}
 
 \item{x = "norm2Filter", data = "flowFrame"}{ see above }
 

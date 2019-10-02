@@ -104,11 +104,11 @@ setMethod("flowPlot",
             yd =    data[selectParent,plotParameters[2]]   
             if(logx) {
             	xd[xd <=1] = 1
-            	xd = log(xd,b=10)
+            	xd = log(xd,base=10)
             }
           	if(logy) {
           		yd[yd <=1] = 1
-              	yd = log(yd,b=10)
+              	yd = log(yd,base=10)
               }
 
             ## the default limits are going to be 0,1 or the range of the data
