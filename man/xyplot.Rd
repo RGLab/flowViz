@@ -10,11 +10,14 @@
 \alias{prepanel.xyplot.flowframe}
 \alias{panel.xyplot.flowframe}
 \alias{xyplot,formula,flowSet-method}
+\alias{.xyplot.flowSet}
 \alias{prepanel.xyplot.flowset}
 \alias{panel.xyplot.flowset}
 \alias{xyplot,formula,view-method}
 \alias{xyplot,view,missing-method}
 \alias{xyplot,formula,gateView-method}
+\alias{xyplot,formula,ncdfFlowSet-method}
+\alias{xyplot,formula,ncdfFlowList-method}
 \title{Methods implementing Lattice xyplots for flow data.}
 \usage{
 \S4method{xyplot}{flowFrame,missing}(x, data, time, xlab, ylab = "",
@@ -42,6 +45,13 @@ panel.xyplot.flowframe(frame, filter = NULL, smooth = TRUE,
 
 \S4method{xyplot}{formula,flowSet}(x, data, ...)
 
+.xyplot.flowSet(x, data, smooth = TRUE, filter = NULL,
+  as.table = TRUE, prepanel = prepanel.xyplot.flowset,
+  panel = panel.xyplot.flowset, xlab = NULL, ylab = NULL,
+  par.settings = NULL, axis = axis.grid, defaultCond = "name",
+  between = list(x = 0.2, y = 0.2), plotType = "xyplot",
+  marker.only = FALSE, ...)
+
 prepanel.xyplot.flowset(x, frames, channel.x.name, channel.y.name, xlim,
   ylim, ...)
 
@@ -54,6 +64,10 @@ panel.xyplot.flowset(x, frames, filter = NULL, channel.x, channel.y,
 
 \S4method{xyplot}{formula,gateView}(x, data, filter = NULL, par.settings,
   ...)
+
+\S4method{xyplot}{formula,ncdfFlowSet}(x, data, ...)
+
+\S4method{xyplot}{formula,ncdfFlowList}(x, data, ...)
 }
 \arguments{
 \item{x}{A formula describing the structure of the plot and the variables to
@@ -190,13 +204,21 @@ speed up plotting.}
 \item{overlay.symbol}{list of the lattice graphic parameters to format the
 overlay points.}
 
+\item{par.settings}{A list of lists of graphical parameters.  See \code{\link{flowViz.par.set}} for details.}
+
+\item{marker.only}{Specifies whether to show both channel and marker names.}
+
 \item{frames}{An environment containing frame-specific data.}
 
 \item{channel.x, channel.y}{Expressions defining the x and y variables in
 terms of columns in the data.  Can involve functions or multiple columns
 from the data, however this usage is discouraged.}
 
-\item{par.settings}{A list of lists of graphical parameters.  See \code{\link{flowViz.par.set}} for details.}
+\item{x}{\code{formula}}
+
+\item{data}{\code{ncdfFlowSet} or \code{ncdfFlowList}}
+
+\item{...}{other arguments passed to \code{flowViz}}
 }
 \description{
 These functions create Trellis scatter plots (a.k.a. dot plots in the Flow

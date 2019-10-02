@@ -1186,7 +1186,8 @@ setMethod("xyplot",
 ## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
 ## within flowViz::xyplot method that changes it back to data@frames
 ## however ncdfFlow::xyplot keeps data as it is
-#'  \item{marker.only}{ \code{ligcal} specifies whether to show both channel and marker names }
+#' @param marker.only Specifies whether to show both channel and marker names.
+#' @rdname xyplot
 .xyplot.flowSet <- function(x,
                               data,
                               smooth=TRUE,
@@ -1547,4 +1548,41 @@ setMethod("xyplot",
       })
 
 
+#' ncdfFlowSet xyplot methods
+#' 
+#' @aliases xyplot,formula,ncdfFlowSet-method
+#' @rdname xyplot
+#' @param x \code{formula}
+#' @param data \code{ncdfFlowSet} or \code{ncdfFlowList}
+#' @param ... other arguments passed to \code{flowViz}
+#' @export 
+setMethod("xyplot",
+          signature=signature(x="formula",
+                              data="ncdfFlowSet"),
+          definition=function(x, data, ...)
+          {
+            #construct lattice object
+            thisTrellisObj <- .xyplot.flowSet(x, data, type = "xyplot", ...)
+            
+            #subset data on channels
+            channel.x.name <- thisTrellisObj[["panel.args.common"]][["channel.x.name"]]
+            channel.y.name <- thisTrellisObj[["panel.args.common"]][["channel.y.name"]]
+            thisData <- thisTrellisObj[["panel.args.common"]][["frames"]]
+            thisData <- thisData[,c(channel.x.name,channel.y.name)]
+            
+            #update frames
+            thisTrellisObj[["panel.args.common"]][["frames"]] <- thisData
+            
+            
+            thisTrellisObj
+          })
 
+#' @aliases xyplot,formula,ncdfFlowList-method
+#' @rdname xyplot
+setMethod("xyplot",
+          signature=signature(x="formula",
+                              data="ncdfFlowList"),
+          definition=function(x, data, ...)
+          {
+            selectMethod("xyplot", signature = c("formula", "ncdfFlowSet"))(x, data, ...)
+          })
