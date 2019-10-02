@@ -820,8 +820,8 @@ analyzeDensityFormula <- function(x, dot.names)
 
 
 
-#' dispatch to different trellis object contructing function based on stack argument
-#' @param stack \code{logical} indicating whether to stack `name` on y axis
+# dispatch to different trellis object contructing function based on stack argument
+# param: stack \code{logical} indicating whether to stack `name` on y axis
 .densityplot.adapor <- function(x, data, stack = TRUE, plotType = "densityplot", ...){
   
       plotType <- match.arg(plotType, c("densityplot", "histogram"))

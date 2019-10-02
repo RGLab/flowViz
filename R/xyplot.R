@@ -175,11 +175,9 @@ panel.xyplot.flowframe.time <-
 #' be used in the display.  In the \code{prepanel} and \code{panel} functions,
 #' also the names of \code{\link[flowCore:flowFrame-class]{flowFrames}} or any
 #' of the annotation data columns in the \code{phenoData} slot.
-#' @param data,y,frame a \code{flowSet} or
-#' \code{\link[flowCore:flowFrame-class]{flowFrame}} object that serves as the
-#' source of data. For the workflow methods, this can also be various
-#' \code{\link[flowCore:view-class]{view}} or
-#' \code{\link[flowCore:actionItem-class]{actionItem}} objects.
+#' @param data,y,frame a \code{flowSet}, \code{\link[flowCore:flowFrame-class]{flowFrame}},
+#' \code{ncdfFlowSet}, or \code{ncdfFlowList} object that serves as the
+#' source of data.
 #' @param prepanel The prepanel function. See
 #' \code{\link[lattice:xyplot]{xyplot}}.
 #' @param panel The panel function. See \code{\link[lattice:xyplot]{xyplot}}.
@@ -1186,8 +1184,8 @@ setMethod("xyplot",
 ## flowViz:::.xyplot.flowSet now passes data instead of data@frames 
 ## within flowViz::xyplot method that changes it back to data@frames
 ## however ncdfFlow::xyplot keeps data as it is
-#' @param marker.only Specifies whether to show both channel and marker names.
-#' @rdname xyplot
+# @param marker.only Specifies whether to show both channel and marker names.
+# @rdname xyplot
 .xyplot.flowSet <- function(x,
                               data,
                               smooth=TRUE,
@@ -1552,9 +1550,6 @@ setMethod("xyplot",
 #' 
 #' @aliases xyplot,formula,ncdfFlowSet-method
 #' @rdname xyplot
-#' @param x \code{formula}
-#' @param data \code{ncdfFlowSet} or \code{ncdfFlowList}
-#' @param ... other arguments passed to \code{flowViz}
 #' @export 
 setMethod("xyplot",
           signature=signature(x="formula",

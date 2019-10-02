@@ -10,7 +10,6 @@
 \alias{prepanel.xyplot.flowframe}
 \alias{panel.xyplot.flowframe}
 \alias{xyplot,formula,flowSet-method}
-\alias{.xyplot.flowSet}
 \alias{prepanel.xyplot.flowset}
 \alias{panel.xyplot.flowset}
 \alias{xyplot,formula,view-method}
@@ -45,13 +44,6 @@ panel.xyplot.flowframe(frame, filter = NULL, smooth = TRUE,
 
 \S4method{xyplot}{formula,flowSet}(x, data, ...)
 
-.xyplot.flowSet(x, data, smooth = TRUE, filter = NULL,
-  as.table = TRUE, prepanel = prepanel.xyplot.flowset,
-  panel = panel.xyplot.flowset, xlab = NULL, ylab = NULL,
-  par.settings = NULL, axis = axis.grid, defaultCond = "name",
-  between = list(x = 0.2, y = 0.2), plotType = "xyplot",
-  marker.only = FALSE, ...)
-
 prepanel.xyplot.flowset(x, frames, channel.x.name, channel.y.name, xlim,
   ylim, ...)
 
@@ -75,11 +67,9 @@ be used in the display.  In the \code{prepanel} and \code{panel} functions,
 also the names of \code{\link[flowCore:flowFrame-class]{flowFrames}} or any
 of the annotation data columns in the \code{phenoData} slot.}
 
-\item{data, y, frame}{a \code{flowSet} or
-\code{\link[flowCore:flowFrame-class]{flowFrame}} object that serves as the
-source of data. For the workflow methods, this can also be various
-\code{\link[flowCore:view-class]{view}} or
-\code{\link[flowCore:actionItem-class]{actionItem}} objects.}
+\item{data, y, frame}{a \code{flowSet}, \code{\link[flowCore:flowFrame-class]{flowFrame}},
+\code{ncdfFlowSet}, or \code{ncdfFlowList} object that serves as the
+source of data.}
 
 \item{time}{A character string giving the name of the data column recording
 time. If not provided, we try to guess from the available parameters.}
@@ -204,21 +194,13 @@ speed up plotting.}
 \item{overlay.symbol}{list of the lattice graphic parameters to format the
 overlay points.}
 
-\item{par.settings}{A list of lists of graphical parameters.  See \code{\link{flowViz.par.set}} for details.}
-
-\item{marker.only}{Specifies whether to show both channel and marker names.}
-
 \item{frames}{An environment containing frame-specific data.}
 
 \item{channel.x, channel.y}{Expressions defining the x and y variables in
 terms of columns in the data.  Can involve functions or multiple columns
 from the data, however this usage is discouraged.}
 
-\item{x}{\code{formula}}
-
-\item{data}{\code{ncdfFlowSet} or \code{ncdfFlowList}}
-
-\item{...}{other arguments passed to \code{flowViz}}
+\item{par.settings}{A list of lists of graphical parameters.  See \code{\link{flowViz.par.set}} for details.}
 }
 \description{
 These functions create Trellis scatter plots (a.k.a. dot plots in the Flow
