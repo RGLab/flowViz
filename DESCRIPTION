@@ -3,7 +3,7 @@ Type: Package
 Title: Visualization for flow cytometry
 Version: 1.51.0
 Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar, M. Jiang
-Maintainer: Mike Jiang <wjiang2@fhcrc.org>
+Maintainer: Mike Jiang <wjiang2@fhcrc.org>, Jake Wagner <jpwagner@fhcrc.org>
 Description: Provides visualization tools for flow cytometry data.
 Depends: R (>= 2.7.0), flowCore(>= 1.41.9), lattice
 Imports: stats4, Biobase, flowCore, graphics, grDevices, grid,
