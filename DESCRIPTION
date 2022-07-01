@@ -1,9 +1,9 @@
 Package: flowViz
 Type: Package
 Title: Visualization for flow cytometry
-Version: 1.61.0
+Version: 1.61.1
 Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar, M. Jiang
-Maintainer: Mike Jiang <mike@ozette.ai>, Jake Wagner <jpwagner@fhcrc.org>
+Maintainer: Mike Jiang <mike@ozette.com>
 Description: Provides visualization tools for flow cytometry data.
 Depends: R (>= 2.7.0), flowCore(>= 1.41.9), lattice
 Imports: stats4, Biobase, flowCore, graphics, grDevices, grid,
