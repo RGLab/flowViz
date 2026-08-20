@@ -65,4 +65,5 @@ setGeneric("ecdfplot")
 setGeneric("levelplot")
 setGeneric("qqmath")
 setGeneric("splom")
-setGeneric("parallel")
+#' @rdname lattice-methods
+setGeneric("parallel", function(x, data, ...) standardGeneric("parallel"))

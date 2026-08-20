@@ -6,8 +6,8 @@ Author: B. Ellis, R. Gentleman, F. Hahne, N. Le Meur, D. Sarkar, M. Jiang
 Maintainer: Mike Jiang <mike@ozette.com>
 Description: Provides visualization tools for flow cytometry data.
 Depends: R (>= 2.7.0), flowCore(>= 1.41.9), lattice
-Imports: stats4, Biobase, flowCore, graphics, grDevices, grid,
-         KernSmooth, lattice, latticeExtra, MASS, methods,
+Imports: stats4, Biobase, graphics, grDevices, grid,
+         KernSmooth, latticeExtra, MASS, methods,
          RColorBrewer, stats, utils, hexbin,IDPmisc
 Suggests: 
     colorspace,
@@ -19,4 +19,4 @@ Suggests:
 License: Artistic-2.0
 biocViews: ImmunoOncology, Infrastructure, FlowCytometry, CellBasedAssays, Visualization
 VignetteBuilder: knitr
-RoxygenNote: 6.1.1
+Config/roxygen2/version: 8.0.0

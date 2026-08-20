@@ -7,8 +7,15 @@
 \usage{
 flowViz.par.get(name = NULL)
 
-flowViz.par.set(name, value, ..., theme, warn = TRUE, strict = FALSE,
-  reset = FALSE)
+flowViz.par.set(
+  name,
+  value,
+  ...,
+  theme,
+  warn = TRUE,
+  strict = FALSE,
+  reset = FALSE
+)
 }
 \arguments{
 \item{name}{The name of a parameter category to set.}
@@ -48,6 +55,7 @@ for all \code{lattice} and \code{flowViz} graphical parameters.
 \code{\link[lattice:trellis.par.get]{trellis.par.set}}. It sets the same set
 of graphical parameters, either in the \code{flowViz} package or directly in
 \code{lattice}.
+
 
 Getting and setting graphical parameters in \code{flowViz} follows exactly
 the mechanism of the \code{lattice} package. For all purpose and intentions,

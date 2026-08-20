@@ -7,8 +7,7 @@
 \alias{panel.splom.flowframe}
 \title{Method implementing Lattice scatter plot matrices for flow data.}
 \usage{
-\S4method{splom}{flowFrame,missing}(x, data, pscales, time,
-  exclude.time = TRUE, names = FALSE, ...)
+\S4method{splom}{flowFrame,missing}(x, data, pscales, time, exclude.time = TRUE, names = FALSE, ...)
 }
 \arguments{
 \item{x}{A formula describing the structure of the plot and the variables to

@@ -10,16 +10,36 @@
 \usage{
 prepanel.ecdfplot.flowset(x, frames, channel, f.value, ...)
 
-panel.ecdfplot.flowset(x, frames, channel, f.value, ref = TRUE,
-  groups = NULL, subscripts, col = superpose.symbol$col,
-  col.points = col, pch = superpose.symbol$pch,
-  cex = superpose.symbol$cex, alpha = superpose.symbol$alpha,
-  col.line = col, lty = superpose.line$lty, lwd = superpose.line$lwd,
-  ...)
+panel.ecdfplot.flowset(
+  x,
+  frames,
+  channel,
+  f.value,
+  ref = TRUE,
+  groups = NULL,
+  subscripts,
+  col = superpose.symbol$col,
+  col.points = col,
+  pch = superpose.symbol$pch,
+  cex = superpose.symbol$cex,
+  alpha = superpose.symbol$alpha,
+  col.line = col,
+  lty = superpose.line$lty,
+  lwd = superpose.line$lwd,
+  ...
+)
 
-\S4method{ecdfplot}{formula,flowSet}(x, data, xlab, f.value = function(n)
-  ppoints(ceiling(sqrt(n))), prepanel = prepanel.ecdfplot.flowset,
-  panel = panel.ecdfplot.flowset, type = "l", as.table = TRUE, ...)
+\S4method{ecdfplot}{formula,flowSet}(
+  x,
+  data,
+  xlab,
+  f.value = function(n) ppoints(ceiling(sqrt(n))),
+  prepanel = prepanel.ecdfplot.flowset,
+  panel = panel.ecdfplot.flowset,
+  type = "l",
+  as.table = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{a formula describing the structure of the plot and the variables to

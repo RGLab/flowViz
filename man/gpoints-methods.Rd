@@ -16,8 +16,7 @@
 \alias{gpoints,rectangleGate,flowFrame,character-method}
 \title{Adding points within a gate to a plot}
 \usage{
-\S4method{gpoints}{filter,flowFrame,missing}(x, data, channels,
-  verbose = TRUE, filterResult = NULL, ...)
+\S4method{gpoints}{filter,flowFrame,missing}(x, data, channels, verbose = TRUE, filterResult = NULL, ...)
 }
 \arguments{
 \item{x}{filter, filterResult or any derived filter class}

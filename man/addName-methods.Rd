@@ -21,8 +21,7 @@
 \alias{addName,rectangleGate,logical-method}
 \title{Add gate names to a flowViz plot.}
 \usage{
-\S4method{addName}{rectangleGate,character}(x, name, data, gp, pos = 0.5,
-  abs = FALSE, xlim, ylim, ...)
+\S4method{addName}{rectangleGate,character}(x, name, data, gp, pos = 0.5, abs = FALSE, xlim, ylim, ...)
 }
 \arguments{
 \item{x}{rectangleGate, ellipsoidGate, quadGate, polygonGate or kmeansFilter}

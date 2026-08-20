@@ -9,9 +9,23 @@
 \alias{contour,flowSet-method}
 \title{Contour plots for flow data}
 \usage{
-\S4method{contour}{flowFrame}(x, y = 1:2, nlevels = 10, bw,
-  grid.size = c(65, 65), add = FALSE, xlab, ylab, xlim, ylim,
-  lwd = 1, lty = 1, col = par("fg"), fill = "transparent", ...)
+\S4method{contour}{flowFrame}(
+  x,
+  y = 1:2,
+  nlevels = 10,
+  bw,
+  grid.size = c(65, 65),
+  add = FALSE,
+  xlab,
+  ylab,
+  xlim,
+  ylim,
+  lwd = 1,
+  lty = 1,
+  col = par("fg"),
+  fill = "transparent",
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class

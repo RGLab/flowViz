@@ -35,8 +35,14 @@
 \alias{glpolygon,subsetFilter,ANY-method}
 \title{Drawing filter regions}
 \usage{
-\S4method{glpolygon}{filter,missing}(x, data, verbose = TRUE,
-  gpar = flowViz.par.get(), strict = TRUE, ...)
+\S4method{glpolygon}{filter,missing}(
+  x,
+  data,
+  verbose = TRUE,
+  gpar = flowViz.par.get(),
+  strict = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{filter or filterResult or any derived filter class}

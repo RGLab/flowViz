@@ -19,8 +19,7 @@
 \alias{glpoints,subsetFilter,flowFrame,ANY-method}
 \title{Adding points within a gate to a plot}
 \usage{
-\S4method{glpoints}{filter,flowFrame,missing}(x, data, channels,
-  verbose = TRUE, filterResult = NULL, ...)
+\S4method{glpoints}{filter,flowFrame,missing}(x, data, channels, verbose = TRUE, filterResult = NULL, ...)
 }
 \arguments{
 \item{x}{filter, filterResult or any derived filter class}

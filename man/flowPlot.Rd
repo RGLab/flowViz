@@ -6,11 +6,25 @@
 \alias{flowPlot,flowFrame-method}
 \title{Standard Plots for Flow Cytometry Data}
 \usage{
-\S4method{flowPlot}{flowFrame}(x, child, filter = NULL,
-  plotParameters = c("FSC-H", "SSC-H"), logx = FALSE, logy = FALSE,
-  parent, colParent = "Grey", colChild = "Blue", showFilter = TRUE,
-  gate.fill = "transparent", gate.border = "black", xlab, ylab, xlim,
-  ylim, ...)
+\S4method{flowPlot}{flowFrame}(
+  x,
+  child,
+  filter = NULL,
+  plotParameters = c("FSC-H", "SSC-H"),
+  logx = FALSE,
+  logy = FALSE,
+  parent,
+  colParent = "Grey",
+  colChild = "Blue",
+  showFilter = TRUE,
+  gate.fill = "transparent",
+  gate.border = "black",
+  xlab,
+  ylab,
+  xlim,
+  ylim,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{flowFrame} that contains the data to be
